@@ -239,7 +239,7 @@
   color: var(--text);
 }
 
-select {
+.workspace :global(select) {
   font: inherit;
   color: var(--text);
   background: var(--panel-2);

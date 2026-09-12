@@ -30,7 +30,7 @@ export class AnimaClient {
     }
     const response = await fetch(`${this.baseUrl}${path}`, { ...init, headers })
     const text = await response.text()
-    let body: unknown = null
+    let body: unknown
     try {
       body = text ? JSON.parse(text) : null
     } catch {

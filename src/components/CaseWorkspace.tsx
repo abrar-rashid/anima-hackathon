@@ -1,11 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { hashProposal } from '@/services/proposal-hash'
 import { CaseHeader } from './CaseHeader'
 import { CovenantGraph, type CovenantGraphTrack } from './CovenantGraph'
 import { EvidencePane } from './EvidencePane'
 import { LiveRegion } from './LiveRegion'
 import { ProposalPane, type ProposalActionView, type ProposalStaff } from './ProposalPane'
+import { ProtocolLab } from './ProtocolLab'
 import { ReceiptPane, type ReceiptRowView } from './ReceiptPane'
 import { TechnicalDetails } from './TechnicalDetails'
 import styles from './case-workspace.module.css'
@@ -90,16 +92,6 @@ export const DEFAULT_STAFF_ROSTER: CaseWorkspaceStaff[] = [
 export type CaseWorkspaceProps = {
   snapshot: CaseWorkspaceSnapshot
   patientName: string
-}
-
-function hashProposal(proposal: unknown): string {
-  const encoded = JSON.stringify(proposal)
-  let hash = 2166136261
-  for (let i = 0; i < encoded.length; i += 1) {
-    hash ^= encoded.charCodeAt(i)
-    hash = Math.imul(hash, 16777619)
-  }
-  return `p${(hash >>> 0).toString(16)}`
 }
 
 function ownershipActive(state: string): string {
@@ -397,6 +389,7 @@ export function CaseWorkspace({ snapshot, patientName }: CaseWorkspaceProps) {
         payload={proposal?.actions[0]?.payload}
         stages={['open', receipts ? 'approved' : 'proposed', 'readback']}
       />
+      <ProtocolLab caseId={current.case.caseId} />
       <LiveRegion message={liveMessage} />
     </div>
   )

@@ -41,7 +41,7 @@ async function get<T>(pathname: string): Promise<{ status: number; body: T }> {
     headers: { Authorization: `Bearer ${KEY}`, Accept: 'application/json' },
   })
   const text = await res.text()
-  let body: unknown = null
+  let body: unknown
   try {
     body = text ? JSON.parse(text) : null
   } catch {

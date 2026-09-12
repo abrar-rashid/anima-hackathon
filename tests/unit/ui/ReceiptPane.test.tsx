@@ -16,7 +16,7 @@ function chain(status: (typeof CHAIN)[number] | 'FAILED' | 'STALE' | 'DUPLICATE_
   )
 }
 
-function reachedFlags(status: (typeof CHAIN)[number]) {
+function reachedFlags() {
   const row = screen.getByRole('listitem', { name: /action 0/i })
   return CHAIN.map((step) => {
     const node = within(row).getByText(step)
@@ -37,22 +37,22 @@ describe('ReceiptPane', () => {
 
   it('marks only SUBMITTED as reached after an HTTP success', () => {
     chain('SUBMITTED')
-    expect(reachedFlags('SUBMITTED')).toEqual([true, false, false, false])
+    expect(reachedFlags()).toEqual([true, false, false, false])
   })
 
   it('marks VISIBLE_DOWNSTREAM as reached only when the receipt status says so', () => {
     chain('VISIBLE_DOWNSTREAM')
-    expect(reachedFlags('VISIBLE_DOWNSTREAM')).toEqual([true, true, false, false])
+    expect(reachedFlags()).toEqual([true, true, false, false])
   })
 
   it('marks ACCEPTED as reached only when the receipt status says so', () => {
     chain('ACCEPTED')
-    expect(reachedFlags('ACCEPTED')).toEqual([true, true, true, false])
+    expect(reachedFlags()).toEqual([true, true, true, false])
   })
 
   it('marks EVIDENCED as reached only when the receipt status says so', () => {
     chain('EVIDENCED')
-    expect(reachedFlags('EVIDENCED')).toEqual([true, true, true, true])
+    expect(reachedFlags()).toEqual([true, true, true, true])
   })
 
   it('shows an inline failure row for STALE', () => {
