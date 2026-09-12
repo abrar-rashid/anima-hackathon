@@ -1,0 +1,15 @@
+{
+  "id": "v3",
+  "supersedes": "v2",
+  "receiverMode": "NAMED_ACTOR",
+  "ackDeadlineMinutes": 120,
+  "fallbackTeamId": "hospital",
+  "exceptionRoute": "orderer-task",
+  "dedupeWindowMinutes": 0,
+  "clinicalPolicyRefs": ["local-abnormal-result-policy-2026"],
+  "approval": {
+    "status": "ACTIVE",
+    "approvers": ["seed"],
+    "rollbackTarget": "v2"
+  }
+}

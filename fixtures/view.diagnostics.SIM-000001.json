@@ -30,7 +30,23 @@
     "bloodPatient:SIM-000030": 1,
     "bloodPatient:SIM-035638": 1,
     "appointmentSessionVersion": 1,
-    "hospitalAttendanceVersion": 2
+    "hospitalAttendanceVersion": 2,
+    "bloodPatient:SIM-000007": 1,
+    "bloodPatient:SIM-000010": 1,
+    "bloodPatient:SIM-000013": 1,
+    "bloodPatient:SIM-000014": 1,
+    "bloodPatient:SIM-000015": 1,
+    "bloodPatient:SIM-000016": 1,
+    "bloodPatient:SIM-000017": 1,
+    "bloodPatient:SIM-000018": 1,
+    "bloodPatient:SIM-000019": 1,
+    "bloodPatient:SIM-000020": 1,
+    "bloodPatient:SIM-000021": 1,
+    "bloodPatient:SIM-000022": 1,
+    "bloodPatient:SIM-000024": 1,
+    "bloodPatient:SIM-000025": 1,
+    "bloodPatient:SIM-000027": 1,
+    "bloodPatient:SIM-000029": 1
   },
   "resources": [
     {

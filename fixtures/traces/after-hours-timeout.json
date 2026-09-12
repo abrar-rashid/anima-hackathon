@@ -1,0 +1,389 @@
+[
+  {
+    "eventId": "evt-result-available",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789286400000,
+    "actor": "diagnostics-sim",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ResultAvailable",
+      "resultId": "blood-v1-SIM-000001-crp-5",
+      "resultVersion": 1,
+      "orderingTeamId": "hospital",
+      "requestedReceiver": "gp",
+      "classification": {
+        "rule": "source-reference-range",
+        "ruleText": "An analyte value lies outside the reference range supplied by the source laboratory (referenceLow..referenceHigh). No urgency, diagnosis or treatment is inferred.",
+        "analyteId": "crp",
+        "analyteName": "C-reactive protein",
+        "value": 5.6,
+        "unit": "mg/L",
+        "referenceLow": 0,
+        "referenceHigh": 5,
+        "direction": "above"
+      }
+    }
+  },
+  {
+    "eventId": "evt-clinical-review",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789287000000,
+    "actor": "hosp-clin-1",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClinicalReviewRecorded",
+      "actor": {
+        "id": "hosp-clin-1",
+        "name": "Dr. Priya Nair",
+        "role": "hospital-clinician",
+        "teamId": "hospital",
+        "attribution": "app-side"
+      }
+    }
+  },
+  {
+    "eventId": "evt-plan-recorded",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789287300000,
+    "actor": "hosp-clin-1",
+    "sourceVersion": 1,
+    "activityId": "act-plan-1",
+    "event": {
+      "type": "PlanRecorded",
+      "actor": {
+        "id": "hosp-clin-1",
+        "name": "Dr. Priya Nair",
+        "role": "hospital-clinician",
+        "teamId": "hospital",
+        "attribution": "app-side"
+      },
+      "planRef": {
+        "site": "hospital",
+        "resourceId": "plan-sim-000001-1",
+        "resourceVersion": 1,
+        "observedAtSimulatorTime": 1789287300000,
+        "activityId": "act-plan-1",
+        "eventType": "PlanRecorded"
+      }
+    }
+  },
+  {
+    "eventId": "evt-transfer-requested",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789287600000,
+    "actor": "hospital-system",
+    "sourceVersion": 1,
+    "event": {
+      "type": "TransferRequested",
+      "toTeam": "gp",
+      "toActorId": "gp-dr-named",
+      "ackDeadlineAt": 1789294800000
+    }
+  },
+  {
+    "eventId": "evt-receiver-unavailable",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789287900000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ReceiverUnavailable",
+      "actorId": "gp-dr-named"
+    }
+  },
+  {
+    "eventId": "evt-clock-30",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789288200000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789288200000
+    }
+  },
+  {
+    "eventId": "evt-transfer-accepted-duty",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789289100000,
+    "actor": "gp-duty-1",
+    "sourceVersion": 1,
+    "event": {
+      "type": "TransferAccepted",
+      "actor": {
+        "id": "gp-duty-1",
+        "name": "Dr. Elena Voss",
+        "role": "duty-clinician",
+        "teamId": "gp",
+        "attribution": "app-side"
+      }
+    }
+  },
+  {
+    "eventId": "evt-clock-45",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789289100000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789289100000
+    }
+  },
+  {
+    "eventId": "evt-clock-60",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789290000000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789290000000
+    }
+  },
+  {
+    "eventId": "evt-clock-75",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789290900000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789290900000
+    }
+  },
+  {
+    "eventId": "evt-chase-90",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789291800000,
+    "actor": "hospital",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ManualChase",
+      "byTeam": "hospital"
+    }
+  },
+  {
+    "eventId": "evt-clock-90",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789291800000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789291800000
+    }
+  },
+  {
+    "eventId": "evt-clock-105",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789292700000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789292700000
+    }
+  },
+  {
+    "eventId": "evt-clock-120",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789293600000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789293600000
+    }
+  },
+  {
+    "eventId": "evt-clock-135",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789294500000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789294500000
+    }
+  },
+  {
+    "eventId": "evt-clock-150",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789295400000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789295400000
+    }
+  },
+  {
+    "eventId": "evt-clock-165",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789296300000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789296300000
+    }
+  },
+  {
+    "eventId": "evt-chase-180",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789297200000,
+    "actor": "hospital",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ManualChase",
+      "byTeam": "hospital"
+    }
+  },
+  {
+    "eventId": "evt-clock-180",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789297200000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789297200000
+    }
+  },
+  {
+    "eventId": "evt-clock-195",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789298100000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789298100000
+    }
+  },
+  {
+    "eventId": "evt-clock-210",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789299000000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789299000000
+    }
+  },
+  {
+    "eventId": "evt-clock-225",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789299900000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789299900000
+    }
+  },
+  {
+    "eventId": "evt-clock-240",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789300800000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789300800000
+    }
+  },
+  {
+    "eventId": "evt-clock-255",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789301700000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789301700000
+    }
+  },
+  {
+    "eventId": "evt-transfer-accepted-named",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789302000000,
+    "actor": "gp-dr-named",
+    "sourceVersion": 1,
+    "event": {
+      "type": "TransferAccepted",
+      "actor": {
+        "id": "gp-dr-named",
+        "name": "Dr. James Okonkwo",
+        "role": "gp-partner",
+        "teamId": "gp",
+        "attribution": "app-side"
+      }
+    }
+  },
+  {
+    "eventId": "evt-patient-message",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789302300000,
+    "actor": "gp-duty-1",
+    "sourceVersion": 1,
+    "event": {
+      "type": "PatientMessageSubmitted",
+      "messageId": "msg-sim-000001-1"
+    }
+  },
+  {
+    "eventId": "evt-clock-270",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789302600000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789302600000
+    }
+  },
+  {
+    "eventId": "evt-patient-contact",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789302900000,
+    "actor": "gp-system",
+    "sourceVersion": 1,
+    "activityId": "act-contact-1",
+    "event": {
+      "type": "PatientContactEvidenced",
+      "evidence": {
+        "site": "gp",
+        "resourceId": "msg-sim-000001-1",
+        "resourceVersion": 1,
+        "observedAtSimulatorTime": 1789302900000,
+        "activityId": "act-contact-1",
+        "eventType": "PatientContactEvidenced"
+      }
+    }
+  },
+  {
+    "eventId": "evt-clock-285",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789303500000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789303500000
+    }
+  },
+  {
+    "eventId": "evt-clock-300",
+    "caseId": "case-after-hours-timeout",
+    "simulatorTime": 1789304400000,
+    "actor": "clock",
+    "sourceVersion": 1,
+    "event": {
+      "type": "ClockTick",
+      "now": 1789304400000
+    }
+  }
+]

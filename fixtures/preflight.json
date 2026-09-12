@@ -13,10 +13,10 @@
       "wearables"
     ]
   },
-  "capturedAt": "2026-09-12T12:12:40.886Z",
+  "capturedAt": "2026-09-12T12:21:05.075Z",
   "simulatorNow": 1789286400000,
-  "acceptSupported": null,
-  "probeDetail": null,
+  "acceptSupported": true,
+  "probeDetail": "200 {\"id\":\"r-2\",\"data\":{},\"kind\":\"task\",\"dueAt\":1789286400000,\"owner\":\"gp\",\"title\":\"Arrange post-discharge monitoring\",\"status\":\"accepted\",\"version\":2,\"priority\":\"urgent\",\"createdAt\":1789200000000,\"patientId\":\"SIM-000001\",\"visibleTo\":[\"gp\"],\"provenance\":{\"changes\":[{\"actor\":{\"kind\":\"team\",\"name\":\"team12",
   "eligibilityRuleText": "An analyte value lies outside the reference range supplied by the source laboratory (referenceLow..referenceHigh). No urgency, diagnosis or treatment is inferred.",
   "selectedPatientId": "SIM-000001",
   "selectedResultId": "blood-v1-SIM-000001-crp-5",

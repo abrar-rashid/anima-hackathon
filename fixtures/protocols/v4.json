@@ -1,0 +1,15 @@
+{
+  "id": "v4",
+  "supersedes": "v3",
+  "receiverMode": "ACCOUNTABLE_TEAM",
+  "ackDeadlineMinutes": 30,
+  "fallbackTeamId": "gp-duty",
+  "exceptionRoute": "duty-clinician-task",
+  "dedupeWindowMinutes": 60,
+  "clinicalPolicyRefs": ["local-abnormal-result-policy-2026"],
+  "approval": {
+    "status": "DRAFT",
+    "approvers": [],
+    "rollbackTarget": "v3"
+  }
+}
