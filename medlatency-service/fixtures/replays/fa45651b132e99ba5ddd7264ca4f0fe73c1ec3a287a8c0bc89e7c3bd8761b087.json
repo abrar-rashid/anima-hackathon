@@ -1,0 +1,153 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "fbc-workflow",
+        "action_key": "fbc-workflow",
+        "label": "Obtain, review and communicate full blood count",
+        "outcome": "A full blood count result reviewed and communicated",
+        "family": "diagnostic",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "test-request",
+          "snapshot_id": "snap_bc316e04881dce8939111349",
+          "pointer": "/data/text",
+          "quote": "GP: obtain a full blood count, review the result and communicate it to the patient."
+        },
+        "responsible": "GP",
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "full blood count",
+        "parent_key": null,
+        "required_stages": [
+          "result_available",
+          "reviewed",
+          "communicated"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [
+      {
+        "task_key": "fbc-workflow",
+        "stage": "requested",
+        "source": {
+          "resource_id": "test-request",
+          "snapshot_id": "snap_bc316e04881dce8939111349",
+          "pointer": "/data/text",
+          "quote": "GP: obtain a full blood count, review the result and communicate it to the patient."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "fbc-workflow",
+        "stage": "ordered",
+        "source": {
+          "resource_id": "test-ordered",
+          "snapshot_id": "snap_95d3198d0cbc1d3a8b402c8c",
+          "pointer": "/data/text",
+          "quote": "Full blood count ordered for the linked request."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "fbc-workflow",
+        "stage": "collected",
+        "source": {
+          "resource_id": "test-collected",
+          "snapshot_id": "snap_e4765cd5b01909a1559fa144",
+          "pointer": "/data/text",
+          "quote": "Full blood count sample collected."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "fbc-workflow",
+        "stage": "received",
+        "source": {
+          "resource_id": "test-received",
+          "snapshot_id": "snap_66e169057527fa56c527e72b",
+          "pointer": "/data/text",
+          "quote": "Full blood count sample received by laboratory."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "fbc-workflow",
+        "stage": "analysed",
+        "source": {
+          "resource_id": "test-analysed",
+          "snapshot_id": "snap_8dba146377570a21f80408cf",
+          "pointer": "/data/text",
+          "quote": "Full blood count sample analysed."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "fbc-workflow",
+        "stage": "result_available",
+        "source": {
+          "resource_id": "test-result_available",
+          "snapshot_id": "snap_407464efa2be93fc1341c928",
+          "pointer": "/data/text",
+          "quote": "Full blood count result available: haemoglobin 138 g/L."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "fbc-workflow",
+        "stage": "reviewed",
+        "source": {
+          "resource_id": "test-reviewed",
+          "snapshot_id": "snap_8eec075a63152cb4320f31ae",
+          "pointer": "/data/text",
+          "quote": "GP reviewed the linked full blood count result."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "fbc-workflow",
+        "stage": "communicated",
+        "source": {
+          "resource_id": "test-communicated",
+          "snapshot_id": "snap_f1ef498eeea68f7670e98580",
+          "pointer": "/data/text",
+          "quote": "GP communicated the reviewed full blood count result to the patient."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      }
+    ],
+    "edges": [],
+    "context": [
+      "AUTHORED COMPLETE-WORKFLOW FIXTURE — not observed in Anima"
+    ]
+  }
+}

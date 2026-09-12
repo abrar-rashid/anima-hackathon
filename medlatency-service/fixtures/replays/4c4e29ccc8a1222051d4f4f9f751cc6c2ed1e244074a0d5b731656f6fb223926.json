@@ -1,0 +1,189 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "close-document",
+        "action_key": "close-document",
+        "label": "Close the document task",
+        "outcome": "Record document processing after the two stated prerequisites",
+        "family": "document_followup",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        },
+        "responsible": "GP team",
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "Close the document task",
+        "parent_key": null,
+        "required_stages": [
+          "processing_outcome_recorded"
+        ],
+        "fulfillment_rule": "all"
+      },
+      {
+        "key": "match-panel",
+        "action_key": "match-panel",
+        "label": "Match the referenced panel",
+        "outcome": "Identify the panel referenced by the letter",
+        "family": "unknown",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        },
+        "responsible": "GP team",
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "referenced panel",
+        "parent_key": "close-document",
+        "required_stages": [
+          "panel_matched"
+        ],
+        "fulfillment_rule": "all"
+      },
+      {
+        "key": "request-note",
+        "action_key": "request-note",
+        "label": "Request the medicines note",
+        "outcome": "Send a request for the outstanding medicines note",
+        "family": "external_document",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        },
+        "responsible": "GP team",
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [
+          "Earlier pending statement describes its recorded time; the later request is not a receipt or review."
+        ],
+        "item": "medicines note",
+        "parent_key": "close-document",
+        "required_stages": [
+          "requested"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [
+      {
+        "task_key": "close-document",
+        "stage": "processing_outcome_recorded",
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        },
+        "item": "Close the document task",
+        "polarity": "pending",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "match-panel",
+        "stage": "panel_matched",
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        },
+        "item": "referenced panel",
+        "polarity": "pending",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "request-note",
+        "stage": "requested",
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        },
+        "item": "medicines note",
+        "polarity": "pending",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "request-note",
+        "stage": "requested",
+        "source": {
+          "resource_id": "note-request",
+          "snapshot_id": "snap_b33f5f03934e830871563995",
+          "pointer": "/data/text",
+          "quote": "Request for the medicines note sent to the ward."
+        },
+        "item": "medicines note",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      }
+    ],
+    "edges": [
+      {
+        "from_key": "match-panel",
+        "to_key": "close-document",
+        "kind": "prerequisite",
+        "origin": "documented",
+        "condition": null,
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        }
+      },
+      {
+        "from_key": "request-note",
+        "to_key": "close-document",
+        "kind": "prerequisite",
+        "origin": "documented",
+        "condition": null,
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        }
+      },
+      {
+        "from_key": "match-panel",
+        "to_key": "request-note",
+        "kind": "parallel",
+        "origin": "documented",
+        "condition": null,
+        "source": {
+          "resource_id": "discharge-letter",
+          "snapshot_id": "snap_569ecebd263edf39375a39b4",
+          "pointer": "/data/text",
+          "quote": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+        }
+      }
+    ],
+    "context": [
+      "Compound discharge instructions"
+    ]
+  }
+}

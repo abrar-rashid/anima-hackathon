@@ -1,0 +1,94 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-002",
+    "display_name": "Morgan Vale",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "Delivered reminder, unresolved registration"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "registration-instruction",
+      "patient_id": "DEMO-002",
+      "kind": "encounter",
+      "title": "Registration Instruction",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-10T09:00:00Z",
+      "clinical_event_at": "2026-09-10T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Please send a registration reminder. The patient must complete the registration paperwork."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-002.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_56dc55fc2d79fcdb97a0407c"
+    },
+    {
+      "id": "delivered-message",
+      "patient_id": "DEMO-002",
+      "kind": "communication",
+      "title": "Delivered Message",
+      "source_status": "delivered",
+      "version": 1,
+      "record_created_at": "2026-09-10T09:00:00Z",
+      "clinical_event_at": "2026-09-10T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Registration reminder delivered. Please complete the registration paperwork.",
+        "request_id": "registration-instruction"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-002.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_f191c9bf231c4a00dc72b914"
+    }
+  ],
+  "events": [],
+  "links": [
+    {
+      "from": "delivered-message",
+      "to": "registration-instruction",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    }
+  ],
+  "shared_context": []
+}

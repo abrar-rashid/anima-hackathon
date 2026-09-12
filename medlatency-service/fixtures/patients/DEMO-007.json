@@ -1,0 +1,59 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-007",
+    "display_name": "Drew Hazel",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "Conditional plan and negated prescription"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "conditional-note",
+      "patient_id": "DEMO-007",
+      "kind": "encounter",
+      "title": "Conditional Note",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-10T09:00:00Z",
+      "clinical_event_at": "2026-09-10T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Consider referral if symptoms persist. No prescription required."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-007.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_131e7bc20a7e02caff42b34a"
+    }
+  ],
+  "events": [],
+  "links": [],
+  "shared_context": []
+}

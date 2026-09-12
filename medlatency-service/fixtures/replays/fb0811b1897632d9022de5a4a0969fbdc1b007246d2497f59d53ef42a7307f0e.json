@@ -1,0 +1,121 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "first-repeat",
+        "action_key": "first-repeat",
+        "label": "Arrange repeat full blood count",
+        "outcome": "Obtain the newly requested full blood count",
+        "family": "diagnostic",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "first-repeat",
+          "snapshot_id": "snap_ea95c1eb1ad26cf93e635efd",
+          "pointer": "/data/text",
+          "quote": "Please arrange a repeat full blood count."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "full blood count",
+        "parent_key": null,
+        "required_stages": [
+          "result_available"
+        ],
+        "fulfillment_rule": "all"
+      },
+      {
+        "key": "second-repeat",
+        "action_key": "second-repeat",
+        "label": "Arrange repeat full blood count",
+        "outcome": "Obtain the newly requested full blood count",
+        "family": "diagnostic",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "second-repeat",
+          "snapshot_id": "snap_90a8402eae7d61850b0afbf8",
+          "pointer": "/data/text",
+          "quote": "Please arrange a repeat full blood count."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "full blood count",
+        "parent_key": null,
+        "required_stages": [
+          "result_available"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [
+      {
+        "task_key": "first-repeat",
+        "stage": "requested",
+        "source": {
+          "resource_id": "first-repeat",
+          "snapshot_id": "snap_ea95c1eb1ad26cf93e635efd",
+          "pointer": "/data/text",
+          "quote": "Please arrange a repeat full blood count."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "first-repeat",
+        "stage": "result_available",
+        "source": {
+          "resource_id": "old-fbc",
+          "snapshot_id": "snap_b621b80e1150057776f6295d",
+          "pointer": "/data/text",
+          "quote": "Full blood count result available: haemoglobin 132 g/L."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "second-repeat",
+        "stage": "requested",
+        "source": {
+          "resource_id": "second-repeat",
+          "snapshot_id": "snap_90a8402eae7d61850b0afbf8",
+          "pointer": "/data/text",
+          "quote": "Please arrange a repeat full blood count."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "second-repeat",
+        "stage": "result_available",
+        "source": {
+          "resource_id": "old-fbc",
+          "snapshot_id": "snap_b621b80e1150057776f6295d",
+          "pointer": "/data/text",
+          "quote": "Full blood count result available: haemoglobin 132 g/L."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      }
+    ],
+    "edges": [],
+    "context": [
+      "Repeat requests and an old unlinked result"
+    ]
+  }
+}

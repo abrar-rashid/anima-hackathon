@@ -1,0 +1,128 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-008",
+    "display_name": "Sam Willow",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "Cancellation followed by explicit reopening"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "initial-referral",
+      "patient_id": "DEMO-008",
+      "kind": "encounter",
+      "title": "Initial Referral",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-01T09:00:00Z",
+      "clinical_event_at": "2026-09-01T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Arrange a physiotherapy referral."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-008.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_310ba46ee5fc86f7e6eab018"
+    },
+    {
+      "id": "cancel-referral",
+      "patient_id": "DEMO-008",
+      "kind": "encounter",
+      "title": "Cancel Referral",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-03T09:00:00Z",
+      "clinical_event_at": "2026-09-03T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Cancel the linked physiotherapy referral; patient declined.",
+        "request_id": "initial-referral"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-008.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_4e59c5a6eb03c2da31ed9f06"
+    },
+    {
+      "id": "reopen-referral",
+      "patient_id": "DEMO-008",
+      "kind": "encounter",
+      "title": "Reopen Referral",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-11T09:00:00Z",
+      "clinical_event_at": "2026-09-11T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Reopen the linked physiotherapy referral at the patient request. Referral has not yet been sent.",
+        "request_id": "initial-referral"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-008.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_55097320b2b53497979b43d1"
+    }
+  ],
+  "events": [],
+  "links": [
+    {
+      "from": "cancel-referral",
+      "to": "initial-referral",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    },
+    {
+      "from": "reopen-referral",
+      "to": "initial-referral",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    }
+  ],
+  "shared_context": []
+}
