@@ -36,13 +36,3 @@ export function parseProtocol(input: unknown): ProtocolVersion {
 export function deriveAckDeadlineAt(simulatorTime: number, protocol: ProtocolVersion): number {
   return simulatorTime + protocol.ackDeadlineMinutes * 60_000
 }
-
-const protocolsById = new Map<string, ProtocolVersion>()
-
-export function rememberProtocol(protocol: ProtocolVersion): void {
-  protocolsById.set(protocol.id, protocol)
-}
-
-export function recalledProtocol(id: string): ProtocolVersion | undefined {
-  return protocolsById.get(id)
-}

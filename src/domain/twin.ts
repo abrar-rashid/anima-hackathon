@@ -22,6 +22,7 @@ export interface TwinMetrics {
 
 export interface TwinRun {
   protocolId: string
+  protocol?: ProtocolVersion
   finalState: CovenantCase
   acceptedLog: EventEnvelope[]
   rejected: { envelope: EventEnvelope; reason: string }[]
@@ -135,11 +136,12 @@ export function replayTrace(
 
   const run: TwinRunWithHash = {
     protocolId: protocol.id,
+    protocol,
     finalState: state,
     acceptedLog,
     rejected,
     metrics: computeMetrics(state, acceptedLog),
-    invariants: evaluateInvariants(state),
+    invariants: evaluateInvariants(state, undefined, protocol),
     traceHash: hashTrace(trace),
   }
   return run
@@ -160,7 +162,7 @@ export function compare(
   candidateStatus: 'PASSED' | 'FAILED_INVARIANTS'
   sameTrace: boolean
 } {
-  const invariants = evaluateInvariants(candidate.finalState, baseline.finalState)
+  const invariants = evaluateInvariants(candidate.finalState, baseline.finalState, candidate.protocol)
   const candidateWithInvariants: TwinRun = { ...candidate, invariants }
   const keys = Object.keys(baseline.metrics) as (keyof TwinMetrics)[]
   const deltas = Object.fromEntries(

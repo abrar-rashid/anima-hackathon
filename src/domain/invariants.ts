@@ -1,6 +1,5 @@
 import { hasRequiredClosureEvidence, claimsClinicalReview } from '@/domain/closure-reducer'
 import { initialCase, reduce } from '@/domain/case-reducer'
-import { recalledProtocol } from '@/domain/protocol'
 import type { CovenantCase, ProtocolVersion, SourceClassification } from '@/domain/types'
 
 export interface InvariantResult {
@@ -132,13 +131,12 @@ export function evaluateInvariants(
     state.evidenceRefs.some((ref) => ref.eventType === 'ActionVisibleDownstream')
   const reopenOk = reopenOnlyReviewPlan && contactKept && actionKept
 
-  const resolvedProtocol = protocol ?? recalledProtocol(state.protocolVersion)
-  const approvalOk = !resolvedProtocol
-    ? true
-    : resolvedProtocol.approval.status !== 'ACTIVE' ||
-      (resolvedProtocol.approval.approvers.length > 0 &&
-        resolvedProtocol.approval.rollbackTarget != null &&
-        resolvedProtocol.approval.rollbackTarget.length > 0)
+  const approvalOk = !protocol
+    ? false
+    : protocol.approval.status !== 'ACTIVE' ||
+      (protocol.approval.approvers.length > 0 &&
+        protocol.approval.rollbackTarget != null &&
+        protocol.approval.rollbackTarget.length > 0)
 
   const ownerEveryPoint = ownerNonEmptyAtEveryLogPoint(state, protocol)
 
@@ -237,11 +235,11 @@ export function evaluateInvariants(
       id: 12,
       name: 'active-protocol-requires-approvers-and-rollback',
       passed: approvalOk,
-      detail: resolvedProtocol
+      detail: protocol
         ? approvalOk
           ? 'Protocol is not ACTIVE, or ACTIVE with named approvers and a rollback target.'
           : 'ACTIVE protocol is missing named approvers or a rollback target.'
-        : 'Protocol not supplied; ACTIVE approval gate not evaluated.',
+        : 'Protocol was not supplied and the approval gate therefore could not be evaluated.',
     },
   ]
 }

@@ -540,15 +540,21 @@ describe('case-reducer', () => {
     expect(skipped.state.closureState).toBe('RESULT_AVAILABLE')
   })
 
-  it('CLOSED rejected unless ClinicalReviewRecorded, PlanRecorded, PatientContactEvidenced, ActionVisibleDownstream, OutcomeEvidenced all exist for current sourceResultVersion', () => {
-    const missing = mustOk(
-      apply([
-        resultAvailable(),
-        envelope('out-early', { type: 'OutcomeEvidenced', evidence: ev('OutcomeEvidenced', 'out-1') }),
-      ]),
+  it('early OutcomeEvidenced from RESULT_AVAILABLE is rejected and does not advance closure', () => {
+    const available = mustOk(apply([resultAvailable()]))
+    const early = reduce(
+      available,
+      envelope('out-early', { type: 'OutcomeEvidenced', evidence: ev('OutcomeEvidenced', 'out-1') }),
+      protocol,
     )
-    expect(missing.closureState).not.toBe('CLOSED')
+    const rejected = mustFail(early)
+    expect(rejected.reason).toBe('invalid-closure-transition')
+    expect(rejected.state.closureState).toBe('RESULT_AVAILABLE')
+    expect(rejected.state.closureState).not.toBe('OUTCOME_EVIDENCED')
+    expect(rejected.state.closureState).not.toBe('CLOSED')
+  })
 
+  it('CLOSED rejected unless ClinicalReviewRecorded, PlanRecorded, PatientContactEvidenced, ActionVisibleDownstream, OutcomeEvidenced all exist for current sourceResultVersion', () => {
     const closed = mustOk(
       apply([
         resultAvailable(),
@@ -566,6 +572,10 @@ describe('case-reducer', () => {
           type: 'ActionVisibleDownstream',
           evidence: ev('ActionVisibleDownstream', 'task-close'),
         }),
+        envelope('act-close', {
+          type: 'ActivityEvidenced',
+          evidence: ev('ActivityEvidenced', 'act-close'),
+        }),
         envelope('out-1', { type: 'OutcomeEvidenced', evidence: ev('OutcomeEvidenced', 'out-1') }),
       ]),
     )
@@ -573,7 +583,7 @@ describe('case-reducer', () => {
   })
 
   it('closure rejects missing review, contact, action or outcome evidence', () => {
-    const noContact = apply([
+    const noActionVisible = apply([
       resultAvailable(),
       envelope('rev-2', { type: 'ClinicalReviewRecorded', actor: hospitalClinician }),
       envelope('plan-2', {
@@ -581,14 +591,21 @@ describe('case-reducer', () => {
         actor: hospitalClinician,
         planRef: ev('PlanRecorded', 'plan-2'),
       }),
-      envelope('vis-miss', {
-        type: 'ActionVisibleDownstream',
-        evidence: ev('ActionVisibleDownstream', 'task-miss'),
+      envelope('contact-miss', {
+        type: 'PatientContactEvidenced',
+        evidence: ev('PatientContactEvidenced', 'msg-miss'),
+      }),
+      envelope('act-miss', {
+        type: 'ActivityEvidenced',
+        evidence: ev('ActivityEvidenced', 'act-miss'),
       }),
       envelope('out-miss', { type: 'OutcomeEvidenced', evidence: ev('OutcomeEvidenced', 'out-miss') }),
     ])
-    expect(noContact.ok).toBe(true)
-    if (noContact.ok) expect(noContact.state.closureState).not.toBe('CLOSED')
+    expect(noActionVisible.ok).toBe(true)
+    if (noActionVisible.ok) {
+      expect(noActionVisible.state.closureState).toBe('OUTCOME_EVIDENCED')
+      expect(noActionVisible.state.closureState).not.toBe('CLOSED')
+    }
   })
 
   it('PatientMessageSubmitted does not set PATIENT_INFORMED; only PatientContactEvidenced does', () => {

@@ -29,7 +29,7 @@ describe('protocol schema and deadlines', () => {
     expect(parsed.fallbackTeamId).toBe('gp-duty')
   })
 
-  it('parseProtocol rejects a protocol that changes clinical fields via unknown shape', () => {
+  it('parseProtocol rejects invalid receiverMode enum and non-numeric ackDeadlineMinutes', () => {
     expect(() => parseProtocol({ ...validProtocol, receiverMode: 'EVERYONE' })).toThrow()
     expect(() => parseProtocol({ ...validProtocol, ackDeadlineMinutes: 'soon' })).toThrow()
   })

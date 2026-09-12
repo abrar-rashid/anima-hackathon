@@ -16,14 +16,14 @@ const CLOSURE_RANK: Record<ClosureState, number> = {
   CLOSED: 6,
 }
 
-const REVIEW_CLAIMING: ReadonlySet<ClosureState> = new Set([
+const REVIEW_CLAIMING: readonly ClosureState[] = [
   'CLINICALLY_REVIEWED',
   'PLAN_RECORDED',
   'PATIENT_INFORMED',
   'ACTION_STARTED',
   'OUTCOME_EVIDENCED',
   'CLOSED',
-])
+]
 
 function closureTarget(event: DomainEvent): { rank: number; minFrom: number } | null {
   switch (event.type) {
@@ -37,7 +37,7 @@ function closureTarget(event: DomainEvent): { rank: number; minFrom: number } | 
     case 'ActivityEvidenced':
       return { rank: 4, minFrom: 3 }
     case 'OutcomeEvidenced':
-      return { rank: 5, minFrom: 0 }
+      return { rank: 5, minFrom: 4 }
     default:
       return null
   }
@@ -90,7 +90,7 @@ export function hasRequiredClosureEvidence(state: CovenantCase): boolean {
 }
 
 export function claimsClinicalReview(state: ClosureState): boolean {
-  return REVIEW_CLAIMING.has(state)
+  return REVIEW_CLAIMING.includes(state)
 }
 
 export function reduceClosure(

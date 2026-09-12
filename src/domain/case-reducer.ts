@@ -1,7 +1,6 @@
 import { isBackwardClosure, isSkippedClosure, reduceClosure } from '@/domain/closure-reducer'
 import { ELIGIBILITY_RULE_TEXT } from '@/domain/eligibility'
 import { isOutstandingTransfer, lastTransferToActorId, reduceOwnership } from '@/domain/ownership-reducer'
-import { rememberProtocol } from '@/domain/protocol'
 import type {
   CovenantCase,
   EventEnvelope,
@@ -31,7 +30,6 @@ export function initialCase(input: {
   patientId: string
   protocol: ProtocolVersion
 }): CovenantCase {
-  rememberProtocol(input.protocol)
   return {
     caseId: input.caseId,
     patientId: input.patientId,
@@ -194,7 +192,6 @@ export function reduce(
   envelope: EventEnvelope,
   protocol: ProtocolVersion,
 ): ReduceResult {
-  rememberProtocol(protocol)
   if (state.eventLog.some((item) => item.eventId === envelope.eventId)) {
     return { ok: false, state, reason: 'duplicate-event' }
   }

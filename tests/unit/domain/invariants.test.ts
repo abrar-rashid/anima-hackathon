@@ -128,6 +128,21 @@ describe('evaluateInvariants', () => {
       currentAccountableOwner: { teamId: '' as TeamId },
     }
     expect(evaluateInvariants(blanked, undefined, protocol)[1]?.passed).toBe(false)
+
+    const midHistoryBlank: CovenantCase = {
+      ...state,
+      currentAccountableOwner: { teamId: 'hospital' },
+      eventLog: state.eventLog.map((envelope) =>
+        envelope.event.type === 'ResultAvailable'
+          ? {
+              ...envelope,
+              event: { ...envelope.event, orderingTeamId: '' as TeamId },
+            }
+          : envelope,
+      ),
+    }
+    expect(midHistoryBlank.currentAccountableOwner.teamId).toBe('hospital')
+    expect(evaluateInvariants(midHistoryBlank, undefined, protocol)[1]?.passed).toBe(false)
   })
 
   it('3 accepted owner has actorId and teamId==requestedReceiver', () => {
@@ -199,20 +214,23 @@ describe('evaluateInvariants', () => {
         apply(
           apply(
             apply(
-              apply(available(), 'rev-c', { type: 'ClinicalReviewRecorded', actor: clinician }),
-              'plan-c',
-              { type: 'PlanRecorded', actor: clinician, planRef: ev('PlanRecorded', 'p') },
+              apply(
+                apply(available(), 'rev-c', { type: 'ClinicalReviewRecorded', actor: clinician }),
+                'plan-c',
+                { type: 'PlanRecorded', actor: clinician, planRef: ev('PlanRecorded', 'p') },
+              ),
+              'contact-c',
+              { type: 'PatientContactEvidenced', evidence: ev('PatientContactEvidenced', 'm') },
             ),
-            'contact-c',
-            { type: 'PatientContactEvidenced', evidence: ev('PatientContactEvidenced', 'm') },
+            'vis-c',
+            { type: 'ActionVisibleDownstream', evidence: ev('ActionVisibleDownstream', 't') },
           ),
-          'vis-c',
-          { type: 'ActionVisibleDownstream', evidence: ev('ActionVisibleDownstream', 't') },
+          'act-c',
+          { type: 'ActivityEvidenced', evidence: ev('ActivityEvidenced', 'a') },
         ),
         'out-c',
         { type: 'OutcomeEvidenced', evidence: ev('OutcomeEvidenced', 'o') },
       ),
-      // no-op extra to keep apply() chain typed; closure already CLOSED
       'chase-c',
       { type: 'ManualChase', byTeam: 'hospital' },
     )
@@ -309,6 +327,15 @@ describe('evaluateInvariants', () => {
       ),
     }
     expect(evaluateInvariants(bad)[10]?.passed).toBe(false)
+
+    const lostContact: CovenantCase = {
+      ...reopened,
+      evidenceRefs: reopened.evidenceRefs.filter((ref) => ref.eventType !== 'PatientContactEvidenced'),
+    }
+    expect(lostContact.eventLog.some((e) => e.event.type === 'PatientContactEvidenced')).toBe(true)
+    expect(lostContact.eventLog.some((e) => e.event.type === 'CaseReopened')).toBe(true)
+    expect(lostContact.evidenceRefs.some((ref) => ref.eventType === 'PatientContactEvidenced')).toBe(false)
+    expect(evaluateInvariants(lostContact)[10]?.passed).toBe(false)
   })
 
   it('12 protocol approval status !== ACTIVE unless approvers.length>0 && rollbackTarget', () => {
@@ -325,12 +352,9 @@ describe('evaluateInvariants', () => {
     }
     expect(evaluateInvariants(state, undefined, activeGood)[11]?.passed).toBe(true)
 
-    const remembered: ProtocolVersion = {
-      ...protocol,
-      id: 'proto-active-bad',
-      approval: { status: 'ACTIVE', approvers: [], rollbackTarget: null },
-    }
-    const start = initialCase({ caseId: 'case-12', patientId: 'SIM-000001', protocol: remembered })
-    expect(evaluateInvariants(start)[11]?.passed).toBe(false)
+    const omitted = evaluateInvariants(state)
+    expect(omitted[11]?.passed).toBe(false)
+    expect(omitted[11]?.detail.toLowerCase()).toContain('protocol')
+    expect(omitted[11]?.detail.toLowerCase()).toMatch(/not supplied|could not be evaluated/)
   })
 })
