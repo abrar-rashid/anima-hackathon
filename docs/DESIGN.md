@@ -158,42 +158,46 @@ Import `src/design/tokens.css` once, or wrap a tree in `DesignRoot`. Tokens are 
 
 Restrained operate palette. Neutrals carry the field. Cobalt is reserved for ownership and the primary action. Semantic wells are tinted from their own hue so secondary text is never grey-on-colour.
 
-| Token pair | Foreground | Background | Ratio | Minimum | Result |
+### Measured contrast ratios
+
+WCAG 2.2 relative luminance, computed by `src/design/contrast.ts` and asserted in `tests/unit/design/contrast.test.ts`. Body and UI text must clear **4.5:1**. Large text and non-text indicators (borders, focus rings) must clear **3:1**. The claim "AA compliant" is these numbers, not an assumption.
+
+| Token pair | Foreground | Background | Ratio | Threshold | Result |
 |---|---|---|---|---|---|
-| ink on canvas | `#14181F` | `#DDE1E6` | 13.55 | 4.5 | pass |
-| muted on canvas | `#3D4553` | `#DDE1E6` | 7.35 | 4.5 | pass |
-| ink on raised | `#14181F` | `#F4F6F8` | 16.42 | 4.5 | pass |
-| muted on raised | `#3D4553` | `#F4F6F8` | 8.91 | 4.5 | pass |
-| ink on inset | `#14181F` | `#CED3DA` | 11.82 | 4.5 | pass |
-| muted on inset | `#3D4553` | `#CED3DA` | 6.42 | 4.5 | pass |
-| on-action on action | `#F4F6F8` | `#163A8A` | 9.66 | 4.5 | pass |
-| on-action on action-hover | `#F4F6F8` | `#0B2F6E` | 11.78 | 4.5 | pass |
-| on-action on danger | `#F4F6F8` | `#9B1D32` | 7.41 | 4.5 | pass |
-| on-action on danger-hover | `#F4F6F8` | `#7A1628` | 9.83 | 4.5 | pass |
-| owned on canvas | `#163A8A` | `#DDE1E6` | 7.97 | 4.5 | pass |
-| awaiting on canvas | `#7A4E00` | `#DDE1E6` | 5.48 | 4.5 | pass |
-| proven on canvas | `#145C32` | `#DDE1E6` | 6.13 | 4.5 | pass |
-| blocked on canvas | `#9B1D32` | `#DDE1E6` | 6.11 | 4.5 | pass |
-| unverified on canvas | `#3D4450` | `#DDE1E6` | 7.47 | 4.5 | pass |
-| owned on owned surface | `#163A8A` | `#C5D4EE` | 6.99 | 4.5 | pass |
-| awaiting on awaiting surface | `#7A4E00` | `#F0DFC0` | 5.49 | 4.5 | pass |
-| proven on proven surface | `#145C32` | `#C5E0CF` | 5.73 | 4.5 | pass |
-| blocked on blocked surface | `#9B1D32` | `#F0D0D4` | 5.61 | 4.5 | pass |
-| unverified on unverified surface | `#3D4450` | `#D5D8DE` | 6.87 | 4.5 | pass |
-| disabled on disabled surface | `#353C4A` | `#C8CDD4` | 6.93 | 4.5 | pass |
-| placeholder on raised | `#4A5160` | `#F4F6F8` | 7.35 | 4.5 | pass |
-| placeholder on canvas | `#4A5160` | `#DDE1E6` | 6.06 | 4.5 | pass |
-| focus on canvas | `#0B3D91` | `#DDE1E6` | 7.65 | 3.0 | pass |
-| border on canvas | `#5C6472` | `#DDE1E6` | 4.54 | 3.0 | pass |
-| border on raised | `#5C6472` | `#F4F6F8` | 5.51 | 3.0 | pass |
-| ink on owned surface | `#14181F` | `#C5D4EE` | 11.88 | 4.5 | pass |
-| ink on awaiting surface | `#14181F` | `#F0DFC0` | 13.58 | 4.5 | pass |
-| ink on proven surface | `#14181F` | `#C5E0CF` | 12.66 | 4.5 | pass |
-| ink on blocked surface | `#14181F` | `#F0D0D4` | 12.44 | 4.5 | pass |
-| ink on secondary | `#14181F` | `#C9D0D8` | 11.44 | 4.5 | pass |
-| ink on secondary-hover | `#14181F` | `#B8BFC8` | 9.60 | 4.5 | pass |
-| action-hover on canvas | `#0B2F6E` | `#DDE1E6` | 9.71 | 4.5 | pass |
-| on-action on ink | `#F4F6F8` | `#14181F` | 16.42 | 4.5 | pass |
+| ink on canvas | `#14181F` | `#DDE1E6` | 13.55:1 | 4.5:1 body | pass |
+| muted on canvas | `#3D4553` | `#DDE1E6` | 7.35:1 | 4.5:1 body | pass |
+| ink on raised | `#14181F` | `#F4F6F8` | 16.42:1 | 4.5:1 body | pass |
+| muted on raised | `#3D4553` | `#F4F6F8` | 8.91:1 | 4.5:1 body | pass |
+| ink on inset | `#14181F` | `#CED3DA` | 11.82:1 | 4.5:1 body | pass |
+| muted on inset | `#3D4553` | `#CED3DA` | 6.42:1 | 4.5:1 body | pass |
+| on-action on action | `#F4F6F8` | `#163A8A` | 9.66:1 | 4.5:1 body | pass |
+| on-action on action-hover | `#F4F6F8` | `#0B2F6E` | 11.78:1 | 4.5:1 body | pass |
+| on-action on danger | `#F4F6F8` | `#9B1D32` | 7.41:1 | 4.5:1 body | pass |
+| on-action on danger-hover | `#F4F6F8` | `#7A1628` | 9.83:1 | 4.5:1 body | pass |
+| owned on canvas | `#163A8A` | `#DDE1E6` | 7.97:1 | 4.5:1 body | pass |
+| awaiting on canvas | `#7A4E00` | `#DDE1E6` | 5.48:1 | 4.5:1 body | pass |
+| proven on canvas | `#145C32` | `#DDE1E6` | 6.13:1 | 4.5:1 body | pass |
+| blocked on canvas | `#9B1D32` | `#DDE1E6` | 6.11:1 | 4.5:1 body | pass |
+| unverified on canvas | `#3D4450` | `#DDE1E6` | 7.47:1 | 4.5:1 body | pass |
+| owned on owned surface | `#163A8A` | `#C5D4EE` | 6.99:1 | 4.5:1 body | pass |
+| awaiting on awaiting surface | `#7A4E00` | `#F0DFC0` | 5.49:1 | 4.5:1 body | pass |
+| proven on proven surface | `#145C32` | `#C5E0CF` | 5.73:1 | 4.5:1 body | pass |
+| blocked on blocked surface | `#9B1D32` | `#F0D0D4` | 5.61:1 | 4.5:1 body | pass |
+| unverified on unverified surface | `#3D4450` | `#D5D8DE` | 6.87:1 | 4.5:1 body | pass |
+| disabled on disabled surface | `#353C4A` | `#C8CDD4` | 6.93:1 | 4.5:1 body | pass |
+| placeholder on raised | `#4A5160` | `#F4F6F8` | 7.35:1 | 4.5:1 body | pass |
+| placeholder on canvas | `#4A5160` | `#DDE1E6` | 6.06:1 | 4.5:1 body | pass |
+| focus on canvas | `#0B3D91` | `#DDE1E6` | 7.65:1 | 3:1 non-text | pass |
+| border on canvas | `#5C6472` | `#DDE1E6` | 4.54:1 | 3:1 non-text | pass |
+| border on raised | `#5C6472` | `#F4F6F8` | 5.51:1 | 3:1 non-text | pass |
+| ink on owned surface | `#14181F` | `#C5D4EE` | 11.88:1 | 4.5:1 body | pass |
+| ink on awaiting surface | `#14181F` | `#F0DFC0` | 13.58:1 | 4.5:1 body | pass |
+| ink on proven surface | `#14181F` | `#C5E0CF` | 12.66:1 | 4.5:1 body | pass |
+| ink on blocked surface | `#14181F` | `#F0D0D4` | 12.44:1 | 4.5:1 body | pass |
+| ink on secondary | `#14181F` | `#C9D0D8` | 11.44:1 | 4.5:1 body | pass |
+| ink on secondary-hover | `#14181F` | `#B8BFC8` | 9.60:1 | 4.5:1 body | pass |
+| action-hover on canvas | `#0B2F6E` | `#DDE1E6` | 9.71:1 | 4.5:1 body | pass |
+| on-action on ink | `#F4F6F8` | `#14181F` | 16.42:1 | 4.5:1 body | pass |
 
 Ratios are WCAG 2.2 relative luminance, computed in `src/design/contrast.ts` and asserted by `tests/unit/design/contrast.test.ts`. No pair in this table fails.
 
@@ -216,6 +220,7 @@ One UI family. Five sizes, 1.25 ratio, fixed rem. No fluid headings.
 
 - **Atkinson Hyperlegible** for interface, headings, and buttons. Chosen for projector-grade letter disambiguation, not as a display costume.
 - **Red Hat Mono** only for ids, versions, and timestamps. Monospace is data, not atmosphere.
+- Both families are **self-hosted** as WOFF2 under `src/design/fonts/` and declared with `@font-face` (`font-display: swap`) in `tokens.css`. There is no Google Fonts `@import`. `--ds-font-ui` and `--ds-font-data` keep their system fallback stacks so a missing file degrades to Segoe UI / ui-monospace, never to serif. Import `tokens.css` or wrap with `DesignRoot`; either path loads the local faces.
 - Hero 1.953125rem / title 1.5625rem / lead 1.25rem / body 1rem / meta 0.8125rem.
 - Body measure 70ch. Data and tables may run wider.
 - Tracking floor is `-0.02em` on title and hero only. Meta text is not tracked and is not uppercase. Kickers above headings are banned.

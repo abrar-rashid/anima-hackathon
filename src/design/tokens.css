@@ -7,9 +7,58 @@
   Scene: fluorescent GP back office and a washed projector, so the field is light.
 
   Semantic names only. Retheme by role, never by appearance.
+
+  Faces are vendored under ./fonts and declared here. No remote @import.
+  A missing file falls back to the system stack on the token, never to serif.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Red+Hat+Mono:ital,wght@0,500;0,600&display=swap');
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('./fonts/atkinson-hyperlegible-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('./fonts/atkinson-hyperlegible-latin-400-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('./fonts/atkinson-hyperlegible-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('./fonts/atkinson-hyperlegible-latin-700-italic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Red Hat Mono';
+  src: url('./fonts/red-hat-mono-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Red Hat Mono';
+  src: url('./fonts/red-hat-mono-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root,
 [data-design-root] {
