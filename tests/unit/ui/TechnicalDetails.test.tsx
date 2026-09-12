@@ -27,4 +27,20 @@ describe('TechnicalDetails', () => {
     expect(within(region).getByText('act-1')).toBeTruthy()
     expect(within(region).getAllByText(/create_task/).length).toBeGreaterThan(0)
   })
+
+  it('renders the Activity actor and time so a receipt can be matched to the audit record', () => {
+    render(
+      <TechnicalDetails
+        caseId={CASE_ID}
+        resultId={RESULT_ID}
+        resultVersion={1}
+        activityLinks={[{ activityId: 'act-1', label: 'create_task provenance' }]}
+        activityActor="execution"
+        activityTime={1_789_286_400_000}
+      />,
+    )
+    const details = screen.getByText('Technical details').closest('details') as HTMLElement
+    expect(within(details).getByText('execution')).toBeTruthy()
+    expect(within(details).getByText('1789286400000')).toBeTruthy()
+  })
 })

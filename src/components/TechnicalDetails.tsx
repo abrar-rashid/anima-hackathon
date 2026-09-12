@@ -5,6 +5,8 @@ export type TechnicalDetailsProps = {
   resultId: string
   resultVersion: number
   activityLinks?: { activityId: string; label?: string }[]
+  activityActor?: string
+  activityTime?: number
   payload?: unknown
   stages?: string[]
 }
@@ -14,6 +16,8 @@ export function TechnicalDetails({
   resultId,
   resultVersion,
   activityLinks = [],
+  activityActor,
+  activityTime,
   payload,
   stages = [],
 }: TechnicalDetailsProps) {
@@ -31,6 +35,18 @@ export function TechnicalDetails({
             <span>{resultId}</span> v{resultVersion}
           </dd>
         </div>
+        {activityActor ? (
+          <div>
+            <dt>Activity actor</dt>
+            <dd>{activityActor}</dd>
+          </div>
+        ) : null}
+        {activityTime != null ? (
+          <div>
+            <dt>Activity time</dt>
+            <dd>{activityTime}</dd>
+          </div>
+        ) : null}
       </dl>
       {stages.length > 0 ? (
         <p>Stages: {stages.join(' → ')}</p>

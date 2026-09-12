@@ -9,6 +9,8 @@ export type ProposalActionView = {
   idempotencyKey: string
   supported: boolean
   label: 'live' | 'Protocol preview'
+  requiresSeparateApproval?: boolean
+  blockedReason?: string
 }
 
 export type ProposalStaff = {
@@ -21,6 +23,8 @@ export type ProposalStaff = {
 export type ProposalPaneProps = {
   currentOwner: string
   nextOwner: string
+  orderingTeamId?: string
+  requestedReceiver?: string | null
   transfer: { toTeam: string; mode: string; toActorId?: string }
   deadlines: { ackDeadlineAt: number | null; policySource: string }
   actions: ProposalActionView[]
@@ -34,21 +38,54 @@ export type ProposalPaneProps = {
   onToggleIncluded?: (index: number) => void
 }
 
+function payloadResourceId(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== 'object') return undefined
+  const id = (payload as { resourceId?: unknown }).resourceId
+  return typeof id === 'string' && id.trim().length > 0 ? id : undefined
+}
+
 function isExecutable(action: ProposalActionView): boolean {
-  return action.supported && action.label === 'live'
+  if (!action.supported || action.label !== 'live') return false
+  if (action.blockedReason) return false
+  if (action.kind === 'accept' && !payloadResourceId(action.payload)) return false
+  return true
+}
+
+function defaultIncludedIndexes(actions: ProposalActionView[]): number[] {
+  const executable = actions
+    .map((action, index) => (isExecutable(action) ? index : -1))
+    .filter((index) => index >= 0)
+  const accepts = executable.filter((index) => actions[index]?.kind === 'accept')
+  if (accepts.length > 0) return accepts
+  return executable.filter((index) => actions[index]?.kind !== 'accept')
 }
 
 export function ProposalPane(props: ProposalPaneProps) {
-  const defaultIncluded = props.actions
-    .map((action, index) => (isExecutable(action) ? index : -1))
-    .filter((index) => index >= 0)
-  const included = props.includedIndexes ?? defaultIncluded
-  const approveDisabled = props.hardStops.length > 0 || !props.selectedStaffId
+  const included = props.includedIndexes ?? defaultIncludedIndexes(props.actions)
+  const accept = props.actions.find((action) => action.kind === 'accept')
+  const twoStep = Boolean(accept && accept.label === 'live')
+  const acceptReady = Boolean(accept && isExecutable(accept))
+  const selected = props.staffRoster.find((staff) => staff.id === props.selectedStaffId)
+  const receiverRequired = included.some((index) => props.actions[index]?.kind === 'accept')
+  const receiverMismatch = Boolean(
+    receiverRequired && props.requestedReceiver && selected && selected.teamId !== props.requestedReceiver,
+  )
+  const approveDisabled = props.hardStops.length > 0 || !props.selectedStaffId || receiverMismatch
+  const orderingTeam = props.orderingTeamId ?? props.currentOwner
+  const receivingTeam = props.requestedReceiver ?? props.nextOwner
 
   return (
     <section className={styles.panel} aria-labelledby="proposal-heading">
       <h2 id="proposal-heading">Proposed covenant</h2>
       <div className={styles.stack}>
+        {twoStep ? (
+          <p className={styles.step}>
+            <span aria-hidden="true">{acceptReady ? '②' : '①'}</span>{' '}
+            {acceptReady
+              ? `Step 2 of 2. The receiving team (${receivingTeam}) must approve accept. The ordering team cannot accept on the receiver's behalf.`
+              : `Step 1 of 2. The ordering team (${orderingTeam}) requests the transfer with create_task. Accountability stays with the ordering team until the receiving team (${receivingTeam}) accepts.`}
+          </p>
+        ) : null}
         <p>Current owner: {props.currentOwner}</p>
         <p>Next owner: {props.nextOwner}</p>
         <p>
@@ -76,8 +113,13 @@ export function ProposalPane(props: ProposalPaneProps) {
                     />{' '}
                     Include {action.kind}
                   </label>
-                ) : (
+                ) : action.label === 'Protocol preview' ? (
                   <p>Protocol preview</p>
+                ) : (
+                  <p>
+                    {action.blockedReason ??
+                      'Accept is a separate receiving-team approval and is not executable yet.'}
+                  </p>
                 )}
                 <p>{action.expectedReadback}</p>
                 <p>
@@ -129,6 +171,12 @@ export function ProposalPane(props: ProposalPaneProps) {
             ))}
           </select>
         </label>
+        {receiverRequired ? (
+          <p>
+            Receiving team ({receivingTeam}) approval is required. The ordering team cannot accept on
+            the receiver&apos;s behalf.
+          </p>
+        ) : null}
         <button
           type="button"
           className={styles.primary}

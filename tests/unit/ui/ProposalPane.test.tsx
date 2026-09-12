@@ -132,4 +132,98 @@ describe('ProposalPane', () => {
     expect(screen.getByRole('option', { name: /Dr Ada Sim/ })).toBeTruthy()
     expect(screen.getByRole('option', { name: /Dr Morgan Bell/ })).toBeTruthy()
   })
+
+  it('does not default-include a live accept and names the receiving team as the second approver', () => {
+    const onApprove = vi.fn()
+    const liveAccept = {
+      ...heroProposal().actions[1]!,
+      supported: true,
+      label: 'live' as const,
+      requiresSeparateApproval: true,
+      blockedReason: 'Task id is not yet known. Accept becomes executable after the ordering team creates the transfer task and a receipt or readback returns its id.',
+      payload: { type: 'accept' },
+    }
+    render(
+      <ProposalPane
+        currentOwner="hospital"
+        nextOwner="gp"
+        orderingTeamId="hospital"
+        requestedReceiver="gp"
+        transfer={heroProposal().transfer}
+        deadlines={heroProposal().deadlines}
+        actions={[heroProposal().actions[0]!, liveAccept]}
+        prohibited={heroProposal().prohibited}
+        hardStops={[]}
+        staffRoster={DEFAULT_STAFF}
+        selectedStaffId="hosp-1"
+        onStaffChange={() => undefined}
+        onApprove={onApprove}
+      />,
+    )
+
+    expect(screen.getByText(/Step 1 of 2/i)).toBeTruthy()
+    expect(screen.getByText(/ordering team \(hospital\)/i)).toBeTruthy()
+    expect(screen.getByText(/receiving team \(gp\)/i)).toBeTruthy()
+    expect(screen.queryByText('Protocol preview')).toBeNull()
+    const acceptRow = screen.getByRole('listitem', { name: /accept to gp/i })
+    expect(within(acceptRow).queryByRole('checkbox')).toBeNull()
+    expect(within(acceptRow).getByText(/Task id is not yet known/i)).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Approve covenant actions' }))
+    expect(onApprove).toHaveBeenCalledWith([0])
+  })
+
+  it('requires receiving-team staff before the second approval can be sent', () => {
+    const onApprove = vi.fn()
+    const readyAccept = {
+      ...heroProposal().actions[1]!,
+      supported: true,
+      label: 'live' as const,
+      requiresSeparateApproval: true,
+      payload: { type: 'accept', resourceId: 'fake-task-1' },
+    }
+    const { rerender } = render(
+      <ProposalPane
+        currentOwner="hospital"
+        nextOwner="gp"
+        orderingTeamId="hospital"
+        requestedReceiver="gp"
+        transfer={heroProposal().transfer}
+        deadlines={heroProposal().deadlines}
+        actions={[heroProposal().actions[0]!, readyAccept]}
+        prohibited={heroProposal().prohibited}
+        hardStops={[]}
+        staffRoster={DEFAULT_STAFF}
+        selectedStaffId="hosp-1"
+        onStaffChange={() => undefined}
+        onApprove={onApprove}
+      />,
+    )
+
+    expect(screen.getByText(/Step 2 of 2/i)).toBeTruthy()
+    expect(screen.getByText(/receiving team \(gp\) must approve accept/i)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Approve covenant actions' })).toHaveProperty('disabled', true)
+
+    rerender(
+      <ProposalPane
+        currentOwner="hospital"
+        nextOwner="gp"
+        orderingTeamId="hospital"
+        requestedReceiver="gp"
+        transfer={heroProposal().transfer}
+        deadlines={heroProposal().deadlines}
+        actions={[heroProposal().actions[0]!, readyAccept]}
+        prohibited={heroProposal().prohibited}
+        hardStops={[]}
+        staffRoster={DEFAULT_STAFF}
+        selectedStaffId="gp-duty-1"
+        onStaffChange={() => undefined}
+        onApprove={onApprove}
+      />,
+    )
+    const button = screen.getByRole('button', { name: 'Approve covenant actions' })
+    expect(button).toHaveProperty('disabled', false)
+    fireEvent.click(button)
+    expect(onApprove).toHaveBeenCalledWith([1])
+  })
 })

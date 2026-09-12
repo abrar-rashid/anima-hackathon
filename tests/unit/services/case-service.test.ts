@@ -170,8 +170,59 @@ describe('CaseService', () => {
       actionIndexes: [0],
     })
     expect(deps.write.calls).toHaveLength(1)
-    expect(result.receipts[0]?.status).toMatch(/SUBMITTED|VISIBLE_DOWNSTREAM|ACCEPTED|EVIDENCED/)
-    expect(result.case.submissionState).not.toBe('NOT_SUBMITTED')
+    expect(result.receipts[0]?.status).toBe('VISIBLE_DOWNSTREAM')
+    expect(result.case.submissionState).toBe('VISIBLE_DOWNSTREAM')
+  })
+
+  it('uses the server roster when COVENANT_STAFF_ROSTER is unset and parses it when set', async () => {
+    const unset = ports()
+    const defaultSnapshot = await service(unset).open({ patientId: 'SIM-000001' })
+    expect(defaultSnapshot.staffRoster).toEqual([
+      { id: 'gp-duty-1', name: 'Dr Ada Sim', role: 'Duty GP', teamId: 'gp', attribution: 'app-side' },
+      { id: 'hosp-1', name: 'Dr Morgan Bell', role: 'Hospital clinician', teamId: 'hospital', attribution: 'app-side' },
+    ])
+
+    vi.stubEnv(
+      'COVENANT_STAFF_ROSTER',
+      JSON.stringify([
+        { id: 'comm-1', name: 'Community Nurse', role: 'Nurse', teamId: 'community' },
+      ]),
+    )
+    const custom = ports()
+    const customSnapshot = await service(custom).open({ patientId: 'SIM-000001' })
+    expect(customSnapshot.staffRoster).toEqual([
+      { id: 'comm-1', name: 'Community Nurse', role: 'Nurse', teamId: 'community', attribution: 'app-side' },
+    ])
+    vi.stubEnv('COVENANT_STAFF_ROSTER', '')
+  })
+
+  it('recompiles accept against the created task receipt, never the blood report', async () => {
+    const deps = ports()
+    const opened = await service(deps).open({ patientId: 'SIM-000001' })
+    const first = opened.proposal
+    if (!first) throw new Error('expected proposal')
+    const acceptBefore = first.actions.find((action) => action.kind === 'accept')
+    expect((acceptBefore?.payload as { resourceId?: string } | undefined)?.resourceId).toBeUndefined()
+
+    const approved = await service(deps).approve(opened.case.caseId, {
+      proposalHash: hashProposal(first),
+      approverId: staff.id,
+      staff,
+      actionIndexes: [0],
+    })
+    expect(deps.write.calls).toHaveLength(1)
+    expect(deps.write.calls[0]?.actionName).toBe('create_task')
+
+    const compiled = await service(deps).compile(opened.case.caseId)
+    const accept = compiled.proposal?.actions.find((action) => action.kind === 'accept')
+    const createdId = approved.receipts[0]?.resourceId
+    expect(createdId).toBeTruthy()
+    expect((accept?.payload as { resourceId?: string }).resourceId).toBe(createdId)
+    expect((accept?.payload as { resourceId?: string }).resourceId).not.toBe(
+      'blood-v1-SIM-000001-crp-5',
+    )
+    expect(accept?.label).toBe('live')
+    expect(accept?.requiresSeparateApproval).toBe(true)
   })
 
   it('replays the after-hours-timeout twin to PROPOSED when invariants pass', async () => {

@@ -53,7 +53,7 @@ export type CaseWorkspaceCase = {
     eventType: string
     activityId?: string
   }[]
-  eventLog: { actor: string; event: { type: string } }[]
+  eventLog: { actor: string; simulatorTime?: number; event: { type: string } }[]
 }
 
 export type CaseWorkspaceSnapshot = {
@@ -83,11 +83,6 @@ export type ApproveResultView = {
   case: CaseWorkspaceCase
   hardStops: string[]
 }
-
-export const DEFAULT_STAFF_ROSTER: CaseWorkspaceStaff[] = [
-  { id: 'gp-duty-1', name: 'Dr Ada Sim', role: 'Duty GP', teamId: 'gp', attribution: 'app-side' },
-  { id: 'hosp-1', name: 'Dr Morgan Bell', role: 'Hospital clinician', teamId: 'hospital', attribution: 'app-side' },
-]
 
 export type CaseWorkspaceProps = {
   snapshot: CaseWorkspaceSnapshot
@@ -179,12 +174,32 @@ function announceReceipts(receipts: ReceiptRowView[]): string {
   return ''
 }
 
+function payloadResourceId(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== 'object') return undefined
+  const id = (payload as { resourceId?: unknown }).resourceId
+  return typeof id === 'string' && id.trim().length > 0 ? id : undefined
+}
+
 function normalizeProposal(proposal: CaseWorkspaceProposal, acceptSupported: boolean | null): CaseWorkspaceProposal {
   return {
     ...proposal,
     actions: proposal.actions.map((action) => {
       if (action.kind === 'accept' && acceptSupported !== true) {
         return { ...action, supported: false, label: 'Protocol preview' }
+      }
+      if (action.kind === 'accept' && acceptSupported === true) {
+        const taskId = payloadResourceId(action.payload)
+        return {
+          ...action,
+          supported: true,
+          label: 'live',
+          requiresSeparateApproval: true,
+          blockedReason:
+            action.blockedReason ??
+            (taskId
+              ? undefined
+              : 'Task id is not yet known. Accept becomes executable after the ordering team creates the transfer task and a receipt or readback returns its id.'),
+        }
       }
       return action
     }),
@@ -202,7 +217,10 @@ export function CaseWorkspace({ snapshot, patientName }: CaseWorkspaceProps) {
     () => (current.proposal ? normalizeProposal(current.proposal, current.connection.acceptSupported) : null),
     [current],
   )
-  const staffRoster = current.staffRoster && current.staffRoster.length > 0 ? current.staffRoster : DEFAULT_STAFF_ROSTER
+  const staffRoster = current.staffRoster ?? []
+  const auditEvent =
+    current.case.eventLog.find((entry) => entry.event.type === 'ActivityEvidenced') ??
+    current.case.eventLog.find((entry) => entry.event.type === 'ActionSubmitted')
   const classification = current.case.sourceClassification
   const owner = current.case.currentAccountableOwner.teamId
   const evidence = current.snapshot
@@ -229,6 +247,7 @@ export function CaseWorkspace({ snapshot, patientName }: CaseWorkspaceProps) {
       }
       const result = (await response.json()) as ApproveResultView
       setReceipts(result.receipts)
+      setSelectedStaffId(null)
       setCurrent((prev) => ({
         ...prev,
         case: result.case,
@@ -237,6 +256,26 @@ export function CaseWorkspace({ snapshot, patientName }: CaseWorkspaceProps) {
           : prev.proposal,
       }))
       setLiveMessage(announceReceipts(result.receipts))
+      try {
+        const compiled = await fetch(`/api/case/${current.case.caseId}/compile`, { method: 'POST' })
+        if (compiled.ok) {
+          const data = (await compiled.json()) as Partial<CaseWorkspaceSnapshot>
+          setCurrent((prev) => ({
+            ...prev,
+            ...data,
+            case: data.case ?? prev.case,
+            protocol: data.protocol ?? prev.protocol,
+            proposal: data.proposal ?? prev.proposal,
+            snapshot: data.snapshot ?? prev.snapshot,
+            connection: data.connection ?? prev.connection,
+            eligibility: data.eligibility ?? prev.eligibility,
+            replay: data.replay === undefined ? prev.replay : data.replay,
+            staffRoster: data.staffRoster ?? prev.staffRoster,
+          }))
+        }
+      } catch {
+        // Keep the approve result. The second step stays blocked until compile succeeds.
+      }
     } catch {
       setLiveMessage('Approval request failed. No new write is assumed.')
       setError('The approve request did not reach the server. No write is assumed.')
@@ -352,32 +391,37 @@ export function CaseWorkspace({ snapshot, patientName }: CaseWorkspaceProps) {
           conflicts={evidence?.conflicts ?? []}
           existingTasks={evidence?.existingTasks ?? []}
         />
-        {receipts ? (
-          <ReceiptPane
-            receipts={receipts}
-            currentOwner={owner}
-            nextSafeAction="Refresh the destination readback"
-          />
-        ) : proposal ? (
-          <ProposalPane
-            currentOwner={owner}
-            nextOwner={proposal.transfer.toTeam}
-            transfer={proposal.transfer}
-            deadlines={proposal.deadlines}
-            actions={proposal.actions}
-            prohibited={proposal.prohibited}
-            hardStops={proposal.hardStops}
-            staffRoster={staffRoster}
-            selectedStaffId={selectedStaffId}
-            onStaffChange={(id) => setSelectedStaffId(id || null)}
-            onApprove={(indexes) => void approve(indexes)}
-          />
-        ) : (
-          <section className={styles.panel}>
-            <h2>Proposed covenant</h2>
-            <p>No proposal is available. The case can still be inspected from returned evidence.</p>
-          </section>
-        )}
+        <div className={styles.stack}>
+          {receipts ? (
+            <ReceiptPane
+              receipts={receipts}
+              currentOwner={owner}
+              nextSafeAction="Refresh the destination readback"
+            />
+          ) : null}
+          {proposal ? (
+            <ProposalPane
+              currentOwner={owner}
+              nextOwner={proposal.transfer.toTeam}
+              orderingTeamId={current.case.orderingTeamId}
+              requestedReceiver={current.case.requestedReceiver}
+              transfer={proposal.transfer}
+              deadlines={proposal.deadlines}
+              actions={proposal.actions}
+              prohibited={proposal.prohibited}
+              hardStops={proposal.hardStops}
+              staffRoster={staffRoster}
+              selectedStaffId={selectedStaffId}
+              onStaffChange={(id) => setSelectedStaffId(id || null)}
+              onApprove={(indexes) => void approve(indexes)}
+            />
+          ) : receipts ? null : (
+            <section className={styles.panel}>
+              <h2>Proposed covenant</h2>
+              <p>No proposal is available. The case can still be inspected from returned evidence.</p>
+            </section>
+          )}
+        </div>
       </div>
       <TechnicalDetails
         caseId={current.case.caseId}
@@ -386,6 +430,8 @@ export function CaseWorkspace({ snapshot, patientName }: CaseWorkspaceProps) {
         activityLinks={(receipts ?? [])
           .filter((row) => row.activityId)
           .map((row) => ({ activityId: row.activityId as string, label: `action ${row.actionIndex}` }))}
+        activityActor={auditEvent?.actor}
+        activityTime={auditEvent?.simulatorTime}
         payload={proposal?.actions[0]?.payload}
         stages={['open', receipts ? 'approved' : 'proposed', 'readback']}
       />

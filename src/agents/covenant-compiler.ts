@@ -30,6 +30,9 @@ export function compileProposal(raw: unknown): Proposal {
   const sourceVersions = [{ id: snapshot.result.id, version: snapshot.result.version }]
   const policySource = `protocol:${protocol.id}.ackDeadlineMinutes`
 
+  const taskReadback = `GET /api/nhs/gp-connect?patient=${snapshot.patientId}`
+  const createdTaskId = input.createdTaskId && input.createdTaskId !== snapshot.result.id ? input.createdTaskId : undefined
+
   const createTask: Proposal['actions'][number] = {
     kind: 'create_task',
     site: destination,
@@ -39,7 +42,7 @@ export function compileProposal(raw: unknown): Proposal {
       owner: snapshot.requestedReceiver,
       patientId: snapshot.patientId,
     },
-    expectedReadback: `GET /api/sites/${destination}/view`,
+    expectedReadback: taskReadback,
     sourceVersions,
     idempotencyKey: idempotencyKey(
       team,
@@ -57,11 +60,8 @@ export function compileProposal(raw: unknown): Proposal {
   const accept: Proposal['actions'][number] = {
     kind: 'accept',
     site: destination,
-    payload: {
-      type: 'accept',
-      resourceId: snapshot.result.id,
-    },
-    expectedReadback: `GET /api/sites/${destination}/view`,
+    payload: createdTaskId ? { type: 'accept', resourceId: createdTaskId } : { type: 'accept' },
+    expectedReadback: taskReadback,
     sourceVersions,
     idempotencyKey: idempotencyKey(
       team,
@@ -74,6 +74,13 @@ export function compileProposal(raw: unknown): Proposal {
     ),
     supported: acceptSupported,
     label: acceptSupported ? 'live' : 'Protocol preview',
+    requiresSeparateApproval: true,
+    ...(createdTaskId
+      ? {}
+      : {
+          blockedReason:
+            'Task id is not yet known. Accept becomes executable after the ordering team creates the transfer task and a receipt or readback returns its id.',
+        }),
   }
 
   const hardStops: string[] = []
@@ -104,9 +111,28 @@ export function compileProposal(raw: unknown): Proposal {
       'deadlines.ackDeadlineAt': policySource,
       'deadlines.policySource': `protocol:${protocol.id}`,
       'actions[0]': 'bound create_task',
-      'actions[1]': acceptSupported ? 'bound accept' : 'preflight.acceptSupported',
+      'actions[1]': acceptSupported
+        ? createdTaskId
+          ? 'bound accept from created task receipt'
+          : 'accept awaits created task id'
+        : 'preflight.acceptSupported',
     },
   }
+}
+
+export function createdHandoverTaskId(
+  proposal: Proposal | null | undefined,
+  receipts: { actionIndex: number; resourceId: string | null }[],
+  sourceResultId?: string,
+): string | undefined {
+  if (!proposal) return undefined
+  for (const row of receipts) {
+    const action = proposal.actions[row.actionIndex]
+    if (action?.kind !== 'create_task') continue
+    if (!row.resourceId || row.resourceId === sourceResultId) continue
+    return row.resourceId
+  }
+  return undefined
 }
 
 function sameJson(left: unknown, right: unknown): boolean {

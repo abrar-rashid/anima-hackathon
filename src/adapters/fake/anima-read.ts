@@ -22,6 +22,7 @@ const DEFAULT_TEAM: TeamContext = {
 export class FakeRead implements AnimaReadPort {
   readonly records = new Map<string, VersionedRecord[]>()
   readonly events: ActivityEntry[] = []
+  readonly gpConnectCalls: string[] = []
   team: TeamContext
   openApi: OpenAPIDocument
   private readonly clock: FakeClock
@@ -97,5 +98,23 @@ export class FakeRead implements AnimaReadPort {
     void caseId
     const allow = new Set(resourceIds)
     return this.events.filter((event) => allow.size === 0 || (event.resourceId && allow.has(event.resourceId)))
+  }
+
+  async getGpConnectBundle(patientId: string): Promise<unknown> {
+    this.gpConnectCalls.push(patientId)
+    const tasks = (this.records.get(patientId) ?? []).filter((record) => record.kind === 'task')
+    return {
+      resourceType: 'Bundle',
+      type: 'searchset',
+      total: tasks.length,
+      entry: tasks.map((task) => ({
+        resource: {
+          resourceType: 'Task',
+          id: task.id,
+          status: task.status,
+          meta: { versionId: String(task.version) },
+        },
+      })),
+    }
   }
 }

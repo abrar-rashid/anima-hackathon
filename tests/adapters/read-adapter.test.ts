@@ -236,4 +236,24 @@ describe('read-adapter', () => {
       },
     ])
   })
+
+  it('getGpConnectBundle reads GET /api/nhs/gp-connect?patient=', async () => {
+    const gpConnect = JSON.parse(
+      readFileSync(path.join(process.cwd(), 'fixtures/gp-connect.SIM-000001.json'), 'utf8'),
+    ) as Record<string, unknown>
+    const requested: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input)
+        requested.push(url)
+        if (url.includes('/api/nhs/gp-connect')) return jsonResponse(gpConnect)
+        throw new Error(`unexpected ${url}`)
+      }),
+    )
+    const read = await loadRead()
+    const bundle = await read.getGpConnectBundle('SIM-000001')
+    expect(requested.some((url) => url.includes('/api/nhs/gp-connect?patient=SIM-000001'))).toBe(true)
+    expect(bundle).toEqual(gpConnect)
+  })
 })

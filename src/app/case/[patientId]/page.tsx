@@ -1,4 +1,4 @@
-import { CaseWorkspace, DEFAULT_STAFF_ROSTER, type CaseWorkspaceSnapshot } from '@/components/CaseWorkspace'
+import { CaseWorkspace, type CaseWorkspaceSnapshot } from '@/components/CaseWorkspace'
 import styles from '@/components/case-workspace.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -10,23 +10,6 @@ const SYNTHETIC_PATIENT_NAMES: Record<string, string> = {
 
 function appBaseUrl(): string {
   return process.env.CARE_COVENANT_INTERNAL_URL ?? 'http://127.0.0.1:3000'
-}
-
-function parseStaffRoster(raw: string | undefined): CaseWorkspaceSnapshot['staffRoster'] {
-  if (!raw?.trim()) return DEFAULT_STAFF_ROSTER
-  try {
-    const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed) || parsed.length === 0) return DEFAULT_STAFF_ROSTER
-    return parsed.map((entry: { id?: string; name?: string; role?: string; teamId?: string }) => ({
-      id: String(entry.id ?? ''),
-      name: String(entry.name ?? ''),
-      role: String(entry.role ?? ''),
-      teamId: String(entry.teamId ?? ''),
-      attribution: 'app-side' as const,
-    })).filter((entry) => entry.id && entry.name)
-  } catch {
-    return DEFAULT_STAFF_ROSTER
-  }
 }
 
 export function CaseLoadError({ patientId, message }: { patientId: string; message: string }) {
@@ -62,9 +45,6 @@ export default async function CasePage({ params }: { params: Promise<{ patientId
       )
     }
     const snapshot = (await response.json()) as CaseWorkspaceSnapshot
-    if (!snapshot.staffRoster?.length) {
-      snapshot.staffRoster = parseStaffRoster(process.env.COVENANT_STAFF_ROSTER)
-    }
     return <CaseWorkspace snapshot={snapshot} patientName={patientName} />
   } catch {
     return (

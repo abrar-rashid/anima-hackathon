@@ -70,4 +70,5 @@ export interface AnimaReadPort {
   getCurrentResult(patientId: string): Promise<VersionedResult | null>
   getSiteRecords(site: SiteId, patientId: string, cursor?: string): Promise<Page<VersionedRecord>>
   getActivity(caseId: string, resourceIds: string[]): Promise<ActivityEntry[]>
+  getGpConnectBundle(patientId: string): Promise<unknown>
 }

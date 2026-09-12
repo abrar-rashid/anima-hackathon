@@ -21,7 +21,7 @@ export interface AppContainer {
   mode: RuntimeMode
   live: boolean
   read: AnimaReadPort
-  write: AnimaWritePort & { calls: ExecuteApprovedActionInput[] }
+  write: AnimaWritePort
   clock: SimulatorClockPort
   runtime: AdkRuntimePort
   store: CaseStore
@@ -29,6 +29,13 @@ export interface AppContainer {
   cases: CaseService
   acceptSupported: boolean | null
   replay: StoredCase['replay']
+}
+
+export function writeCallLog(write: AnimaWritePort): ExecuteApprovedActionInput[] | null {
+  if ('calls' in write && Array.isArray((write as { calls?: unknown }).calls)) {
+    return (write as AnimaWritePort & { calls: ExecuteApprovedActionInput[] }).calls
+  }
+  return null
 }
 
 let singleton: AppContainer | null = null
@@ -79,7 +86,7 @@ function buildFake(
 function buildLive(acceptSupported: boolean, world: string): AppContainer {
   const client = createAnimaClient()
   const read = new AnimaReadAdapter(client)
-  const write = Object.assign(new AnimaWriteAdapter(client), { calls: [] as ExecuteApprovedActionInput[] })
+  const write = new AnimaWriteAdapter(client)
   const clock = new AnimaClockAdapter(client)
   return assemble('live', true, read, write, clock, acceptSupported, null, world)
 }
@@ -88,7 +95,7 @@ function assemble(
   mode: RuntimeMode,
   live: boolean,
   read: AnimaReadPort,
-  write: AnimaWritePort & { calls: ExecuteApprovedActionInput[] },
+  write: AnimaWritePort,
   clock: SimulatorClockPort,
   acceptSupported: boolean | null,
   replay: StoredCase['replay'],

@@ -12,6 +12,7 @@ import {
   openedCase,
   PATIENT_ID,
   persist,
+  orderingStaff,
   ports,
   protocol,
   RESULT_ID,
@@ -242,7 +243,7 @@ describe('ExecutionService.execute', () => {
     expect(result.case.eventLog.some((row) => row.event.type === 'ActionSubmitted')).toBe(false)
   })
 
-  it('3e. continues remaining actions when one action in the bundle fails', async () => {
+  it('3e. refuses a create_task+accept bundle so acceptance stays a separate approval', async () => {
     const deps = ports()
     persist(deps.store, openedCase(), heroProposal())
     const inner = new FakeWrite()
@@ -270,11 +271,12 @@ describe('ExecutionService.execute', () => {
       staff,
     })
 
-    expect(inner.calls.some((call) => call.actionName === 'create_task')).toBe(true)
-    expect(result.receipts.find((row) => row.actionIndex === 0)?.status).toBe('SUBMITTED')
-    expect(result.receipts.find((row) => row.actionIndex === 1)?.status).toBe('FAILED')
-    expect(result.case.submissionState).toBe('SUBMITTED')
-    expect(result.case.eventLog.filter((row) => row.event.type === 'ActionSubmitted')).toHaveLength(1)
+    expect(inner.calls).toHaveLength(0)
+    expect(deps.write.calls).toHaveLength(0)
+    expect(result.receipts.every((row) => row.status === 'FAILED')).toBe(true)
+    expect(result.receipts[0]?.error).toMatch(/separate-approval-required/)
+    expect(result.case.submissionState).toBe('NOT_SUBMITTED')
+    expect(result.case.eventLog.some((row) => row.event.type === 'ActionSubmitted')).toBe(false)
   })
 
   it('4. appends ActionVisibleDownstream from a matching readback and TransferAccepted only when accept evidence is present', async () => {
@@ -330,6 +332,7 @@ describe('ExecutionService.execute', () => {
     expect(result.case.acceptingActor?.attribution).toBe('app-side')
     expect(result.case.eventLog.some((row) => row.event.type === 'ActionVisibleDownstream')).toBe(true)
     expect(result.case.eventLog.some((row) => row.event.type === 'TransferAccepted')).toBe(true)
+    expect(deps.read.gpConnectCalls).toContain(PATIENT_ID)
   })
 
   it('4b. leaves ownership unchanged when readback is visible but acceptance evidence is missing', async () => {
@@ -420,5 +423,86 @@ describe('ExecutionService.execute', () => {
     expect(blocked.receipts[0]?.status).toBe('VISIBLE_DOWNSTREAM')
     expect(blocked.hardStops).toContain('Activity evidence unavailable: closure/audit claim blocked')
     expect(blocked.case.eventLog.some((row) => row.event.type === 'ActivityEvidenced')).toBe(false)
+  })
+
+  it('4c. empty-string change actors are not acceptance evidence', async () => {
+    const deps = ports()
+    persist(deps.store, openedCase(), heroProposal())
+    const blankActor: AnimaWritePort = {
+      async executeApprovedAction(input) {
+        const receipt = await deps.write.executeApprovedAction(input)
+        deps.read.addRecord(PATIENT_ID, {
+          id: receipt.resourceId,
+          kind: 'task',
+          version: 2,
+          patientId: PATIENT_ID,
+          owner: 'gp',
+          visibleTo: ['gp'],
+          status: 'accepted',
+          createdAt: receipt.simulatorTime,
+          data: { title: 'Acknowledge abnormal-result handover' },
+          provenance: {
+            changes: [{ actor: { kind: '', name: '' } }],
+          },
+        })
+        return receipt
+      },
+    }
+    const result = await new ExecutionService({
+      read: deps.read,
+      write: blankActor,
+      store: deps.store,
+      acceptSupported: true,
+    }).execute({
+      caseId: CASE_ID,
+      proposal: heroProposal(),
+      approval: approval(true),
+      actionIndexes: [0],
+      staff,
+    })
+
+    expect(result.case.eventLog.some((row) => row.event.type === 'TransferAccepted')).toBe(false)
+    expect(result.case.ownershipState).not.toBe('ACCEPTED')
+    expect(result.receipts[0]?.status).toBe('VISIBLE_DOWNSTREAM')
+  })
+
+  it('6. refuses accept when the staff team is not the requested receiver', async () => {
+    const deps = ports()
+    persist(deps.store, openedCase(), heroProposal())
+    const exec = service(deps, true)
+    const first = await exec.execute({
+      caseId: CASE_ID,
+      proposal: heroProposal(),
+      approval: approval(true),
+      actionIndexes: [0],
+      staff,
+    })
+    const createdId = first.receipts[0]?.resourceId
+    expect(createdId).toBeTruthy()
+    const writesAfterCreate = deps.write.calls.length
+
+    const bound = heroProposal({
+      actions: [
+        heroProposal().actions[0]!,
+        {
+          ...heroProposal().actions[1]!,
+          payload: { type: 'accept', resourceId: createdId },
+        },
+      ],
+    })
+    persist(deps.store, first.case, bound)
+
+    const refused = await exec.execute({
+      caseId: CASE_ID,
+      proposal: bound,
+      approval: approval(true),
+      actionIndexes: [1],
+      staff: orderingStaff,
+    })
+
+    expect(deps.write.calls).toHaveLength(writesAfterCreate)
+    expect(refused.receipts[0]?.status).toBe('FAILED')
+    expect(refused.receipts[0]?.error).toMatch(/receiver-approval-required/)
+    expect(refused.case.ownershipState).not.toBe('ACCEPTED')
   })
 })

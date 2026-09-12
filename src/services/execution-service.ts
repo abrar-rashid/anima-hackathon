@@ -1,5 +1,6 @@
 import { taskReadbackFrom } from '@/adapters/anima/mapping'
 import { IdempotencyConflict, StaleVersionError } from '@/adapters/anima/write-adapter'
+import { createdHandoverTaskId } from '@/agents/covenant-compiler'
 import type { Proposal } from '@/agents/schemas'
 import type { ReceiptRow } from '@/api/contracts'
 import { reduce } from '@/domain/case-reducer'
@@ -65,6 +66,17 @@ export class ExecutionService {
     }
 
     const staff = input.staff
+    const selected = input.actionIndexes
+      .map((actionIndex) => ({ actionIndex, action: input.proposal.actions[actionIndex] }))
+      .filter((row): row is { actionIndex: number; action: Proposal['actions'][number] } => Boolean(row.action))
+    const kinds = new Set(selected.map((row) => row.action.kind))
+    if (kinds.has('create_task') && kinds.has('accept')) {
+      return {
+        receipts: selected.map((row) => blankReceipt(row.actionIndex, 'FAILED', 'separate-approval-required')),
+        case: state,
+        hardStops,
+      }
+    }
     const currentVersion = await this.readSourceVersion(state)
     const expected = expectedSourceVersion(input.proposal, state)
     if (currentVersion == null || expected == null || currentVersion !== expected) {
@@ -89,6 +101,30 @@ export class ExecutionService {
       const action = input.proposal.actions[actionIndex]
       if (!action) continue
       if (action.supported === false) continue
+      if (action.kind === 'accept') {
+        if (!state.requestedReceiver || staff.teamId !== state.requestedReceiver) {
+          receipts.push({
+            ...blankReceipt(actionIndex, 'FAILED', 'receiver-approval-required'),
+            site: action.site,
+            title: payloadTitle(action.payload),
+          })
+          continue
+        }
+      }
+      const resolvedPayload = resolveActionPayload(
+        action,
+        input.proposal,
+        [...stored.receipts, ...receipts],
+        state.sourceResultId,
+      )
+      if (action.kind === 'accept' && !payloadResourceId(resolvedPayload)) {
+        receipts.push({
+          ...blankReceipt(actionIndex, 'FAILED', 'accept-task-id-unknown'),
+          site: action.site,
+          title: payloadTitle(action.payload),
+        })
+        continue
+      }
 
       const key = idempotencyKey({
         team: team.team,
@@ -102,7 +138,7 @@ export class ExecutionService {
       const writeInput = {
         site: action.site,
         actionName: action.kind,
-        payload: action.payload,
+        payload: resolvedPayload,
         staffIdentity: staff,
         expectedSourceVersions: [{ id: state.sourceResultId, version: currentVersion }],
         idempotencyKey: key,
@@ -218,7 +254,7 @@ export class ExecutionService {
     this.deps.store.save({
       ...stored,
       case: state,
-      receipts,
+      receipts: mergeReceipts(stored.receipts, receipts),
       hardStops,
       connection: { ...stored.connection, simulatorNow: now },
     })
@@ -321,8 +357,9 @@ export class ExecutionService {
       })
       if (!found) continue
 
-      const page = await this.deps.read.getSiteRecords(row.site, next.patientId)
-      const readback = taskReadbackFrom(toTaskBundle(page.items), found.id)
+      const bundle = await this.deps.read.getGpConnectBundle(next.patientId).catch(() => null)
+      const readback = bundle ? taskReadbackFrom(bundle, found.id) : null
+      if (!readback) continue
       const visible = found
       const evidence: EvidenceRef = {
         site: row.site,
@@ -452,8 +489,39 @@ function hasChangeActor(record: VersionedRecord): boolean {
   if (!Array.isArray(changes)) return false
   return changes.some((change) => {
     const actor = asRecord(asRecord(change).actor)
-    return typeof actor.kind === 'string' || typeof actor.name === 'string'
+    return nonEmptyString(actor.kind) || nonEmptyString(actor.name)
   })
+}
+
+function nonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function payloadResourceId(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== 'object') return undefined
+  const id = (payload as { resourceId?: unknown }).resourceId
+  return typeof id === 'string' && id.trim().length > 0 ? id : undefined
+}
+
+function resolveActionPayload(
+  action: Proposal['actions'][number],
+  proposal: Proposal,
+  receipts: { actionIndex: number; resourceId: string | null }[],
+  sourceResultId: string,
+): unknown {
+  if (action.kind !== 'accept') return action.payload
+  const fromReceipts = createdHandoverTaskId(proposal, receipts, sourceResultId)
+  const fromPayload = payloadResourceId(action.payload)
+  const taskId =
+    fromReceipts ?? (fromPayload && fromPayload !== sourceResultId ? fromPayload : undefined)
+  if (!taskId) return { type: 'accept' }
+  return { type: 'accept', resourceId: taskId }
+}
+
+function mergeReceipts(previous: ReceiptRow[], next: ReceiptRow[]): ReceiptRow[] {
+  const byIndex = new Map(previous.map((row) => [row.actionIndex, row]))
+  for (const row of next) byIndex.set(row.actionIndex, row)
+  return [...byIndex.values()].sort((a, b) => a.actionIndex - b.actionIndex)
 }
 
 function createdProvenance(record: VersionedRecord): { time: number; version: number; activityId: string } | null {
@@ -465,20 +533,6 @@ function createdProvenance(record: VersionedRecord): { time: number; version: nu
   if (time == null) return null
   const action = typeof created.action === 'string' ? created.action : 'activity'
   return { time, version, activityId: `${action}@${version}` }
-}
-
-function toTaskBundle(items: VersionedRecord[]): unknown {
-  return {
-    entry: items
-      .filter((item) => item.kind === 'task' || Boolean(item.id))
-      .map((item) => ({
-        resource: {
-          id: item.id,
-          status: item.status,
-          meta: { versionId: String(item.version) },
-        },
-      })),
-  }
 }
 
 function isIdempotencyConflict(error: unknown): error is IdempotencyConflict {

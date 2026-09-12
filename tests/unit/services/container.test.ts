@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { writeCallLog } from '@/services/container'
 
 afterEach(() => {
   vi.unstubAllEnvs()
@@ -13,7 +14,7 @@ describe('container', () => {
     const container = getContainer()
     expect(container.mode).toBe('fake')
     expect(container.live).toBe(false)
-    expect(container.write.calls).toEqual([])
+    expect(writeCallLog(container.write)).toEqual([])
     expect(container.acceptSupported).toBe(true)
     expect(container.replay).toBeNull()
   })
@@ -41,5 +42,6 @@ describe('container', () => {
     expect(container.live).toBe(true)
     expect(container.replay).toBeNull()
     expect(container.write.constructor.name).toBe('AnimaWriteAdapter')
+    expect(container.write).not.toHaveProperty('calls')
   })
 })

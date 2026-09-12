@@ -34,6 +34,14 @@ export const staff: StaffIdentity = {
   attribution: 'app-side',
 }
 
+export const orderingStaff: StaffIdentity = {
+  id: 'hosp-1',
+  name: 'Dr Morgan Bell',
+  role: 'Hospital clinician',
+  teamId: 'hospital',
+  attribution: 'app-side',
+}
+
 export const protocol: ProtocolVersion = {
   id: 'v-test',
   supersedes: null,

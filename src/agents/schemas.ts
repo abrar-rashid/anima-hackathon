@@ -102,6 +102,8 @@ export const ProposalSchema = z.object({
       idempotencyKey: z.string(),
       supported: z.boolean(),
       label: z.enum(['live', 'Protocol preview']),
+      requiresSeparateApproval: z.boolean().optional(),
+      blockedReason: z.string().optional(),
     }),
   ),
   prohibited: z.array(
@@ -184,6 +186,7 @@ export const CompilerInputSchema = z.object({
   protocol: ProtocolVersionSchema,
   binding: CompilerBindingSchema,
   toActorId: z.string().optional(),
+  createdTaskId: z.string().optional(),
 })
 
 export const AnalystInputSchema = z.object({

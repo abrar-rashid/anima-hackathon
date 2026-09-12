@@ -58,6 +58,13 @@ describe('in-memory fakes', () => {
       patientId: 'SIM-000001',
       owner: 'community',
     })
+
+    const bundle = await read.getGpConnectBundle('SIM-000001')
+    const root = bundle as { entry?: Array<{ resource?: { id?: string; status?: string } }> }
+    expect(root.entry?.some((entry) => entry.resource?.id === receipt.resourceId)).toBe(true)
+    expect(root.entry?.find((entry) => entry.resource?.id === receipt.resourceId)?.resource?.status).toBe(
+      'open',
+    )
   })
 
   it('FakeClock advances deterministically without wall-clock time', async () => {

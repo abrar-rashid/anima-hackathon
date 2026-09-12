@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { ZodError } from 'zod'
 import { assembleSnapshot } from '@/agents/context-assembler'
-import { compileProposal } from '@/agents/covenant-compiler'
+import { compileProposal, createdHandoverTaskId } from '@/agents/covenant-compiler'
 import { analyseReliability } from '@/agents/reliability-analyst'
 import type {
   AnalystInput,
@@ -217,6 +217,7 @@ export class CaseService {
       requestedReceiver: (stored.case.requestedReceiver ?? 'gp') as TeamId,
     }
     const snapshot = await this.runAssembler(assemblerInput)
+    const createdTaskId = createdHandoverTaskId(stored.proposal, stored.receipts, stored.case.sourceResultId)
     const proposal = await this.runCompiler({
       snapshot,
       protocol: mutableProtocol(stored.protocol),
@@ -225,12 +226,13 @@ export class CaseService {
         team: team.team,
         world: team.world,
       },
+      ...(createdTaskId ? { createdTaskId } : {}),
     })
     const next: StoredCase = {
       ...stored,
       snapshot,
       proposal,
-      hardStops: proposal.hardStops,
+      hardStops: [...new Set([...stored.hardStops, ...proposal.hardStops])],
       connection: {
         ...stored.connection,
         simulatorNow: clock.now,

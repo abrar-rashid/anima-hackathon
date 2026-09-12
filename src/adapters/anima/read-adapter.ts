@@ -167,6 +167,13 @@ export class AnimaReadAdapter implements AnimaReadPort {
     }
     return entries.sort((a, b) => a.time - b.time || a.id.localeCompare(b.id))
   }
+
+  async getGpConnectBundle(patientId: string): Promise<unknown> {
+    const query = new URLSearchParams({ patient: patientId })
+    const { status, body } = await this.client.request<unknown>(`/api/nhs/gp-connect?${query.toString()}`)
+    if (status !== 200) throw new Error(`Anima getGpConnectBundle failed: ${status}`)
+    return body
+  }
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

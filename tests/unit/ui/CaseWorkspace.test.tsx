@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { CaseWorkspace } from '@/components/CaseWorkspace'
-import { CASE_ID, heroSnapshot, PATIENT_NAME, submittedReceipt } from './fixtures'
+import { CASE_ID, heroProposal, heroSnapshot, PATIENT_NAME, submittedReceipt } from './fixtures'
 
 function renderWorkspace(snapshot = heroSnapshot()) {
   return render(<CaseWorkspace snapshot={snapshot} patientName={PATIENT_NAME} />)
@@ -26,6 +26,63 @@ describe('CaseWorkspace', () => {
     renderWorkspace()
     expect(screen.getByText('Protocol preview')).toBeTruthy()
     expect(screen.queryByRole('checkbox', { name: /accept/i })).toBeNull()
+  })
+
+  it('keeps a live accept as a second step and still posts only create_task on the first approve', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        receipts: [submittedReceipt()],
+        case: heroSnapshot().case,
+        hardStops: [],
+        proposal: heroProposal({
+          actions: [
+            heroProposal().actions[0]!,
+            {
+              ...heroProposal().actions[1]!,
+              supported: true,
+              label: 'live',
+              requiresSeparateApproval: true,
+              payload: { type: 'accept', resourceId: 'task-SIM-000001-crp' },
+            },
+          ],
+        }),
+      }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const snapshot = heroSnapshot({
+      connection: {
+        live: true,
+        world: 'team-ea32f6302052',
+        simulatorNow: 1_789_286_400_000,
+        acceptSupported: true,
+      },
+      proposal: heroProposal({
+        actions: [
+          heroProposal().actions[0]!,
+          {
+            ...heroProposal().actions[1]!,
+            supported: true,
+            label: 'live',
+            requiresSeparateApproval: true,
+            blockedReason: 'Task id is not yet known.',
+            payload: { type: 'accept' },
+          },
+        ],
+      }),
+    })
+    renderWorkspace(snapshot)
+    expect(screen.queryByText('Protocol preview')).toBeNull()
+    expect(screen.getByText(/Step 1 of 2/i)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('App-side staff attribution (simulator records team-level actor)'), {
+      target: { value: 'hosp-1' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Approve covenant actions' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+    const approveCall = fetchMock.mock.calls.find((call) => String(call[0]).includes('/approve'))
+    expect(approveCall).toBeTruthy()
+    const body = JSON.parse(String((approveCall?.[1] as RequestInit).body))
+    expect(body.actionIndexes).toEqual([0])
   })
 
   it('posts approve to the case approve route with staff and live action indexes', async () => {
@@ -76,24 +133,33 @@ describe('CaseWorkspace', () => {
 
   it('announces readback changes when refresh returns a later receipt state', async () => {
     const snapshot = heroSnapshot()
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          receipts: [submittedReceipt()],
-          case: snapshot.case,
-          hardStops: [],
-        }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          ...snapshot,
-          case: { ...snapshot.case, submissionState: 'VISIBLE_DOWNSTREAM' },
-          receipts: [submittedReceipt({ status: 'VISIBLE_DOWNSTREAM' })],
-        }),
-      })
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.includes('/approve')) {
+        return {
+          ok: true,
+          json: async () => ({
+            receipts: [submittedReceipt()],
+            case: snapshot.case,
+            hardStops: [],
+          }),
+        }
+      }
+      if (url.includes('/compile')) {
+        return { ok: true, json: async () => snapshot }
+      }
+      if (url.includes('/refresh')) {
+        return {
+          ok: true,
+          json: async () => ({
+            ...snapshot,
+            case: { ...snapshot.case, submissionState: 'VISIBLE_DOWNSTREAM' },
+            receipts: [submittedReceipt({ status: 'VISIBLE_DOWNSTREAM' })],
+          }),
+        }
+      }
+      return { ok: false, json: async () => ({}) }
+    })
     vi.stubGlobal('fetch', fetchMock)
     renderWorkspace(snapshot)
     fireEvent.change(screen.getByLabelText('App-side staff attribution (simulator records team-level actor)'), {
