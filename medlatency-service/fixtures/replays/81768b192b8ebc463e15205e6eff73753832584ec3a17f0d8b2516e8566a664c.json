@@ -1,0 +1,94 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "send-reminder",
+        "action_key": "send-reminder",
+        "label": "Send registration reminder",
+        "outcome": "Send the registration reminder",
+        "family": "communication",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "registration-instruction",
+          "snapshot_id": "snap_56dc55fc2d79fcdb97a0407c",
+          "pointer": "/data/text",
+          "quote": "Please send a registration reminder. The patient must complete the registration paperwork."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "registration reminder",
+        "parent_key": null,
+        "required_stages": [
+          "sent",
+          "delivered"
+        ],
+        "fulfillment_rule": "any"
+      },
+      {
+        "key": "complete-paperwork",
+        "action_key": "complete-paperwork",
+        "label": "Complete registration paperwork",
+        "outcome": "Complete patient registration",
+        "family": "unknown",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "registration-instruction",
+          "snapshot_id": "snap_56dc55fc2d79fcdb97a0407c",
+          "pointer": "/data/text",
+          "quote": "Please send a registration reminder. The patient must complete the registration paperwork."
+        },
+        "responsible": "patient",
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "registration paperwork",
+        "parent_key": null,
+        "required_stages": [
+          "paperwork_completed"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [
+      {
+        "task_key": "send-reminder",
+        "stage": "delivered",
+        "source": {
+          "resource_id": "delivered-message",
+          "snapshot_id": "snap_f191c9bf231c4a00dc72b914",
+          "pointer": "/data/text",
+          "quote": "Registration reminder delivered. Please complete the registration paperwork."
+        },
+        "item": "registration reminder",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "complete-paperwork",
+        "stage": "reminder_delivered",
+        "source": {
+          "resource_id": "delivered-message",
+          "snapshot_id": "snap_f191c9bf231c4a00dc72b914",
+          "pointer": "/data/text",
+          "quote": "Registration reminder delivered. Please complete the registration paperwork."
+        },
+        "item": "registration paperwork",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      }
+    ],
+    "edges": [],
+    "context": [
+      "Delivered reminder, unresolved registration"
+    ]
+  }
+}

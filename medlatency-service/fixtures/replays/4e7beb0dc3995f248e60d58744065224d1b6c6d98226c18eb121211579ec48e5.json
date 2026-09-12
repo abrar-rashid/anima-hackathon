@@ -1,0 +1,69 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "make-call",
+        "action_key": "make-call",
+        "label": "Call patient to confirm address",
+        "outcome": "Obtain address confirmation during a completed call",
+        "family": "communication",
+        "intent": "commitment",
+        "origin": "documented",
+        "source": {
+          "resource_id": "queued-call",
+          "snapshot_id": "snap_2b6d481c47aea8d42219b5e1",
+          "pointer": "/data/text",
+          "quote": "Queued script: ask the patient to confirm their address. This call has not occurred."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [
+          "Queued script is not a transcript. Wall-clock timing is not simulation time."
+        ],
+        "item": "address confirmation",
+        "parent_key": null,
+        "required_stages": [
+          "response_received"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [
+      {
+        "task_key": "make-call",
+        "stage": "queued",
+        "source": {
+          "resource_id": "queued-call",
+          "snapshot_id": "snap_2b6d481c47aea8d42219b5e1",
+          "pointer": "/data/text",
+          "quote": "Queued script: ask the patient to confirm their address. This call has not occurred."
+        },
+        "item": "address confirmation",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "make-call",
+        "stage": "response_received",
+        "source": {
+          "resource_id": "queued-call",
+          "snapshot_id": "snap_2b6d481c47aea8d42219b5e1",
+          "pointer": "/data/text",
+          "quote": "Queued script: ask the patient to confirm their address. This call has not occurred."
+        },
+        "item": "address confirmation",
+        "polarity": "pending",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      }
+    ],
+    "edges": [],
+    "context": [
+      "Queued telephone script is a plan, not a conversation"
+    ]
+  }
+}

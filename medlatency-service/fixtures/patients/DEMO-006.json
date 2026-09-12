@@ -1,0 +1,113 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-006",
+    "display_name": "Robin Ash",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "Repeat requests and an old unlinked result"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "old-fbc",
+      "patient_id": "DEMO-006",
+      "kind": "diagnostic_report",
+      "title": "Old Fbc",
+      "source_status": "available",
+      "version": 1,
+      "record_created_at": "2026-08-01T10:00:00Z",
+      "clinical_event_at": "2026-08-01T10:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count result available: haemoglobin 132 g/L."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-006.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_b621b80e1150057776f6295d"
+    },
+    {
+      "id": "first-repeat",
+      "patient_id": "DEMO-006",
+      "kind": "encounter",
+      "title": "First Repeat",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-08T09:00:00Z",
+      "clinical_event_at": "2026-09-08T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Please arrange a repeat full blood count."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-006.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_ea95c1eb1ad26cf93e635efd"
+    },
+    {
+      "id": "second-repeat",
+      "patient_id": "DEMO-006",
+      "kind": "encounter",
+      "title": "Second Repeat",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-11T09:00:00Z",
+      "clinical_event_at": "2026-09-11T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Please arrange a repeat full blood count."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-006.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_90a8402eae7d61850b0afbf8"
+    }
+  ],
+  "events": [],
+  "links": [],
+  "shared_context": []
+}

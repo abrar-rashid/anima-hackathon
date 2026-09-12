@@ -1,0 +1,59 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-009",
+    "display_name": "Lee Brook",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "Queued telephone script is a plan, not a conversation"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "queued-call",
+      "patient_id": "DEMO-009",
+      "kind": "telephone_call",
+      "title": "Queued Call",
+      "source_status": "queued",
+      "version": 1,
+      "record_created_at": "2026-09-10T09:00:00Z",
+      "clinical_event_at": "2026-09-10T09:00:00Z",
+      "clock": "wall",
+      "data": {
+        "text": "Queued script: ask the patient to confirm their address. This call has not occurred."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-009.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_2b6d481c47aea8d42219b5e1"
+    }
+  ],
+  "events": [],
+  "links": [],
+  "shared_context": []
+}

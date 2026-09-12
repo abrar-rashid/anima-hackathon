@@ -17,6 +17,8 @@ export interface NeighbourhoodViewProps {
   initial: TownModel
   /** Hide the standalone header when the map sits inside the cockpit. */
   embedded?: boolean
+  /** Short strip under the Wardline boards. Also applies embedded chrome. */
+  compact?: boolean
 }
 
 const POLL_MS = 20_000
@@ -29,7 +31,12 @@ function atHour(now: number, hour: number): number {
   return day + hour * 3_600_000
 }
 
-export function NeighbourhoodView({ initial, embedded = false }: NeighbourhoodViewProps) {
+export function NeighbourhoodView({
+  initial,
+  embedded = false,
+  compact = false,
+}: NeighbourhoodViewProps) {
+  const hideHeader = embedded || compact
   const reduced = useReducedMotion()
   const [model, setModel] = useState<TownModel>(initial)
   const [selected, setSelected] = useState<Site | null>(null)
@@ -97,13 +104,19 @@ export function NeighbourhoodView({ initial, embedded = false }: NeighbourhoodVi
   }, [])
 
   return (
-    <div className={styles.page} data-embedded={embedded ? 'true' : 'false'}>
-      <a className={styles.skipLink} href="#neighbourhood-as-data">
-        Skip the map and read the neighbourhood as data
-      </a>
+    <div
+      className={styles.page}
+      data-embedded={hideHeader ? 'true' : 'false'}
+      data-compact={compact ? 'true' : 'false'}
+    >
+      {compact ? null : (
+        <a className={styles.skipLink} href="#neighbourhood-as-data">
+          Skip the map and read the neighbourhood as data
+        </a>
+      )}
 
       <div className={styles.shell} data-aside={selectedSite ? 'open' : 'closed'}>
-        {embedded ? null : (
+        {hideHeader ? null : (
           <header className={styles.header}>
             <h1 className={styles.title}>The neighbourhood</h1>
             <p className={styles.headerNote}>
@@ -204,7 +217,7 @@ export function NeighbourhoodView({ initial, embedded = false }: NeighbourhoodVi
             <p className={styles.note}>unclosed / past deadline, within the window each site returned</p>
           </section>
 
-          <section className={styles.card}>
+          <section className={`${styles.card} ${styles.compactHide}`}>
             <h2 className={styles.cardTitle}>Legend</h2>
             <ul className={styles.legendList}>
               <li>
@@ -246,7 +259,7 @@ export function NeighbourhoodView({ initial, embedded = false }: NeighbourhoodVi
             </p>
           </section>
 
-          <section className={styles.card}>
+          <section className={`${styles.card} ${styles.compactHide}`}>
             <h2 className={styles.cardTitle}>Lighting preview</h2>
             <p className={styles.note}>
               The town&apos;s hour comes from the simulator clock. This control only previews other
@@ -273,7 +286,7 @@ export function NeighbourhoodView({ initial, embedded = false }: NeighbourhoodVi
             </div>
           </section>
 
-          <section className={styles.card}>
+          <section className={`${styles.card} ${styles.compactHide}`}>
             <h2 className={styles.cardTitle}>Scan</h2>
             <p className={styles.note}>
               {withDenominator(model.scan.scanned, model.scan.total, 'resources scanned')} across{' '}
@@ -322,42 +335,44 @@ export function NeighbourhoodView({ initial, embedded = false }: NeighbourhoodVi
           </span>
         </p>
 
-        <section className={styles.ticker} aria-label="Recent simulator events">
-          <p className={styles.tickerLabel}>
-            Clock event stream · {formatCount(model.docs.length)} events from{' '}
-            <code>GET /api/clock</code>
-            {agentLines.length > 0 ? (
-              <>
-                {' · '}
-                <span className={styles.agentChip}>
-                  agent{busy ? ' reading' : ''}: {agentLines.join(' — ')}
-                </span>
-              </>
-            ) : null}
-          </p>
-          <div className={styles.tickerRow}>
-            {model.docs.length === 0 ? (
-              <span className={styles.tickerChip}>no events returned by the clock read</span>
-            ) : (
-              model.docs.slice(0, 24).map((doc) => (
-                <span
-                  key={doc.eventId}
-                  className={`${styles.tickerChip} ${
-                    agentSource?.eventId === doc.eventId ? styles.tickerChipActive : ''
-                  }`}
-                >
-                  <span className={styles.tickerTime}>{formatClockTime(doc.time)}</span>
-                  <span className={styles.tickerType}>{doc.type}</span>
-                  <span>{doc.detail ?? 'no detail supplied by source'}</span>
-                  <span className={styles.tickerChain}>{doc.chain.join(' → ')}</span>
-                </span>
-              ))
-            )}
-          </div>
-        </section>
+        {compact ? null : (
+          <section className={styles.ticker} aria-label="Recent simulator events">
+            <p className={styles.tickerLabel}>
+              Clock event stream · {formatCount(model.docs.length)} events from{' '}
+              <code>GET /api/clock</code>
+              {agentLines.length > 0 ? (
+                <>
+                  {' · '}
+                  <span className={styles.agentChip}>
+                    agent{busy ? ' reading' : ''}: {agentLines.join(' — ')}
+                  </span>
+                </>
+              ) : null}
+            </p>
+            <div className={styles.tickerRow}>
+              {model.docs.length === 0 ? (
+                <span className={styles.tickerChip}>no events returned by the clock read</span>
+              ) : (
+                model.docs.slice(0, 24).map((doc) => (
+                  <span
+                    key={doc.eventId}
+                    className={`${styles.tickerChip} ${
+                      agentSource?.eventId === doc.eventId ? styles.tickerChipActive : ''
+                    }`}
+                  >
+                    <span className={styles.tickerTime}>{formatClockTime(doc.time)}</span>
+                    <span className={styles.tickerType}>{doc.type}</span>
+                    <span>{doc.detail ?? 'no detail supplied by source'}</span>
+                    <span className={styles.tickerChain}>{doc.chain.join(' → ')}</span>
+                  </span>
+                ))
+              )}
+            </div>
+          </section>
+        )}
       </div>
 
-      <AccessibleNeighbourhood model={model} />
+      {compact ? null : <AccessibleNeighbourhood model={model} />}
     </div>
   )
 }

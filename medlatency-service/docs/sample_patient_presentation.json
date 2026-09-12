@@ -1,0 +1,904 @@
+{
+  "overview": {
+    "patient": {
+      "id": "DEMO-005",
+      "display_name": "Casey Linden",
+      "synthetic": true
+    },
+    "clinical_as_of": "2026-09-12T12:00:00Z",
+    "dataset": {
+      "mode": "fixture",
+      "source": "locally_authored",
+      "captured_at": "2026-09-12T12:00:00Z",
+      "simulation_as_of": "2026-09-12T12:00:00Z",
+      "label": "AUTHORED COMPLETE-WORKFLOW FIXTURE — not observed in Anima"
+    },
+    "analysis_mode": "fixture_replay",
+    "analysis_version": "1.0.4",
+    "context": [
+      "AUTHORED COMPLETE-WORKFLOW FIXTURE — not observed in Anima"
+    ],
+    "coverage": {
+      "full_history_guaranteed": false,
+      "sources": [
+        {
+          "name": "authored fixture",
+          "complete": true
+        }
+      ],
+      "limitations": [
+        "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+      ]
+    }
+  },
+  "summary": {
+    "tasks_identified": 1,
+    "with_progress": 1,
+    "fulfilled": 1,
+    "explicitly_outstanding": 0,
+    "unknown_fulfillment": 0,
+    "ambiguous_matches": 0,
+    "subtasks": 0,
+    "inferred_candidates": 0
+  },
+  "counting_rules": "Parent totals count active documented task instances, including conditional plans. Subtasks, inferred candidates, preferences, historical and negated mentions are separate. Progress and fulfillment overlap; ambiguous matches count candidate records across all mentions.",
+  "tasks": [
+    {
+      "key": "fbc-workflow",
+      "action_key": "fbc-workflow",
+      "label": "Obtain, review and communicate full blood count",
+      "outcome": "A full blood count result reviewed and communicated",
+      "family": "diagnostic",
+      "intent": "instruction",
+      "origin": "documented",
+      "source": {
+        "resource_id": "test-request",
+        "snapshot_id": "snap_bc316e04881dce8939111349",
+        "pointer": "/data/text",
+        "quote": "GP: obtain a full blood count, review the result and communicate it to the patient."
+      },
+      "responsible": "GP",
+      "condition": null,
+      "deadline": null,
+      "preferences": [],
+      "uncertainties": [],
+      "item": "full blood count",
+      "parent_key": null,
+      "required_stages": [
+        "result_available",
+        "reviewed",
+        "communicated"
+      ],
+      "fulfillment_rule": "all",
+      "id": "task_38854ebd66fbc35925e0b7f4",
+      "parent_id": null,
+      "active": true,
+      "resolution": {
+        "progress": "requested / ordered / collected / received / analysed / result_available / reviewed / communicated",
+        "assessment": "evidenced",
+        "fulfillment": "fulfilled",
+        "lifecycle": "active",
+        "next_step": "No unresolved fulfillment criterion"
+      },
+      "stages": [
+        {
+          "stage": "requested",
+          "assessment": "evidenced",
+          "required": false,
+          "expectation_origin": "template_suggestion",
+          "evidence": [
+            {
+              "resource_id": "test-request",
+              "snapshot_id": "snap_bc316e04881dce8939111349",
+              "pointer": "/data/text",
+              "quote": "GP: obtain a full blood count, review the result and communicate it to the patient."
+            }
+          ],
+          "historical_assertions": []
+        },
+        {
+          "stage": "ordered",
+          "assessment": "evidenced",
+          "required": false,
+          "expectation_origin": "template_suggestion",
+          "evidence": [
+            {
+              "resource_id": "test-ordered",
+              "snapshot_id": "snap_95d3198d0cbc1d3a8b402c8c",
+              "pointer": "/data/text",
+              "quote": "Full blood count ordered for the linked request."
+            }
+          ],
+          "historical_assertions": []
+        },
+        {
+          "stage": "collected",
+          "assessment": "evidenced",
+          "required": false,
+          "expectation_origin": "template_suggestion",
+          "evidence": [
+            {
+              "resource_id": "test-collected",
+              "snapshot_id": "snap_e4765cd5b01909a1559fa144",
+              "pointer": "/data/text",
+              "quote": "Full blood count sample collected."
+            }
+          ],
+          "historical_assertions": []
+        },
+        {
+          "stage": "received",
+          "assessment": "evidenced",
+          "required": false,
+          "expectation_origin": "template_suggestion",
+          "evidence": [
+            {
+              "resource_id": "test-received",
+              "snapshot_id": "snap_66e169057527fa56c527e72b",
+              "pointer": "/data/text",
+              "quote": "Full blood count sample received by laboratory."
+            }
+          ],
+          "historical_assertions": []
+        },
+        {
+          "stage": "analysed",
+          "assessment": "evidenced",
+          "required": false,
+          "expectation_origin": "template_suggestion",
+          "evidence": [
+            {
+              "resource_id": "test-analysed",
+              "snapshot_id": "snap_8dba146377570a21f80408cf",
+              "pointer": "/data/text",
+              "quote": "Full blood count sample analysed."
+            }
+          ],
+          "historical_assertions": []
+        },
+        {
+          "stage": "result_available",
+          "assessment": "evidenced",
+          "required": true,
+          "expectation_origin": "task_interpretation",
+          "evidence": [
+            {
+              "resource_id": "test-result_available",
+              "snapshot_id": "snap_407464efa2be93fc1341c928",
+              "pointer": "/data/text",
+              "quote": "Full blood count result available: haemoglobin 138 g/L."
+            }
+          ],
+          "historical_assertions": []
+        },
+        {
+          "stage": "reviewed",
+          "assessment": "evidenced",
+          "required": true,
+          "expectation_origin": "task_interpretation",
+          "evidence": [
+            {
+              "resource_id": "test-reviewed",
+              "snapshot_id": "snap_8eec075a63152cb4320f31ae",
+              "pointer": "/data/text",
+              "quote": "GP reviewed the linked full blood count result."
+            }
+          ],
+          "historical_assertions": []
+        },
+        {
+          "stage": "communicated",
+          "assessment": "evidenced",
+          "required": true,
+          "expectation_origin": "task_interpretation",
+          "evidence": [
+            {
+              "resource_id": "test-communicated",
+              "snapshot_id": "snap_f1ef498eeea68f7670e98580",
+              "pointer": "/data/text",
+              "quote": "GP communicated the reviewed full blood count result to the patient."
+            }
+          ],
+          "historical_assertions": []
+        }
+      ],
+      "candidates": [
+        {
+          "id": "match_a72ae92b0e210c26d255dc",
+          "observation": {
+            "task_key": "fbc-workflow",
+            "stage": "requested",
+            "source": {
+              "resource_id": "test-request",
+              "snapshot_id": "snap_bc316e04881dce8939111349",
+              "pointer": "/data/text",
+              "quote": "GP: obtain a full blood count, review the result and communicate it to the patient."
+            },
+            "item": "full blood count",
+            "polarity": "supports",
+            "lifecycle": "active",
+            "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+          },
+          "resource_id": "test-request",
+          "snapshot_id": "snap_bc316e04881dce8939111349",
+          "basis": "native_relationship",
+          "confidence": "strong",
+          "event_time": "2026-09-05T09:00:00Z",
+          "clock": "simulation",
+          "supporting_attributes": [
+            "Same source or explicit documented resource relationship path",
+            "Matching interpreted item"
+          ],
+          "conflicting_attributes": [],
+          "review_required": false,
+          "accepted": true,
+          "decision_origin": "deterministic_rules"
+        },
+        {
+          "id": "match_316f3619a237cf3704f090",
+          "observation": {
+            "task_key": "fbc-workflow",
+            "stage": "ordered",
+            "source": {
+              "resource_id": "test-ordered",
+              "snapshot_id": "snap_95d3198d0cbc1d3a8b402c8c",
+              "pointer": "/data/text",
+              "quote": "Full blood count ordered for the linked request."
+            },
+            "item": "full blood count",
+            "polarity": "supports",
+            "lifecycle": "active",
+            "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+          },
+          "resource_id": "test-ordered",
+          "snapshot_id": "snap_95d3198d0cbc1d3a8b402c8c",
+          "basis": "native_relationship",
+          "confidence": "strong",
+          "event_time": "2026-09-06T09:00:00Z",
+          "clock": "simulation",
+          "supporting_attributes": [
+            "Same source or explicit documented resource relationship path",
+            "Matching interpreted item"
+          ],
+          "conflicting_attributes": [],
+          "review_required": false,
+          "accepted": true,
+          "decision_origin": "deterministic_rules"
+        },
+        {
+          "id": "match_e6c2d8856066e4ab920bc8",
+          "observation": {
+            "task_key": "fbc-workflow",
+            "stage": "collected",
+            "source": {
+              "resource_id": "test-collected",
+              "snapshot_id": "snap_e4765cd5b01909a1559fa144",
+              "pointer": "/data/text",
+              "quote": "Full blood count sample collected."
+            },
+            "item": "full blood count",
+            "polarity": "supports",
+            "lifecycle": "active",
+            "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+          },
+          "resource_id": "test-collected",
+          "snapshot_id": "snap_e4765cd5b01909a1559fa144",
+          "basis": "native_relationship",
+          "confidence": "strong",
+          "event_time": "2026-09-06T10:00:00Z",
+          "clock": "simulation",
+          "supporting_attributes": [
+            "Same source or explicit documented resource relationship path",
+            "Matching interpreted item"
+          ],
+          "conflicting_attributes": [],
+          "review_required": false,
+          "accepted": true,
+          "decision_origin": "deterministic_rules"
+        },
+        {
+          "id": "match_dda203258be187f0a5297c",
+          "observation": {
+            "task_key": "fbc-workflow",
+            "stage": "received",
+            "source": {
+              "resource_id": "test-received",
+              "snapshot_id": "snap_66e169057527fa56c527e72b",
+              "pointer": "/data/text",
+              "quote": "Full blood count sample received by laboratory."
+            },
+            "item": "full blood count",
+            "polarity": "supports",
+            "lifecycle": "active",
+            "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+          },
+          "resource_id": "test-received",
+          "snapshot_id": "snap_66e169057527fa56c527e72b",
+          "basis": "native_relationship",
+          "confidence": "strong",
+          "event_time": "2026-09-06T11:00:00Z",
+          "clock": "simulation",
+          "supporting_attributes": [
+            "Same source or explicit documented resource relationship path",
+            "Matching interpreted item"
+          ],
+          "conflicting_attributes": [],
+          "review_required": false,
+          "accepted": true,
+          "decision_origin": "deterministic_rules"
+        },
+        {
+          "id": "match_2d44cfaa9f1b7d3a5f490d",
+          "observation": {
+            "task_key": "fbc-workflow",
+            "stage": "analysed",
+            "source": {
+              "resource_id": "test-analysed",
+              "snapshot_id": "snap_8dba146377570a21f80408cf",
+              "pointer": "/data/text",
+              "quote": "Full blood count sample analysed."
+            },
+            "item": "full blood count",
+            "polarity": "supports",
+            "lifecycle": "active",
+            "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+          },
+          "resource_id": "test-analysed",
+          "snapshot_id": "snap_8dba146377570a21f80408cf",
+          "basis": "native_relationship",
+          "confidence": "strong",
+          "event_time": "2026-09-07T09:00:00Z",
+          "clock": "simulation",
+          "supporting_attributes": [
+            "Same source or explicit documented resource relationship path",
+            "Matching interpreted item"
+          ],
+          "conflicting_attributes": [],
+          "review_required": false,
+          "accepted": true,
+          "decision_origin": "deterministic_rules"
+        },
+        {
+          "id": "match_3bb6581b30bab3f22004bb",
+          "observation": {
+            "task_key": "fbc-workflow",
+            "stage": "result_available",
+            "source": {
+              "resource_id": "test-result_available",
+              "snapshot_id": "snap_407464efa2be93fc1341c928",
+              "pointer": "/data/text",
+              "quote": "Full blood count result available: haemoglobin 138 g/L."
+            },
+            "item": "full blood count",
+            "polarity": "supports",
+            "lifecycle": "active",
+            "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+          },
+          "resource_id": "test-result_available",
+          "snapshot_id": "snap_407464efa2be93fc1341c928",
+          "basis": "native_relationship",
+          "confidence": "strong",
+          "event_time": "2026-09-07T10:00:00Z",
+          "clock": "simulation",
+          "supporting_attributes": [
+            "Same source or explicit documented resource relationship path",
+            "Matching interpreted item"
+          ],
+          "conflicting_attributes": [],
+          "review_required": false,
+          "accepted": true,
+          "decision_origin": "deterministic_rules"
+        },
+        {
+          "id": "match_12c773b4d5d00d95707693",
+          "observation": {
+            "task_key": "fbc-workflow",
+            "stage": "reviewed",
+            "source": {
+              "resource_id": "test-reviewed",
+              "snapshot_id": "snap_8eec075a63152cb4320f31ae",
+              "pointer": "/data/text",
+              "quote": "GP reviewed the linked full blood count result."
+            },
+            "item": "full blood count",
+            "polarity": "supports",
+            "lifecycle": "active",
+            "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+          },
+          "resource_id": "test-reviewed",
+          "snapshot_id": "snap_8eec075a63152cb4320f31ae",
+          "basis": "native_relationship",
+          "confidence": "strong",
+          "event_time": "2026-09-07T11:00:00Z",
+          "clock": "simulation",
+          "supporting_attributes": [
+            "Same source or explicit documented resource relationship path",
+            "Matching interpreted item"
+          ],
+          "conflicting_attributes": [],
+          "review_required": false,
+          "accepted": true,
+          "decision_origin": "deterministic_rules"
+        },
+        {
+          "id": "match_bc7bf63f4b9b349aaaca30",
+          "observation": {
+            "task_key": "fbc-workflow",
+            "stage": "communicated",
+            "source": {
+              "resource_id": "test-communicated",
+              "snapshot_id": "snap_f1ef498eeea68f7670e98580",
+              "pointer": "/data/text",
+              "quote": "GP communicated the reviewed full blood count result to the patient."
+            },
+            "item": "full blood count",
+            "polarity": "supports",
+            "lifecycle": "active",
+            "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+          },
+          "resource_id": "test-communicated",
+          "snapshot_id": "snap_f1ef498eeea68f7670e98580",
+          "basis": "native_relationship",
+          "confidence": "strong",
+          "event_time": "2026-09-08T09:00:00Z",
+          "clock": "simulation",
+          "supporting_attributes": [
+            "Same source or explicit documented resource relationship path",
+            "Matching interpreted item"
+          ],
+          "conflicting_attributes": [],
+          "review_required": false,
+          "accepted": true,
+          "decision_origin": "deterministic_rules"
+        }
+      ],
+      "work_started": true,
+      "overdue": false,
+      "edges": [],
+      "review_flags": []
+    }
+  ],
+  "evidence": [
+    {
+      "id": "test-request",
+      "patient_id": "DEMO-005",
+      "kind": "encounter",
+      "title": "Test Request",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-05T09:00:00Z",
+      "clinical_event_at": "2026-09-05T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "GP: obtain a full blood count, review the result and communicate it to the patient."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_bc316e04881dce8939111349"
+    },
+    {
+      "id": "test-ordered",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Ordered",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-06T09:00:00Z",
+      "clinical_event_at": "2026-09-06T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count ordered for the linked request.",
+        "request_id": "test-request"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_95d3198d0cbc1d3a8b402c8c"
+    },
+    {
+      "id": "test-collected",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Collected",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-06T10:00:00Z",
+      "clinical_event_at": "2026-09-06T10:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count sample collected.",
+        "request_id": "test-ordered"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_e4765cd5b01909a1559fa144"
+    },
+    {
+      "id": "test-received",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Received",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-06T11:00:00Z",
+      "clinical_event_at": "2026-09-06T11:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count sample received by laboratory.",
+        "request_id": "test-collected"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_66e169057527fa56c527e72b"
+    },
+    {
+      "id": "test-analysed",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Analysed",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-07T09:00:00Z",
+      "clinical_event_at": "2026-09-07T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count sample analysed.",
+        "request_id": "test-received"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_8dba146377570a21f80408cf"
+    },
+    {
+      "id": "test-result_available",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Result_Available",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-07T10:00:00Z",
+      "clinical_event_at": "2026-09-07T10:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count result available: haemoglobin 138 g/L.",
+        "request_id": "test-analysed"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_407464efa2be93fc1341c928"
+    },
+    {
+      "id": "test-reviewed",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Reviewed",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-07T11:00:00Z",
+      "clinical_event_at": "2026-09-07T11:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "GP reviewed the linked full blood count result.",
+        "request_id": "test-result_available"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_8eec075a63152cb4320f31ae"
+    },
+    {
+      "id": "test-communicated",
+      "patient_id": "DEMO-005",
+      "kind": "communication",
+      "title": "Test Communicated",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-08T09:00:00Z",
+      "clinical_event_at": "2026-09-08T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "GP communicated the reviewed full blood count result to the patient.",
+        "request_id": "test-reviewed"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_f1ef498eeea68f7670e98580"
+    }
+  ],
+  "timeline": [
+    {
+      "id": "event_44fa21e4001cf5818b33",
+      "resource_id": "test-request",
+      "snapshot_id": "snap_bc316e04881dce8939111349",
+      "time": "2026-09-05T09:00:00Z",
+      "clock": "simulation",
+      "kind": "plan",
+      "label": "Test Request",
+      "pointer": "/clinical_event_at",
+      "hidden_by_default": false
+    },
+    {
+      "id": "event_8efcc951b0550a568354",
+      "resource_id": "test-request",
+      "snapshot_id": "snap_bc316e04881dce8939111349",
+      "time": "2026-09-05T09:00:00Z",
+      "clock": "simulation",
+      "kind": "record_metadata",
+      "label": "Record created: Test Request",
+      "pointer": "/record_created_at",
+      "hidden_by_default": true
+    },
+    {
+      "id": "event_2cbb72d014f24ab5ada9",
+      "resource_id": "test-ordered",
+      "snapshot_id": "snap_95d3198d0cbc1d3a8b402c8c",
+      "time": "2026-09-06T09:00:00Z",
+      "clock": "simulation",
+      "kind": "record_metadata",
+      "label": "Record created: Test Ordered",
+      "pointer": "/record_created_at",
+      "hidden_by_default": true
+    },
+    {
+      "id": "event_5f1b775f5f22d42b6201",
+      "resource_id": "test-ordered",
+      "snapshot_id": "snap_95d3198d0cbc1d3a8b402c8c",
+      "time": "2026-09-06T09:00:00Z",
+      "clock": "simulation",
+      "kind": "clinical_event",
+      "label": "Test Ordered",
+      "pointer": "/clinical_event_at",
+      "hidden_by_default": false
+    },
+    {
+      "id": "event_37bcd9b2d5babe3727ca",
+      "resource_id": "test-collected",
+      "snapshot_id": "snap_e4765cd5b01909a1559fa144",
+      "time": "2026-09-06T10:00:00Z",
+      "clock": "simulation",
+      "kind": "clinical_event",
+      "label": "Test Collected",
+      "pointer": "/clinical_event_at",
+      "hidden_by_default": false
+    },
+    {
+      "id": "event_4f9c7faa5bca11b4aafb",
+      "resource_id": "test-collected",
+      "snapshot_id": "snap_e4765cd5b01909a1559fa144",
+      "time": "2026-09-06T10:00:00Z",
+      "clock": "simulation",
+      "kind": "record_metadata",
+      "label": "Record created: Test Collected",
+      "pointer": "/record_created_at",
+      "hidden_by_default": true
+    },
+    {
+      "id": "event_65890dddc5d9717422a8",
+      "resource_id": "test-received",
+      "snapshot_id": "snap_66e169057527fa56c527e72b",
+      "time": "2026-09-06T11:00:00Z",
+      "clock": "simulation",
+      "kind": "clinical_event",
+      "label": "Test Received",
+      "pointer": "/clinical_event_at",
+      "hidden_by_default": false
+    },
+    {
+      "id": "event_f78621135415de099436",
+      "resource_id": "test-received",
+      "snapshot_id": "snap_66e169057527fa56c527e72b",
+      "time": "2026-09-06T11:00:00Z",
+      "clock": "simulation",
+      "kind": "record_metadata",
+      "label": "Record created: Test Received",
+      "pointer": "/record_created_at",
+      "hidden_by_default": true
+    },
+    {
+      "id": "event_916d40e5efa49c11e87c",
+      "resource_id": "test-analysed",
+      "snapshot_id": "snap_8dba146377570a21f80408cf",
+      "time": "2026-09-07T09:00:00Z",
+      "clock": "simulation",
+      "kind": "clinical_event",
+      "label": "Test Analysed",
+      "pointer": "/clinical_event_at",
+      "hidden_by_default": false
+    },
+    {
+      "id": "event_abfe536e56b201447307",
+      "resource_id": "test-analysed",
+      "snapshot_id": "snap_8dba146377570a21f80408cf",
+      "time": "2026-09-07T09:00:00Z",
+      "clock": "simulation",
+      "kind": "record_metadata",
+      "label": "Record created: Test Analysed",
+      "pointer": "/record_created_at",
+      "hidden_by_default": true
+    },
+    {
+      "id": "event_3f64cf761023a5e43d87",
+      "resource_id": "test-result_available",
+      "snapshot_id": "snap_407464efa2be93fc1341c928",
+      "time": "2026-09-07T10:00:00Z",
+      "clock": "simulation",
+      "kind": "clinical_event",
+      "label": "Test Result_Available",
+      "pointer": "/clinical_event_at",
+      "hidden_by_default": false
+    },
+    {
+      "id": "event_c1a6b96fa9ad2c9922a5",
+      "resource_id": "test-result_available",
+      "snapshot_id": "snap_407464efa2be93fc1341c928",
+      "time": "2026-09-07T10:00:00Z",
+      "clock": "simulation",
+      "kind": "record_metadata",
+      "label": "Record created: Test Result_Available",
+      "pointer": "/record_created_at",
+      "hidden_by_default": true
+    },
+    {
+      "id": "event_76f566483857f5a56e41",
+      "resource_id": "test-reviewed",
+      "snapshot_id": "snap_8eec075a63152cb4320f31ae",
+      "time": "2026-09-07T11:00:00Z",
+      "clock": "simulation",
+      "kind": "clinical_event",
+      "label": "Test Reviewed",
+      "pointer": "/clinical_event_at",
+      "hidden_by_default": false
+    },
+    {
+      "id": "event_966c3a304481090e59fb",
+      "resource_id": "test-reviewed",
+      "snapshot_id": "snap_8eec075a63152cb4320f31ae",
+      "time": "2026-09-07T11:00:00Z",
+      "clock": "simulation",
+      "kind": "record_metadata",
+      "label": "Record created: Test Reviewed",
+      "pointer": "/record_created_at",
+      "hidden_by_default": true
+    },
+    {
+      "id": "event_45364961beac19ae7ace",
+      "resource_id": "test-communicated",
+      "snapshot_id": "snap_f1ef498eeea68f7670e98580",
+      "time": "2026-09-08T09:00:00Z",
+      "clock": "simulation",
+      "kind": "record_metadata",
+      "label": "Record created: Test Communicated",
+      "pointer": "/record_created_at",
+      "hidden_by_default": true
+    },
+    {
+      "id": "event_cf86445ec1a62f59596c",
+      "resource_id": "test-communicated",
+      "snapshot_id": "snap_f1ef498eeea68f7670e98580",
+      "time": "2026-09-08T09:00:00Z",
+      "clock": "simulation",
+      "kind": "communication",
+      "label": "Test Communicated",
+      "pointer": "/clinical_event_at",
+      "hidden_by_default": false
+    }
+  ],
+  "demo_highlights": [
+    {
+      "task_id": "task_38854ebd66fbc35925e0b7f4",
+      "label": "Obtain, review and communicate full blood count",
+      "why": "Authored outcome demonstration; not observed in Anima."
+    }
+  ],
+  "analysis": {
+    "schema_version": "medlatency.analysis.v1",
+    "patient_id": "DEMO-005",
+    "analysis_version": "1.0.4",
+    "prompt_version": "semantic-v1.1",
+    "provider": "authored-replay",
+    "model": "fixture-author-v1",
+    "mode": "fixture_replay",
+    "input_fingerprint": "fa45651b132e99ba5ddd7264ca4f0fe73c1ec3a287a8c0bc89e7c3bd8761b087",
+    "configuration_fingerprint": "abd9eed9ac9a6afcdab6c9d5ffff8d72eaf9b8822fbd72c28c6a40ebcc92fe4f",
+    "analysed_at": "2026-09-12T16:01:35.219730+00:00",
+    "review_history": [],
+    "changes": [
+      {
+        "task_id": "task_38854ebd66fbc35925e0b7f4",
+        "change": "evidence_or_interpretation_changed",
+        "previous_resolution": {
+          "progress": "requested / ordered / collected / received / analysed / result_available / reviewed / communicated",
+          "assessment": "evidenced",
+          "fulfillment": "fulfilled",
+          "lifecycle": "active",
+          "next_step": "No unresolved fulfillment criterion"
+        },
+        "resolution": {
+          "progress": "requested / ordered / collected / received / analysed / result_available / reviewed / communicated",
+          "assessment": "evidenced",
+          "fulfillment": "fulfilled",
+          "lifecycle": "active",
+          "next_step": "No unresolved fulfillment criterion"
+        }
+      }
+    ]
+  }
+}

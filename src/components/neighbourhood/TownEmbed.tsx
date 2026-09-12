@@ -5,12 +5,16 @@ import { NeighbourhoodView } from './NeighbourhoodView'
 import { emptyModel, type TownModel } from './model'
 import styles from './neighbourhood.module.css'
 
+export interface TownEmbedProps {
+  /** Short strip under the Wardline boards. Passed through to NeighbourhoodView. */
+  compact?: boolean
+}
+
 /**
- * Loads the neighbourhood for the cockpit's town tab. The map has its own
- * read path (`/api/ctl/town`) so it does not wait on the three-column case
- * payload, and it does not go through the retired PixelTownCanvas.
+ * Loads the neighbourhood for the cockpit. The map has its own read path
+ * (`/api/ctl/town`) so it does not wait on the operations payload.
  */
-export function TownEmbed() {
+export function TownEmbed({ compact = false }: TownEmbedProps) {
   const [model, setModel] = useState<TownModel | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,7 +46,11 @@ export function TownEmbed() {
 
   if (!model) {
     return (
-      <div className={styles.page} data-embedded="true">
+      <div
+        className={styles.page}
+        data-embedded="true"
+        data-compact={compact ? 'true' : 'false'}
+      >
         <p className={styles.headerNote} role="status">
           {error ?? 'Reading the neighbourhood from the simulator…'}
         </p>
@@ -50,5 +58,5 @@ export function TownEmbed() {
     )
   }
 
-  return <NeighbourhoodView initial={model} embedded />
+  return <NeighbourhoodView initial={model} embedded compact={compact} />
 }

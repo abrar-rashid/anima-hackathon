@@ -1,0 +1,12 @@
+{
+  "label": "Independently authored assertions for scenario evaluation; never read by extraction or resolution",
+  "DEMO-001": {"task_count": 3, "active_count": 3, "fulfillment": {"close-document": "explicitly_not_fulfilled", "match-panel": "explicitly_not_fulfilled", "request-note": "fulfilled"}, "reviewed_must_be_evidenced": false},
+  "DEMO-002": {"task_count": 2, "active_count": 2, "fulfillment": {"send-reminder": "fulfilled", "complete-paperwork": "unknown"}},
+  "DEMO-003": {"task_count": 2, "active_count": 1, "fulfillment": {"coordinate-appointment": "explicitly_not_fulfilled"}},
+  "DEMO-004": {"task_count": 1, "active_count": 1, "fulfillment": {"clarify-review": "unknown"}, "reviewed_must_be_evidenced": false},
+  "DEMO-005": {"task_count": 1, "active_count": 1, "fulfillment": {"fbc-workflow": "fulfilled"}, "reviewed_must_be_evidenced": true},
+  "DEMO-006": {"task_count": 2, "active_count": 2, "fulfillment": {"first-repeat": "unknown", "second-repeat": "unknown"}, "minimum_ambiguous_matches": 2},
+  "DEMO-007": {"task_count": 2, "active_count": 1, "fulfillment": {"conditional-referral": "unknown", "no-prescription": "unknown"}},
+  "DEMO-008": {"task_count": 1, "active_count": 1, "fulfillment": {"physio-referral": "unknown"}, "lifecycle": {"physio-referral": "reopened"}},
+  "DEMO-009": {"task_count": 1, "active_count": 1, "fulfillment": {"make-call": "explicitly_not_fulfilled"}, "reviewed_must_be_evidenced": false}
+}

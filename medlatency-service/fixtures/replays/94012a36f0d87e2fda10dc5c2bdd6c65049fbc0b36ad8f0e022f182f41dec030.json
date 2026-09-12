@@ -1,0 +1,64 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "conditional-referral",
+        "action_key": "conditional-referral",
+        "label": "Consider referral if symptoms persist",
+        "outcome": "Assess need for referral if the condition is met",
+        "family": "unknown",
+        "intent": "conditional",
+        "origin": "documented",
+        "source": {
+          "resource_id": "conditional-note",
+          "snapshot_id": "snap_131e7bc20a7e02caff42b34a",
+          "pointer": "/data/text",
+          "quote": "Consider referral if symptoms persist. No prescription required."
+        },
+        "responsible": null,
+        "condition": "symptoms persist",
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "Consider referral if symptoms persist",
+        "parent_key": null,
+        "required_stages": [
+          "referral_considered"
+        ],
+        "fulfillment_rule": "all"
+      },
+      {
+        "key": "no-prescription",
+        "action_key": "no-prescription",
+        "label": "No prescription required",
+        "outcome": "Document that prescribing is not requested",
+        "family": "unknown",
+        "intent": "negated",
+        "origin": "documented",
+        "source": {
+          "resource_id": "conditional-note",
+          "snapshot_id": "snap_131e7bc20a7e02caff42b34a",
+          "pointer": "/data/text",
+          "quote": "Consider referral if symptoms persist. No prescription required."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "No prescription required",
+        "parent_key": null,
+        "required_stages": [
+          "prescribed"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [],
+    "edges": [],
+    "context": [
+      "Conditional plan and negated prescription"
+    ]
+  }
+}

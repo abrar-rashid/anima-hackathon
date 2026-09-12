@@ -1,0 +1,33 @@
+.wardline {
+  --wl-ink: #14110d;
+  --wl-muted: #6d675e;
+  --wl-faint: #9a948a;
+  --wl-paper: #f6f4ef;
+  --wl-panel: #ffffff;
+  --wl-line: #e6e1d6;
+  --wl-line-strong: #d4cfc3;
+  --wl-forest: #10261b;
+  --wl-forest-mid: #183526;
+  --wl-forest-soft: #e7f0ea;
+  --wl-live: #2f8a5a;
+  --wl-urgent: #c98616;
+  --wl-emergency: #c4472f;
+  --wl-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --wl-sans: 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
+  --wl-radius: 12px;
+  --wl-shadow: 0 1px 2px rgba(20, 17, 13, 0.04);
+  color: var(--wl-ink);
+  background: var(--wl-paper);
+  font-family: var(--wl-sans);
+}
+
+.wardline button,
+.wardline input,
+.wardline select {
+  font: inherit;
+}
+
+.wardline :focus-visible {
+  outline: 2px solid var(--wl-forest);
+  outline-offset: 2px;
+}

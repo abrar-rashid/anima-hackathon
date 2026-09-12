@@ -8,7 +8,7 @@ import { proposeTopProposal } from './effect-bridge'
 import { buildTimeline } from './timeline'
 import type { PatientLoopPayload } from './types'
 
-const FREE_TEXT_KINDS = new Set(['discharge-summary', 'document'])
+const FREE_TEXT_KINDS = new Set(['discharge-summary', 'document', 'encounter', 'consultation', 'note', 'hospital-note'])
 
 /**
  * Reads and merges everything the patient loop page needs, from real reads

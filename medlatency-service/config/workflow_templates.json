@@ -1,0 +1,9 @@
+{
+  "diagnostic": {"possible_stages": ["requested", "ordered", "collected", "received", "analysed", "result_available", "reviewed", "communicated"], "note": "Possible stages only. Later stages never backfill earlier observations."},
+  "blood_test": {"possible_stages": ["requested", "ordered", "phlebotomy_booked", "collected", "dispatched", "received", "analysed", "validated", "result_available", "reviewed", "communicated", "closed"], "note": "Use explicit specimen and investigation references. Release is not review or patient communication."},
+  "ct_imaging": {"possible_stages": ["requested", "awaiting_vetting", "approved", "booked", "safety_checked", "scan_completed", "images_available", "report_available", "reviewed", "communicated", "follow_up_assigned"], "note": "Vetting, scan completion, image availability, authorised report availability, review and communication require distinct evidence."},
+  "document_followup": {"possible_stages": ["instruction_identified", "assigned", "prerequisites_addressed", "processing_outcome_recorded"]},
+  "appointment": {"possible_stages": ["requested", "booking_arranged", "confirmed", "attendance_outcome", "access_confirmed", "transport_confirmed"], "parallel_candidates": ["access_confirmed", "transport_confirmed"]},
+  "communication": {"possible_stages": ["prepared", "queued", "sent", "delivered", "response_received"]},
+  "external_document": {"possible_stages": ["needed", "requested", "received", "reviewed"]}
+}

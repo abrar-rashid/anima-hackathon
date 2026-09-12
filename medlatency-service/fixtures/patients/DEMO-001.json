@@ -1,0 +1,94 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-001",
+    "display_name": "Alex Rowan",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "Compound discharge instructions"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "discharge-letter",
+      "patient_id": "DEMO-001",
+      "kind": "document",
+      "title": "Discharge Letter",
+      "source_status": "sent",
+      "version": 1,
+      "record_created_at": "2026-09-10T09:00:00Z",
+      "clinical_event_at": "2026-09-10T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "GP team: match the referenced panel and request the outstanding medicines note before closing the document task. Both prerequisites remain outstanding."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-001.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_569ecebd263edf39375a39b4"
+    },
+    {
+      "id": "note-request",
+      "patient_id": "DEMO-001",
+      "kind": "communication",
+      "title": "Note Request",
+      "source_status": "sent",
+      "version": 1,
+      "record_created_at": "2026-09-11T09:00:00Z",
+      "clinical_event_at": "2026-09-11T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Request for the medicines note sent to the ward.",
+        "request_id": "discharge-letter"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-001.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_b33f5f03934e830871563995"
+    }
+  ],
+  "events": [],
+  "links": [
+    {
+      "from": "note-request",
+      "to": "discharge-letter",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    }
+  ],
+  "shared_context": []
+}

@@ -1,0 +1,244 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grid > li {
+  min-width: 0;
+}
+
+.card,
+.empty {
+  min-width: 0;
+  background: var(--wl-panel);
+  border: 1px solid var(--wl-line);
+  border-radius: var(--wl-radius);
+  box-shadow: var(--wl-shadow);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  height: 100%;
+  padding: 24px 26px 22px;
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.mark {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  flex: none;
+  border-radius: 8px;
+  background: var(--wl-forest);
+  color: var(--wl-paper);
+  font-family: var(--wl-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.naming {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-family: var(--wl-sans);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wl-faint);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--wl-serif);
+  font-size: 1.625rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--wl-ink);
+  overflow-wrap: anywhere;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  margin-top: 2px;
+  padding: 3px 8px;
+  border: 1px solid var(--wl-line);
+  border-radius: 999px;
+  background: var(--wl-panel);
+  color: var(--wl-muted);
+  font-family: var(--wl-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--wl-live);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--wl-live) 18%, transparent);
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--wl-line);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 16px;
+  border-left: 1px solid var(--wl-line);
+}
+
+.figure:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.figure dt {
+  margin: 0;
+  font-family: var(--wl-sans);
+  font-size: 0.8125rem;
+  color: var(--wl-muted);
+}
+
+.figure dd {
+  margin: 0;
+  font-family: var(--wl-serif);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--wl-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.projections {
+  min-width: 0;
+}
+
+.projLabel {
+  margin: 0 0 10px;
+  font-family: var(--wl-sans);
+  font-size: 0.75rem;
+  color: var(--wl-muted);
+}
+
+.projEmpty {
+  margin: 0;
+  font-family: var(--wl-sans);
+  font-size: 0.8125rem;
+  color: var(--wl-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--wl-paper);
+  color: var(--wl-ink);
+  font-family: var(--wl-sans);
+  font-size: 0.8125rem;
+}
+
+.empty {
+  padding: 40px 28px;
+}
+
+.emptyLead {
+  margin: 0 0 8px;
+  font-family: var(--wl-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--wl-ink);
+}
+
+.emptyBody {
+  margin: 0;
+  max-width: 48rem;
+  font-family: var(--wl-sans);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--wl-muted);
+}
+
+.footer {
+  margin: 16px 0 0;
+  text-align: right;
+  font-family: var(--wl-sans);
+  font-size: 0.75rem;
+  color: var(--wl-faint);
+}
+
+@media (max-width: 52rem) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 28rem) {
+  .figures {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .figure,
+  .figure:first-child {
+    padding: 0;
+    border-left: 0;
+  }
+
+  .cardHead {
+    flex-wrap: wrap;
+  }
+}

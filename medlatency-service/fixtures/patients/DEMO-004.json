@@ -1,0 +1,62 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-004",
+    "display_name": "Jamie Fern",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "Partial blood evidence; order and review unknown"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "blood-report",
+      "patient_id": "DEMO-004",
+      "kind": "diagnostic_report",
+      "title": "Blood Report",
+      "source_status": "available",
+      "version": 1,
+      "record_created_at": "2026-09-10T09:00:00Z",
+      "clinical_event_at": "2026-09-10T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "collected_at": "2026-09-10T08:40:00Z",
+        "haemoglobin": 134,
+        "white_cells": 6.2,
+        "text": "Full blood count: haemoglobin 134 g/L, white cells 6.2 x10^9/L. Sample collected at 08:40. No review is recorded in this export."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-004.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_c70ec8b095592189a5055166"
+    }
+  ],
+  "events": [],
+  "links": [],
+  "shared_context": []
+}

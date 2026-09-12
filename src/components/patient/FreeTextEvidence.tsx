@@ -6,6 +6,7 @@ import { HighlightedText } from './HighlightedText'
 import { absent, formatSimTime } from './format'
 import type { ExtractionSummary } from './types'
 import styles from './free-text-evidence.module.css'
+import { retrospectiveEvent } from '@/ctl/normalise/retrospective'
 
 const SECTION_LABELS: Record<string, string> = {
   reason: 'Reason for admission',
@@ -44,6 +45,11 @@ function DocumentPanel({
   const stage = typeof document.data.stage === 'string' ? document.data.stage : undefined
   const sentAt = typeof document.data.sentAt === 'number' ? document.data.sentAt : undefined
   const sectionEntries = Object.entries(sections).filter(([, v]) => typeof v === 'string' && v.length > 0)
+  const narrative = typeof document.data.text === 'string' ? document.data.text : undefined
+  const retrospective = retrospectiveEvent(document)
+  // Display the clinical note and its labelled time; retain the machine envelope
+  // in the unmodified source resource for provenance and ingestion.
+  const displayNarrative = retrospective ? narrative?.split('\n').slice(3).join('\n') : narrative
 
   return (
     <Surface as="article" elevation="flat" padding="md">
@@ -55,9 +61,12 @@ function DocumentPanel({
           {stage ? <StateBadge tone="idle" label={stage} /> : null}
         </div>
         <Text as="p" size="meta" tone="muted">
-          Sent by {sentBy ?? absent('sender')} · {sentAt ? formatSimTime(sentAt) : absent('sent time')}
+          {retrospective
+            ? `Retrospective synthetic event · ${formatSimTime(retrospective.time)} · ${retrospective.role}`
+            : `Sent by ${sentBy ?? absent('sender')} · ${sentAt ? formatSimTime(sentAt) : absent('sent time')}`}
         </Text>
-        {sectionEntries.length === 0 ? (
+        {displayNarrative ? <div style={{ whiteSpace: 'pre-wrap' }}><Text as="p">{displayNarrative}</Text></div> : null}
+        {sectionEntries.length === 0 && !narrative ? (
           <Text as="p" tone="muted">
             {absent('free-text sections')}
           </Text>

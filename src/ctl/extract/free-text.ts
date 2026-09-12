@@ -1,4 +1,5 @@
 import type { SimResource, Site } from '@/ctl/contracts'
+import { retrospectiveEvent } from '@/ctl/normalise/retrospective'
 
 /**
  * Collect the free text a model is allowed to read.
@@ -78,6 +79,9 @@ export function collectFreeText(resources: SimResource[]): FreeTextSpan[] {
   for (const resource of resources) {
     if (!FREE_TEXT_KINDS.includes(resource.kind)) continue
     if (!resource.patientId) continue
+    // These explicitly labelled seed records describe finished pathways. Keep them
+    // visible as evidence without re-issuing their historical requests as open work.
+    if (retrospectiveEvent(resource)?.completed) continue
 
     const base = {
       resourceId: resource.id,

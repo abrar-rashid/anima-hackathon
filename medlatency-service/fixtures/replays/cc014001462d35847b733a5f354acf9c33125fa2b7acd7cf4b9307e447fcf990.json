@@ -1,0 +1,67 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "physio-referral",
+        "action_key": "physio-referral",
+        "label": "Arrange physiotherapy referral",
+        "outcome": "Send the physiotherapy referral",
+        "family": "unknown",
+        "intent": "instruction",
+        "origin": "documented",
+        "source": {
+          "resource_id": "initial-referral",
+          "snapshot_id": "snap_310ba46ee5fc86f7e6eab018",
+          "pointer": "/data/text",
+          "quote": "Arrange a physiotherapy referral."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "physiotherapy referral",
+        "parent_key": null,
+        "required_stages": [
+          "referral_sent"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [
+      {
+        "task_key": "physio-referral",
+        "stage": "referral_sent",
+        "source": {
+          "resource_id": "cancel-referral",
+          "snapshot_id": "snap_4e59c5a6eb03c2da31ed9f06",
+          "pointer": "/data/text",
+          "quote": "Cancel the linked physiotherapy referral; patient declined."
+        },
+        "item": "physiotherapy referral",
+        "polarity": "pending",
+        "lifecycle": "cancelled",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "physio-referral",
+        "stage": "referral_sent",
+        "source": {
+          "resource_id": "reopen-referral",
+          "snapshot_id": "snap_55097320b2b53497979b43d1",
+          "pointer": "/data/text",
+          "quote": "Reopen the linked physiotherapy referral at the patient request. Referral has not yet been sent."
+        },
+        "item": "physiotherapy referral",
+        "polarity": "pending",
+        "lifecycle": "reopened",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      }
+    ],
+    "edges": [],
+    "context": [
+      "Cancellation followed by explicit reopening"
+    ]
+  }
+}

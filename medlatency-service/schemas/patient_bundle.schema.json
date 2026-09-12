@@ -1,0 +1,198 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "medlatency.patient.v1"
+    },
+    "patient": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,100}$"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "display_name",
+        "synthetic"
+      ],
+      "additionalProperties": false
+    },
+    "dataset": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "fixture",
+            "live"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "captured_at": {
+          "type": "string"
+        },
+        "simulation_as_of": {},
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "source",
+        "captured_at",
+        "simulation_as_of",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "full_history_guaranteed": {
+          "type": "boolean"
+        },
+        "sources": {
+          "type": "array",
+          "items": {}
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "full_history_guaranteed",
+        "sources",
+        "limitations"
+      ],
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "snapshot_id": {
+            "type": "string"
+          },
+          "patient_id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "source_status": {},
+          "version": {},
+          "record_created_at": {},
+          "clinical_event_at": {},
+          "clock": {
+            "type": "string",
+            "enum": [
+              "simulation",
+              "wall",
+              "unknown"
+            ]
+          },
+          "data": {
+            "type": "object"
+          },
+          "provenance": {
+            "type": "array",
+            "items": {}
+          },
+          "source_locations": {
+            "type": "array",
+            "items": {}
+          },
+          "native": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "snapshot_id",
+          "patient_id",
+          "kind",
+          "title",
+          "source_status",
+          "version",
+          "record_created_at",
+          "clinical_event_at",
+          "clock",
+          "data",
+          "provenance",
+          "source_locations",
+          "native"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "pointer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "relation",
+          "pointer"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "shared_context": {
+      "type": "array",
+      "items": {}
+    }
+  },
+  "required": [
+    "schema_version",
+    "patient",
+    "dataset",
+    "coverage",
+    "resources",
+    "events",
+    "links",
+    "shared_context"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,70 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "clarify-review",
+        "action_key": "clarify-review",
+        "label": "Clarify whether the blood result was reviewed",
+        "outcome": "Establish review and communication evidence",
+        "family": "diagnostic",
+        "intent": "inferred_candidate",
+        "origin": "inferred",
+        "source": {
+          "resource_id": "blood-report",
+          "snapshot_id": "snap_c70ec8b095592189a5055166",
+          "pointer": "/data/text",
+          "quote": "Full blood count: haemoglobin 134 g/L, white cells 6.2 x10^9/L. Sample collected at 08:40. No review is recorded in this export."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [
+          "No documented request or linked order. This is a follow-up candidate, not a clinician instruction."
+        ],
+        "item": "full blood count",
+        "parent_key": null,
+        "required_stages": [
+          "reviewed",
+          "communicated"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [
+      {
+        "task_key": "clarify-review",
+        "stage": "collected",
+        "source": {
+          "resource_id": "blood-report",
+          "snapshot_id": "snap_c70ec8b095592189a5055166",
+          "pointer": "/data/text",
+          "quote": "Full blood count: haemoglobin 134 g/L, white cells 6.2 x10^9/L. Sample collected at 08:40. No review is recorded in this export."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "clarify-review",
+        "stage": "result_available",
+        "source": {
+          "resource_id": "blood-report",
+          "snapshot_id": "snap_c70ec8b095592189a5055166",
+          "pointer": "/data/text",
+          "quote": "Full blood count: haemoglobin 134 g/L, white cells 6.2 x10^9/L. Sample collected at 08:40. No review is recorded in this export."
+        },
+        "item": "full blood count",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      }
+    ],
+    "edges": [],
+    "context": [
+      "Partial blood evidence; order and review unknown"
+    ]
+  }
+}

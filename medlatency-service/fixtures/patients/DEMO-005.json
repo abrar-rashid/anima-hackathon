@@ -1,0 +1,298 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-005",
+    "display_name": "Casey Linden",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "AUTHORED COMPLETE-WORKFLOW FIXTURE — not observed in Anima"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "test-request",
+      "patient_id": "DEMO-005",
+      "kind": "encounter",
+      "title": "Test Request",
+      "source_status": "completed",
+      "version": 1,
+      "record_created_at": "2026-09-05T09:00:00Z",
+      "clinical_event_at": "2026-09-05T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "GP: obtain a full blood count, review the result and communicate it to the patient."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_bc316e04881dce8939111349"
+    },
+    {
+      "id": "test-ordered",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Ordered",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-06T09:00:00Z",
+      "clinical_event_at": "2026-09-06T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count ordered for the linked request.",
+        "request_id": "test-request"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_95d3198d0cbc1d3a8b402c8c"
+    },
+    {
+      "id": "test-collected",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Collected",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-06T10:00:00Z",
+      "clinical_event_at": "2026-09-06T10:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count sample collected.",
+        "request_id": "test-ordered"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_e4765cd5b01909a1559fa144"
+    },
+    {
+      "id": "test-received",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Received",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-06T11:00:00Z",
+      "clinical_event_at": "2026-09-06T11:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count sample received by laboratory.",
+        "request_id": "test-collected"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_66e169057527fa56c527e72b"
+    },
+    {
+      "id": "test-analysed",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Analysed",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-07T09:00:00Z",
+      "clinical_event_at": "2026-09-07T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count sample analysed.",
+        "request_id": "test-received"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_8dba146377570a21f80408cf"
+    },
+    {
+      "id": "test-result_available",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Result_Available",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-07T10:00:00Z",
+      "clinical_event_at": "2026-09-07T10:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Full blood count result available: haemoglobin 138 g/L.",
+        "request_id": "test-analysed"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_407464efa2be93fc1341c928"
+    },
+    {
+      "id": "test-reviewed",
+      "patient_id": "DEMO-005",
+      "kind": "diagnostic",
+      "title": "Test Reviewed",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-07T11:00:00Z",
+      "clinical_event_at": "2026-09-07T11:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "GP reviewed the linked full blood count result.",
+        "request_id": "test-result_available"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_8eec075a63152cb4320f31ae"
+    },
+    {
+      "id": "test-communicated",
+      "patient_id": "DEMO-005",
+      "kind": "communication",
+      "title": "Test Communicated",
+      "source_status": "recorded",
+      "version": 1,
+      "record_created_at": "2026-09-08T09:00:00Z",
+      "clinical_event_at": "2026-09-08T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "GP communicated the reviewed full blood count result to the patient.",
+        "request_id": "test-reviewed"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-005.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_f1ef498eeea68f7670e98580"
+    }
+  ],
+  "events": [],
+  "links": [
+    {
+      "from": "test-ordered",
+      "to": "test-request",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    },
+    {
+      "from": "test-collected",
+      "to": "test-ordered",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    },
+    {
+      "from": "test-received",
+      "to": "test-collected",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    },
+    {
+      "from": "test-analysed",
+      "to": "test-received",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    },
+    {
+      "from": "test-result_available",
+      "to": "test-analysed",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    },
+    {
+      "from": "test-reviewed",
+      "to": "test-result_available",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    },
+    {
+      "from": "test-communicated",
+      "to": "test-reviewed",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    }
+  ],
+  "shared_context": []
+}

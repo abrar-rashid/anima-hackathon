@@ -1,0 +1,383 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "medlatency.analysis.v1"
+    },
+    "patient_id": {
+      "type": "string"
+    },
+    "analysis_version": {
+      "type": "string"
+    },
+    "prompt_version": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "fixture_replay",
+        "model"
+      ]
+    },
+    "input_fingerprint": {
+      "type": "string"
+    },
+    "configuration_fingerprint": {
+      "type": "string"
+    },
+    "analysed_at": {
+      "type": "string"
+    },
+    "extraction": {
+      "type": "object",
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "action_key": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "outcome": {
+                "type": "string"
+              },
+              "family": {
+                "type": "string"
+              },
+              "intent": {
+                "type": "string",
+                "enum": [
+                  "instruction",
+                  "commitment",
+                  "patient_request",
+                  "conditional",
+                  "historical",
+                  "negated",
+                  "cancellation",
+                  "preference",
+                  "inferred_candidate"
+                ]
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "documented",
+                  "inferred"
+                ]
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "resource_id": {
+                    "type": "string"
+                  },
+                  "snapshot_id": {
+                    "type": "string"
+                  },
+                  "pointer": {
+                    "type": "string"
+                  },
+                  "quote": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "resource_id",
+                  "snapshot_id",
+                  "pointer",
+                  "quote"
+                ],
+                "additionalProperties": false
+              },
+              "responsible": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "deadline": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "preferences": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "uncertainties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "item": {
+                "type": "string"
+              },
+              "parent_key": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "required_stages": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "fulfillment_rule": {
+                "type": "string",
+                "enum": [
+                  "all",
+                  "any"
+                ]
+              }
+            },
+            "required": [
+              "key",
+              "action_key",
+              "label",
+              "outcome",
+              "family",
+              "intent",
+              "origin",
+              "source",
+              "responsible",
+              "condition",
+              "deadline",
+              "preferences",
+              "uncertainties",
+              "item",
+              "parent_key",
+              "required_stages",
+              "fulfillment_rule"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "task_key": {
+                "type": "string"
+              },
+              "stage": {
+                "type": "string"
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "resource_id": {
+                    "type": "string"
+                  },
+                  "snapshot_id": {
+                    "type": "string"
+                  },
+                  "pointer": {
+                    "type": "string"
+                  },
+                  "quote": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "resource_id",
+                  "snapshot_id",
+                  "pointer",
+                  "quote"
+                ],
+                "additionalProperties": false
+              },
+              "item": {
+                "type": "string"
+              },
+              "polarity": {
+                "type": "string",
+                "enum": [
+                  "supports",
+                  "pending",
+                  "conflicts",
+                  "not_applicable"
+                ]
+              },
+              "lifecycle": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "cancelled",
+                  "declined",
+                  "superseded",
+                  "reopened"
+                ]
+              },
+              "explanation": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "task_key",
+              "stage",
+              "source",
+              "item",
+              "polarity",
+              "lifecycle",
+              "explanation"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from_key": {
+                "type": "string"
+              },
+              "to_key": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "prerequisite",
+                  "parallel",
+                  "conditional",
+                  "alternative",
+                  "supersedes"
+                ]
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "documented",
+                  "template"
+                ]
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "resource_id": {
+                    "type": "string"
+                  },
+                  "snapshot_id": {
+                    "type": "string"
+                  },
+                  "pointer": {
+                    "type": "string"
+                  },
+                  "quote": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "resource_id",
+                  "snapshot_id",
+                  "pointer",
+                  "quote"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "from_key",
+              "to_key",
+              "kind",
+              "origin",
+              "condition",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "context": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "tasks",
+        "observations",
+        "edges",
+        "context"
+      ],
+      "additionalProperties": false
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "review_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "patient_id",
+    "analysis_version",
+    "prompt_version",
+    "provider",
+    "model",
+    "mode",
+    "input_fingerprint",
+    "configuration_fingerprint",
+    "analysed_at",
+    "extraction",
+    "tasks",
+    "timeline",
+    "review_history",
+    "changes"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

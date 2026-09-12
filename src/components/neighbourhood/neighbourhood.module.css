@@ -89,6 +89,67 @@
   }
 }
 
+/*
+ * Compact strip under Wardline. Must not inherit the embedded 100dvh / 520px
+ * shell. The parent sizes the slot (~280–420px); we fill it.
+ */
+.page[data-compact='true'] {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.page[data-compact='true'] .shell,
+.page[data-compact='true'] .shell[data-aside='open'] {
+  grid-template-areas:
+    "rail   stage  aside"
+    "status status status";
+  grid-template-columns: 188px minmax(0, 1fr) 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: 260px;
+}
+
+.page[data-compact='true'] .shell[data-aside='open'] {
+  grid-template-columns: 188px minmax(0, 1fr) minmax(240px, 280px);
+}
+
+.page[data-compact='true'] .rail {
+  gap: 6px;
+}
+
+.page[data-compact='true'] .card {
+  padding: 6px 8px;
+}
+
+.page[data-compact='true'] .compactHide,
+.page[data-compact='true'] .note,
+.page[data-compact='true'] .minimap,
+.page[data-compact='true'] .ticker,
+.page[data-compact='true'] .dataSection {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .page[data-compact='true'] .shell,
+  .page[data-compact='true'] .shell[data-aside='open'] {
+    grid-template-areas:
+      "rail   stage"
+      "status status";
+    grid-template-columns: 168px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
+    min-height: 260px;
+  }
+
+  .page[data-compact='true'] .shell[data-aside='open'] {
+    grid-template-areas:
+      "rail   stage  aside"
+      "status status status";
+    grid-template-columns: 148px minmax(0, 1fr) minmax(200px, 240px);
+  }
+}
+
 /* ---------------------------------------------------------------- header */
 
 .header {

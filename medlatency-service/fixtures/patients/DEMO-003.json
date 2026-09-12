@@ -1,0 +1,94 @@
+{
+  "schema_version": "medlatency.patient.v1",
+  "patient": {
+    "id": "DEMO-003",
+    "display_name": "Taylor Moss",
+    "synthetic": true
+  },
+  "dataset": {
+    "mode": "fixture",
+    "source": "locally_authored",
+    "captured_at": "2026-09-12T12:00:00Z",
+    "simulation_as_of": "2026-09-12T12:00:00Z",
+    "label": "Local accessible appointment with incomplete confirmation"
+  },
+  "coverage": {
+    "full_history_guaranteed": false,
+    "sources": [
+      {
+        "name": "authored fixture",
+        "complete": true
+      }
+    ],
+    "limitations": [
+      "Entirely fictional; no Anima observations. Missing evidence is not evidence of absence."
+    ]
+  },
+  "resources": [
+    {
+      "id": "appointment-request",
+      "patient_id": "DEMO-003",
+      "kind": "communication",
+      "title": "Appointment Request",
+      "source_status": "received",
+      "version": 1,
+      "record_created_at": "2026-09-10T09:00:00Z",
+      "clinical_event_at": "2026-09-10T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "I need an accessible local appointment. Please arrange and confirm it with me. I prefer step-free access; transport needs have not been established."
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-003.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_1cd0ad070b418de96dd034dd"
+    },
+    {
+      "id": "appointment-booking",
+      "patient_id": "DEMO-003",
+      "kind": "appointment",
+      "title": "Appointment Booking",
+      "source_status": "booked",
+      "version": 1,
+      "record_created_at": "2026-09-10T09:00:00Z",
+      "clinical_event_at": "2026-09-10T09:00:00Z",
+      "clock": "simulation",
+      "data": {
+        "text": "Local appointment booked. Confirmation and step-free access checks are still pending.",
+        "request_id": "appointment-request"
+      },
+      "provenance": [
+        {
+          "origin": "authored_fixture",
+          "retrieved_at": "2026-09-12T12:00:00Z"
+        }
+      ],
+      "source_locations": [
+        {
+          "file": "DEMO-003.json"
+        }
+      ],
+      "native": {},
+      "snapshot_id": "snap_d97550c29dfbfa3aca61d644"
+    }
+  ],
+  "events": [],
+  "links": [
+    {
+      "from": "appointment-booking",
+      "to": "appointment-request",
+      "relation": "fulfills_request",
+      "pointer": "/data/request_id"
+    }
+  ],
+  "shared_context": []
+}

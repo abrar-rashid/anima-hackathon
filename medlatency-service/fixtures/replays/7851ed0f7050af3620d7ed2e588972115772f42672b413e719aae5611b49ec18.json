@@ -1,0 +1,112 @@
+{
+  "label": "Authored replay, not model output or evaluation ground truth",
+  "extraction": {
+    "tasks": [
+      {
+        "key": "coordinate-appointment",
+        "action_key": "coordinate-appointment",
+        "label": "Arrange and confirm accessible appointment",
+        "outcome": "A confirmed local appointment with suitable access",
+        "family": "appointment",
+        "intent": "patient_request",
+        "origin": "documented",
+        "source": {
+          "resource_id": "appointment-request",
+          "snapshot_id": "snap_1cd0ad070b418de96dd034dd",
+          "pointer": "/data/text",
+          "quote": "I need an accessible local appointment. Please arrange and confirm it with me. I prefer step-free access; transport needs have not been established."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [
+          "Local",
+          "Step-free access"
+        ],
+        "uncertainties": [],
+        "item": "local appointment",
+        "parent_key": null,
+        "required_stages": [
+          "booking_arranged",
+          "confirmed",
+          "access_confirmed"
+        ],
+        "fulfillment_rule": "all"
+      },
+      {
+        "key": "access-preference",
+        "action_key": "access-preference",
+        "label": "Step-free local access preference",
+        "outcome": "Constrain appointment coordination",
+        "family": "unknown",
+        "intent": "preference",
+        "origin": "documented",
+        "source": {
+          "resource_id": "appointment-request",
+          "snapshot_id": "snap_1cd0ad070b418de96dd034dd",
+          "pointer": "/data/text",
+          "quote": "I need an accessible local appointment. Please arrange and confirm it with me. I prefer step-free access; transport needs have not been established."
+        },
+        "responsible": null,
+        "condition": null,
+        "deadline": null,
+        "preferences": [],
+        "uncertainties": [],
+        "item": "Step-free local access preference",
+        "parent_key": null,
+        "required_stages": [
+          "preference_recorded"
+        ],
+        "fulfillment_rule": "all"
+      }
+    ],
+    "observations": [
+      {
+        "task_key": "coordinate-appointment",
+        "stage": "booking_arranged",
+        "source": {
+          "resource_id": "appointment-booking",
+          "snapshot_id": "snap_d97550c29dfbfa3aca61d644",
+          "pointer": "/data/text",
+          "quote": "Local appointment booked. Confirmation and step-free access checks are still pending."
+        },
+        "item": "local appointment",
+        "polarity": "supports",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "coordinate-appointment",
+        "stage": "confirmed",
+        "source": {
+          "resource_id": "appointment-booking",
+          "snapshot_id": "snap_d97550c29dfbfa3aca61d644",
+          "pointer": "/data/text",
+          "quote": "Local appointment booked. Confirmation and step-free access checks are still pending."
+        },
+        "item": "local appointment",
+        "polarity": "pending",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      },
+      {
+        "task_key": "coordinate-appointment",
+        "stage": "access_confirmed",
+        "source": {
+          "resource_id": "appointment-booking",
+          "snapshot_id": "snap_d97550c29dfbfa3aca61d644",
+          "pointer": "/data/text",
+          "quote": "Local appointment booked. Confirmation and step-free access checks are still pending."
+        },
+        "item": "local appointment",
+        "polarity": "pending",
+        "lifecycle": "active",
+        "explanation": "Authored semantic observation from the quoted source; linkage checked separately."
+      }
+    ],
+    "edges": [],
+    "context": [
+      "Local accessible appointment with incomplete confirmation"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 import type { SimResource } from '@/ctl/contracts'
 import type { TimelineDayGroup, TimelineEntry, TimelineItem } from './types'
 import { formatDayLabel } from './format'
+import { retrospectiveEvent } from '@/ctl/normalise/retrospective'
 
 /**
  * Turns this patient's resources into one chronological spine.
@@ -20,9 +21,9 @@ export function buildTimelineEntries(resources: SimResource[]): TimelineEntry[] 
   const entries: TimelineEntry[] = []
 
   for (const resource of resources) {
-    const push = (time: number, actorName: string, actorKind: string, action: string, version: number): void => {
+    const push = (time: number, actorName: string, actorKind: string, action: string, version: number, retrospective = false): void => {
       entries.push({
-        key: `${resource.id}:${version}`,
+        key: `${resource.id}:${version}${retrospective ? ':retrospective' : ''}`,
         time,
         site: resource.site,
         actorName,
@@ -35,6 +36,11 @@ export function buildTimelineEntries(resources: SimResource[]): TimelineEntry[] 
       })
     }
 
+    const retrospective = retrospectiveEvent(resource)
+    if (retrospective) {
+      push(retrospective.time, retrospective.role, 'synthetic narrative',
+        `Retrospective clinical event: ${retrospective.stage.replaceAll('_', ' ')}`, resource.version, true)
+    }
     const created = resource.provenance.created
     if (created) push(created.time, created.actor.name, created.actor.kind, created.action, created.version)
 
