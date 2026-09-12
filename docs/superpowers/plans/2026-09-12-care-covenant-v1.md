@@ -440,3 +440,57 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm build && COVENANT_FAKE_PORTS=1 
 pnpm smoke:live   # one approved synthetic mutation only
 ```
 Then dispatch the final whole-branch reviewer (superpowers:requesting-code-review) with the acceptance criteria from spec section 16 as the lens.
+
+Note: the build used `npm`, not `pnpm` — the requested install lines were `npm install`, so npm
+remained authoritative. Substitute `npm run <script>` above.
+
+---
+
+## Deviations from this plan, recorded during the build
+
+These are behavioural differences between the plan text and the shipped code. Each was found in
+review, decided deliberately, and is recorded here rather than only in a code comment.
+
+### 1. An unavailable named receiver no longer freezes the covenant
+
+**Plan text:** Task 2 required `TransferAccepted` to come only from `TRANSFER_REQUESTED|OVERDUE`, and
+`ClockTick` to fire a timeout only while `TRANSFER_REQUESTED`.
+
+**Shipped:** acceptance is also valid from `OWNER_UNAVAILABLE` (still gated by `receiverMode`, so
+`NAMED_ACTOR` still requires the matching actor), and the acknowledgement deadline keeps running while
+a transfer is outstanding.
+
+**Why:** the two halves of the plan contradicted each other. Task 5's trace requires
+`ReceiverUnavailable` at T0+25m and then specifies a v3 timeout at T0+140m and a v4 acceptance at
+T0+45m. Under the original rules `OWNER_UNAVAILABLE` froze the case, so both protocols replayed
+identically (verified: 0 timeouts, null accepted-owner latency, no exceptions under both). Task 5's
+stated outcomes govern, because a named clinician being away while the acknowledgement deadline goes
+silent is the exact failure this product exists to expose. Accountability still never leaves the
+ordering team until someone accepts, so the always-owned rule and invariant 9 are unaffected.
+
+**Evidence:** one immutable trace now computes v3 accepted at 240 min with 1 timeout and 8 exceptions,
+v4 accepted at 25 min with 0 timeouts and 0 exceptions.
+
+### 2. Eligibility uses a withdrawn/cancelled blocklist, not a `status === 'available'` allowlist
+
+**Plan text:** Task 2 required selection to require `status === 'available'`.
+
+**Shipped:** `src/domain/eligibility.ts` accepts any status except `withdrawn`, `cancelled` or
+`canceled`.
+
+**Why:** the live simulator does not use `'available'` as its blood-report status value, so a literal
+allowlist would have made every real result ineligible. The blocklist keeps the rule conservative
+about results that were explicitly retracted while still matching real data. The displayed
+abnormality rule is untouched: eligibility still depends only on a value falling outside the
+source-supplied reference range.
+
+**Evidence:** the live preflight found 728 eligible results across 30 synthetic patients under this
+rule.
+
+### 3. `acceptSupported` is `true`, so the ownership handshake is live
+
+Preflight originally recorded `acceptSupported: null` because the probe write had not been sent. With
+human approval, one probe was sent: `POST /api/sites/gp/actions` with `{type:'accept'}` returned 200
+and moved task `r-2` from `open` v1 to `accepted` v2, recording `provenance.changes[].actor.kind ===
+'team'`. The `Protocol preview` label therefore does not apply to the acceptance action. Simulator
+attribution remains team-level, so staff identity stays app-side and labelled as such.
