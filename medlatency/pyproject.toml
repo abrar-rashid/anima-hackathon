@@ -1,0 +1,36 @@
+[project]
+name = "medlatency"
+version = "0.1.0"
+description = "Evidence-backed follow-up task demonstration for simulated clinical records"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.9",
+  "httpx>=0.27",
+  "jsonschema>=4.23",
+  "python-dotenv>=1.0",
+  "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+]
+
+[project.scripts]
+medlatency-serve = "medlatency.api:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["backend"]
+filterwarnings = ["ignore::DeprecationWarning"]

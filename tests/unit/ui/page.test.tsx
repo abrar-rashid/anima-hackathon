@@ -13,44 +13,11 @@ afterEach(() => {
 })
 
 describe('app pages', () => {
-  it('renders the unified Close The Loop application home', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        world: 'team-ea32f6302052',
-        live: false,
-        clock: { now: 1789286400000, paused: true, speed: 0 },
-        patient: {
-          id: 'SIM-000001',
-          name: 'Amira Khan',
-          age: 64,
-          gender: 'Female',
-          problems: [],
-          recentLab: { name: 'CRP', value: 5.6, unit: 'mg/L', isAbnormal: true },
-        },
-        caseSnapshot: {
-          case: {
-            caseId: 'case-SIM-000001',
-            ownershipState: 'ORDERER_OWNS',
-            closureState: 'RESULT_AVAILABLE',
-            currentAccountableOwner: { teamId: 'hospital' },
-            requestedReceiver: 'gp',
-          },
-          proposal: null,
-          connection: { world: 'team-ea32f6302052', simulatorNow: 1789286400000, live: false },
-        },
-        tasks: [],
-        districts: {},
-        recentEvents: [],
-      }),
-    }))
-
-    const { default: Home } = await import('@/app/page')
-    render(<Home />)
-    expect(screen.getByRole('heading', { level: 1, name: /Close The Loop/i })).toBeTruthy()
-    expect(screen.getByRole('button', { name: /Pixel Town/i })).toBeTruthy()
-    expect(screen.getByRole('button', { name: /Command Cockpit/i })).toBeTruthy()
-  })
+  // `/` is now an async server component (the Close The Loop worklist) that
+  // reads the simulator directly via `assembleWorklist`. It is covered by the
+  // component-level suites in tests/unit/worklist/*, which exercise
+  // `WorklistView` with fixture props instead of rendering the page function
+  // (an async server component cannot be rendered synchronously by RTL).
 
   it('renders an honest error panel when the case API cannot be loaded', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')))

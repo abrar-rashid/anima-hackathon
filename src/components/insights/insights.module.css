@@ -1,0 +1,70 @@
+.page {
+  display: grid;
+  gap: var(--ds-space-xl);
+}
+
+.lede {
+  display: grid;
+  gap: var(--ds-space-xs);
+  max-width: 46rem;
+}
+
+.panel {
+  display: grid;
+  gap: var(--ds-space-md);
+}
+
+.list {
+  display: grid;
+  gap: var(--ds-space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  gap: var(--ds-space-xs);
+}
+
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-sm) var(--ds-space-md);
+}
+
+.figure {
+  display: grid;
+  gap: var(--ds-space-2xs);
+}
+
+.rank {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--ds-space-sm);
+  align-items: baseline;
+}
+
+.index {
+  font-family: var(--ds-font-data);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-text-muted);
+}
+
+.break {
+  display: grid;
+  gap: var(--ds-space-2xs);
+}
+
+.fraction {
+  margin: 0;
+  font-family: var(--ds-font-data);
+  font-size: var(--ds-text-title);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-tight);
+}
+
+.twin {
+  display: grid;
+  gap: var(--ds-space-sm);
+}

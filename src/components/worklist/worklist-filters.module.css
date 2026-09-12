@@ -1,0 +1,30 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-md);
+  align-items: end;
+}
+
+.field {
+  display: grid;
+  gap: var(--ds-space-2xs);
+  min-width: 10rem;
+}
+
+.label {
+  font-size: var(--ds-text-meta);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-text-muted);
+}
+
+.select {
+  appearance: none;
+  min-height: 2.25rem;
+  padding: var(--ds-space-2xs) var(--ds-space-sm);
+  border: var(--ds-border-thin) solid var(--ds-border-default);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-surface-raised);
+  color: var(--ds-text-ink);
+  font-family: var(--ds-font-ui);
+  font-size: var(--ds-text-meta);
+}

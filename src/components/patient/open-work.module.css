@@ -1,0 +1,37 @@
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ds-space-lg);
+}
+
+@media (max-width: 720px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-sm);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  border-top: var(--ds-border-thin) solid var(--ds-border-default);
+  padding-top: var(--ds-space-sm);
+}
+
+.findingHead {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-xs);
+}
+
+.citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2xs);
+}

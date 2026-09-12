@@ -1,0 +1,670 @@
+/*
+ * Layout.
+ *
+ * The previous town floated its HUD over the canvas, so panels covered the
+ * hospital and the district list sat on top of the map. Here every panel owns a
+ * grid cell and the canvas owns its own: nothing can overlap anything, because
+ * nothing shares space. The only overlays are world-space — work markers and
+ * speech bubbles — which belong on the map.
+ */
+
+.page {
+  --edge: #14131c;
+  --panel: #191c27;
+  --panel-2: #212533;
+  --line: #2e3343;
+  --textPrimary: #e8e6ef;
+  --textMuted: #9aa1b5;
+  --accent: #b49ce6;
+  --warn: #dd9a2c;
+  --alarm: #c8483c;
+  --ok: #2a8c72;
+
+  background: var(--edge);
+  color: var(--textPrimary);
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  min-height: 100dvh;
+}
+
+.shell {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "rail   stage  aside"
+    "status status status"
+    "ticker ticker ticker";
+  grid-template-columns: 272px minmax(0, 1fr) 0;
+  grid-template-rows: auto minmax(400px, 1fr) auto auto;
+  gap: 10px;
+  padding: 10px;
+  height: 100dvh;
+  min-height: 640px;
+  box-sizing: border-box;
+}
+
+.shell[data-aside="open"] {
+  grid-template-columns: 272px minmax(0, 1fr) minmax(320px, 380px);
+}
+
+@media (max-width: 1100px) {
+  .shell,
+  .shell[data-aside="open"] {
+    grid-template-areas:
+      "header header"
+      "stage  stage"
+      "status status"
+      "rail   aside"
+      "ticker ticker";
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(360px, 60vh) auto auto auto;
+    height: auto;
+  }
+}
+
+/* ---------------------------------------------------------------- header */
+
+.header {
+  grid-area: header;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.headerNote {
+  margin: 0;
+  color: var(--textMuted);
+  font-size: 11px;
+}
+
+.headerLinks {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+}
+
+.headerLinks a {
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- rail */
+
+.rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 9px 10px;
+}
+
+.cardTitle {
+  margin: 0 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--textMuted);
+}
+
+.clockNow {
+  font-size: 16px;
+  letter-spacing: 0.03em;
+}
+
+.clockMeta {
+  margin: 2px 0 0;
+  color: var(--textMuted);
+  font-size: 11px;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.badge {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 1px 6px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--textMuted);
+}
+
+.badgeWarn {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.badgeAlarm {
+  border-color: var(--alarm);
+  color: var(--alarm);
+}
+
+.badgeOk {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+/* Controls get their own gutter inside the rail; they never sit on the map. */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.button {
+  font: inherit;
+  font-size: 11px;
+  color: var(--textPrimary);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 4px 9px;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.buttonActive {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.zoomValue {
+  align-self: center;
+  color: var(--textMuted);
+  font-size: 11px;
+}
+
+.minimap {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #1f4a2b;
+  cursor: crosshair;
+}
+
+.legendList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.legendList li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--textMuted);
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #14131c;
+  flex: none;
+}
+
+.siteList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 3px;
+}
+
+.siteButton {
+  font: inherit;
+  font-size: 11px;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--panel-2);
+  color: var(--textPrimary);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 4px 7px;
+  cursor: pointer;
+}
+
+.siteButton:hover {
+  border-color: var(--accent);
+}
+
+.siteButtonActive {
+  border-color: var(--accent);
+  background: #262a3a;
+}
+
+.siteButtonName {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.siteButtonCount {
+  flex: none;
+  font-size: 10px;
+  color: var(--textMuted);
+}
+
+/* ---------------------------------------------------------------- stage */
+
+.stage {
+  grid-area: stage;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0d1026;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  touch-action: none;
+  cursor: grab;
+}
+
+.canvas[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+/*
+ * The status row lives below the map in its own grid cell, not floating on it,
+ * so the readout can never sit on top of a building.
+ */
+.status {
+  grid-area: status;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 5px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 11px;
+  min-height: 22px;
+}
+
+.statusHint {
+  color: var(--textMuted);
+  margin-left: auto;
+}
+
+.agentChip {
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- aside */
+
+.aside {
+  grid-area: aside;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.shell[data-aside="closed"] .aside {
+  display: none;
+}
+
+.asideHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.asideTitle {
+  margin: 0;
+  font-size: 14px;
+  flex: 1 1 auto;
+}
+
+.asideSource {
+  margin: 2px 0 0;
+  font-size: 10px;
+  color: var(--textMuted);
+}
+
+.closeButton {
+  font: inherit;
+  flex: none;
+  background: transparent;
+  color: var(--textMuted);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 7px;
+  cursor: pointer;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.stat {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 5px 7px;
+}
+
+.statValue {
+  display: block;
+  font-size: 15px;
+}
+
+.statLabel {
+  display: block;
+  font-size: 10px;
+  color: var(--textMuted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.workList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 5px;
+}
+
+.workItem {
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: 3px;
+  padding: 5px 7px;
+  background: var(--panel-2);
+}
+
+.workItem[data-breach="breached"] {
+  border-left-color: var(--alarm);
+}
+
+.workItem[data-breach="due-soon"] {
+  border-left-color: var(--warn);
+}
+
+.workItem[data-breach="on-time"] {
+  border-left-color: var(--ok);
+}
+
+.workItem[data-breach="no-deadline"] {
+  border-left-color: var(--line);
+}
+
+.workTitle {
+  display: block;
+  font-size: 12px;
+}
+
+.workMeta {
+  display: block;
+  font-size: 10px;
+  color: var(--textMuted);
+  margin-top: 2px;
+}
+
+.patientList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 3px;
+}
+
+.patientLink {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  color: var(--accent);
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--panel-2);
+  text-decoration: none;
+}
+
+.patientLink:hover {
+  border-color: var(--accent);
+}
+
+.patientCount {
+  margin-left: auto;
+  color: var(--textMuted);
+  font-size: 10px;
+}
+
+.kindRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.note {
+  margin: 0;
+  font-size: 10px;
+  color: var(--textMuted);
+}
+
+/* ---------------------------------------------------------------- ticker */
+
+/*
+ * The old ticker clipped its own heading. Here the label is on its own line and
+ * the chip row scrolls horizontally, with each chip free to size to its text.
+ */
+.ticker {
+  grid-area: ticker;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 6px 10px 8px;
+  min-width: 0;
+}
+
+.tickerLabel {
+  margin: 0 0 5px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--textMuted);
+  white-space: nowrap;
+}
+
+.tickerRow {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 3px;
+  scrollbar-width: thin;
+}
+
+.tickerChip {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.tickerChipActive {
+  border-color: var(--accent);
+}
+
+.tickerTime {
+  color: var(--textMuted);
+  font-size: 10px;
+}
+
+.tickerType {
+  color: var(--accent);
+}
+
+.tickerChain {
+  color: var(--textMuted);
+  font-size: 10px;
+}
+
+/* ---------------------------------------------------------------- a11y */
+
+.dataSection {
+  padding: 14px 10px 40px;
+  border-top: 1px solid var(--line);
+}
+
+.dataSection h2 {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+
+.dataSection > p {
+  color: var(--textMuted);
+  font-size: 12px;
+  max-width: 78ch;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.tableWrap table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+
+.tableWrap caption {
+  text-align: left;
+  padding: 7px 9px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--textMuted);
+  background: var(--panel);
+}
+
+.tableWrap th,
+.tableWrap td {
+  border-top: 1px solid var(--line);
+  padding: 5px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tableWrap thead th {
+  color: var(--textMuted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
+.tableWrap a {
+  color: var(--accent);
+}
+
+.skipLink {
+  position: absolute;
+  left: -9999px;
+}
+
+.skipLink:focus {
+  position: static;
+  display: inline-block;
+  margin: 6px 10px;
+  color: var(--accent);
+}
+
+.banner {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 11px;
+  border: 1px solid var(--warn);
+  border-radius: 3px;
+  color: var(--warn);
+  background: #241d10;
+}
+
+.bannerAlarm {
+  border-color: var(--alarm);
+  color: var(--alarm);
+  background: #241113;
+}
+
+.centre {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 60dvh;
+  padding: 24px;
+  text-align: center;
+}

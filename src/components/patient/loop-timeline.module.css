@@ -1,0 +1,48 @@
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-lg);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-sm);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-sm);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: var(--ds-border-thin) solid var(--ds-border-default);
+  padding-left: var(--ds-space-md);
+}
+
+.entry,
+.run {
+  display: flex;
+  gap: var(--ds-space-sm);
+  align-items: flex-start;
+}
+
+.siteDot {
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  margin-top: 0.4rem;
+  background-color: var(--ds-border-default);
+}
+
+.entryBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2xs);
+  min-width: 0;
+}

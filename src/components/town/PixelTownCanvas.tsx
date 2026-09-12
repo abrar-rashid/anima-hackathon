@@ -1167,8 +1167,11 @@ export function PixelTownCanvas({
                   )}
                   {selected.id === 'diagnostics' && (
                     <>
-                      <strong>Assay bench:</strong> {lab.name} {lab.value} {lab.unit} released to the ordering
-                      team. {district?.recentEvent ?? ''}
+                      <strong>Laboratory:</strong>{' '}
+                      {lab
+                        ? `${lab.name} ${lab.value} ${lab.unit} released to the ordering team.`
+                        : 'No result released for this patient.'}{' '}
+                      {district?.recentEvent ?? ''}
                     </>
                   )}
                   {selected.id === 'gp' && (
@@ -1244,6 +1247,9 @@ export function PixelTownCanvas({
 }
 
 function labPhraseDrawer(lab: TownSimulationData['patient']['recentLab']): string {
-  const range = lab.refLow != null && lab.refHigh != null ? ` (source range ${lab.refLow}–${lab.refHigh})` : ''
-  return `${lab.name} ${lab.value} ${lab.unit}${lab.isAbnormal ? ' is outside the source range' : ' is inside the source range'}${range}.`
+  if (!lab) return 'No result held for this patient.'
+  const range =
+    lab.refLow != null && lab.refHigh != null ? ` (source range ${lab.refLow}–${lab.refHigh})` : ''
+  const where = lab.isAbnormal ? 'outside the source range' : 'inside the source range'
+  return `${lab.name} ${lab.value} ${lab.unit} is ${where}${range}.`
 }

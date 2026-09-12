@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://medlatency.local/schemas/analysis.schema.json",
+  "title": "MedLatency analysis",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "analysis_id",
+    "patient_id",
+    "dataset_mode",
+    "analysis_mode",
+    "analysis_version",
+    "prompt_version",
+    "provider",
+    "input_fingerprint",
+    "analysed_at",
+    "status",
+    "tasks",
+    "preferences",
+    "coverage_limitations"
+  ],
+  "properties": {
+    "schema_version": { "const": "medlatency.analysis.v1" },
+    "analysis_id": { "type": "string" },
+    "patient_id": { "type": "string" },
+    "dataset_mode": { "enum": ["fixture", "live"] },
+    "analysis_mode": { "enum": ["heuristic", "replay", "live_llm"] },
+    "analysis_version": { "type": "string" },
+    "prompt_version": { "type": "string" },
+    "provider": { "type": "string" },
+    "model_id": { "type": ["string", "null"] },
+    "input_fingerprint": { "type": "string" },
+    "analysed_at": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["queued", "running", "completed", "failed"] },
+    "error": { "type": ["string", "null"] },
+    "tasks": { "type": "array" },
+    "preferences": { "type": "array" },
+    "coverage_limitations": { "type": "array", "items": { "type": "string" } },
+    "extraction_uncertainties": { "type": "array" },
+    "counting_rules": { "type": "object" }
+  }
+}

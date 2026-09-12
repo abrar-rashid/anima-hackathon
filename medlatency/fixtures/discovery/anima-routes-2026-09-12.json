@@ -1,0 +1,44 @@
+{
+  "retrieved_at": "2026-09-12T15:24:00Z",
+  "origin": "https://sim.animahacks.com",
+  "openapi_title": "NHS-SIM API",
+  "openapi_version": "1.0.0",
+  "note": "Authoritative live contract at retrieval time. GET only. No credentials stored.",
+  "read_routes": {
+    "directory": {
+      "path": "/api/sites/{site}/patients",
+      "pagination": "offset",
+      "page_size_observed": "not stated; existing clients use implicit page size",
+      "filter": ["q", "site", "world"]
+    },
+    "site_view": {
+      "path": "/api/sites/{site}/view",
+      "pagination": { "offset": true, "limit": { "min": 1, "max": 500, "default": 500 } },
+      "patient_filter": true,
+      "sites": ["control", "gp", "hospital", "community", "pharmacy", "diagnostics", "referrals", "wearables", "patient"]
+    },
+    "workspaces": [
+      "/api/sites/gp/messaging-workspace",
+      "/api/sites/gp/documents",
+      "/api/sites/hospital/documents",
+      "/api/sites/hospital/attendances",
+      "/api/sites/pharmacy/pharmacy-workspace",
+      "/api/sites/wearables/devices",
+      "/api/sites/wearables/readings"
+    ],
+    "secondary": [
+      "/api/nhs/ers",
+      "/api/nhs/eps",
+      "/api/nhs/eps-tracker",
+      "/api/nhs/gp-connect",
+      "/api/nhs/mesh",
+      "/api/nhs/scr",
+      "/api/nhs/pathology",
+      "/api/nhs/radiology",
+      "/api/nhs/appointments"
+    ],
+    "context": ["/api/team", "/api/clock", "/api/catalogue", "/api/openapi.json"]
+  },
+  "catalogue_sites": ["control", "gp", "hospital", "pharmacy", "community", "wearables"],
+  "clock_note": "Returns time and up to 100 visible recent events, not guaranteed full history."
+}

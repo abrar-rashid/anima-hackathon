@@ -1,0 +1,37 @@
+.citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2xs);
+}
+
+.payload {
+  border: var(--ds-border-thin) solid var(--ds-border-default);
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-sm);
+}
+
+.payload pre {
+  overflow-x: auto;
+  font-family: var(--ds-font-data);
+  font-size: var(--ds-text-meta);
+}
+
+.meta {
+  margin: var(--ds-space-sm) 0 0;
+  font-size: var(--ds-text-meta);
+}
+
+.meta dt {
+  color: var(--ds-text-muted);
+  margin-top: var(--ds-space-xs);
+}
+
+.meta dd {
+  margin: 0;
+  font-family: var(--ds-font-data);
+}
+
+.hardStops {
+  margin: 0;
+  padding-left: var(--ds-space-md);
+}

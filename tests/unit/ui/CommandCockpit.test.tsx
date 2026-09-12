@@ -12,8 +12,7 @@ function fixture(overrides: Partial<CockpitData> = {}): CockpitData {
     patient: {
       id: 'SIM-000001',
       name: 'Amira Khan',
-      age: 64,
-      gender: 'Female',
+      age: 74,
       problems: [
         { term: 'CKD Stage 3', code: 'SIM-PROBLEM-2', status: 'active', date: '2026-05-15' },
         { term: 'Heart failure', code: 'SIM-PROBLEM-1', status: 'resolved', date: '2026-08-13' },

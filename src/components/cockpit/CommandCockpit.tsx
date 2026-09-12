@@ -26,7 +26,13 @@ export interface TaskLedgerItem {
   owner: string
   note: string
   deadline: string
-  clinical_priority: 'emergency' | 'urgent' | 'standard'
+  /** The source's own word, or 'not-supplied-by-source'. Never inferred here. */
+  clinical_priority: string
+  /** How far past its deadline, in ms, when the source set one. */
+  overdueMs?: number | null
+  /** Which detector surfaced this, so the row can say why it is here. */
+  detector?: string
+  site?: string
   snomed_id: string
   performed_by: string
   requested_id: string
@@ -36,9 +42,12 @@ export interface CockpitData {
   patient: {
     id: string
     name: string
-    age: number
-    gender: string
+    /** Derived from the source birthDate. Null when the source omits it. */
+    age: number | null
+    conditions?: string[]
+    localIds?: Record<string, string>
     problems: Array<{ term: string; code: string; status: string; date: string }>
+    /** Null when the simulator holds no result for this patient. */
     recentLab: {
       name: string
       value: number
@@ -46,10 +55,37 @@ export interface CockpitData {
       refLow?: number
       refHigh?: number
       isAbnormal: boolean
-    }
+      panel?: string
+      laboratory?: string
+      collectedAt?: number
+    } | null
+    labTrend?: Array<{
+      collectedAt: number
+      value: number
+      unit: string
+      refLow?: number
+      refHigh?: number
+    }>
+    /** Real correspondence with the free text the source wrote. */
+    documents?: Array<{
+      id: string
+      site: string
+      title: string
+      version: number
+      status: string
+      stage: string | null
+      sentBy: string | null
+      sentAt: number | null
+      sections: Array<{ key: string; text: string }>
+      reviewed: boolean
+    }>
     observations: Array<{ time: number; type: string; detail: string }>
   }
   tasks: TaskLedgerItem[]
+  /**
+   * The agent's proposal. Null while it is still being assembled, or when the
+   * agent failed — the clinical records above are rendered either way.
+   */
   caseSnapshot: {
     case: {
       caseId: string
@@ -62,19 +98,75 @@ export interface CockpitData {
       actions: Array<{ kind: string; site: string; payload: unknown; supported: boolean }>
     } | null
     connection: { world: string; simulatorNow: number; live: boolean }
-  }
+  } | null
+  /** True while the agent is still working, so the UI can say so. */
+  agentPending?: boolean
   clock: { now: number; paused: boolean; speed: number }
 }
 
 type TaskFilter = 'all' | 'open' | 'urgent' | 'closed'
 type TaskSort = 'due' | 'priority' | 'status'
 
-const NHS_NUMBER = '942 104 8821'
 const CRP_TASK_ID = 'TASK-CRP-TRANSFER'
-const PRIORITY_RANK: Record<TaskLedgerItem['clinical_priority'], number> = {
+
+/**
+ * Ordering only. The words come from the source record; anything the source did
+ * not supply sorts last rather than being treated as routine.
+ */
+const PRIORITY_RANK: Record<string, number> = {
   emergency: 0,
   urgent: 1,
   standard: 2,
+  routine: 2,
+}
+
+function priorityRank(priority: string): number {
+  return PRIORITY_RANK[priority.toLowerCase()] ?? 3
+}
+
+/** Trim a trailing .0 so a range reads like a printed lab report. */
+function num(value: number): string {
+  return Number.isInteger(value) ? String(value) : String(value)
+}
+
+type CockpitLab = NonNullable<CockpitData['patient']['recentLab']>
+
+/** The source's own range, or an explicit statement that it had none. */
+function rangeLabel(lab: CockpitLab): string {
+  if (lab.refLow === undefined && lab.refHigh === undefined) {
+    return 'reference range not supplied by source'
+  }
+  if (lab.refLow === undefined) return `below ${num(lab.refHigh!)} ${lab.unit}`
+  if (lab.refHigh === undefined) return `above ${num(lab.refLow)} ${lab.unit}`
+  return `${num(lab.refLow)}–${num(lab.refHigh)} ${lab.unit}`
+}
+
+/**
+ * Low / High / Normal purely by comparing the value to the source's own range.
+ * Arithmetic, not interpretation — and null when there is no range to compare.
+ */
+function flagOf(lab: CockpitLab): 'Low' | 'High' | 'Normal' | null {
+  if (lab.refLow !== undefined && lab.value < lab.refLow) return 'Low'
+  if (lab.refHigh !== undefined && lab.value > lab.refHigh) return 'High'
+  if (lab.refLow === undefined && lab.refHigh === undefined) return null
+  return 'Normal'
+}
+
+/**
+ * Machine state names are not clinical language. A duty GP reads "Still with
+ * the sending service", not `ORDERER_OWNS`.
+ */
+function handoverLabel(state: string): string {
+  switch (state) {
+    case 'ORDERER_OWNS':
+      return 'Still with the sending service'
+    case 'TRANSFER_REQUESTED':
+      return 'Sent · awaiting acceptance'
+    case 'ACCEPTED':
+      return 'Accepted by the receiving service'
+    default:
+      return state
+  }
 }
 
 function initials(name: string): string {
@@ -125,8 +217,23 @@ function isClosedTask(task: TaskLedgerItem, accepted: boolean): boolean {
   return accepted && task.task_id === CRP_TASK_ID
 }
 
+/**
+ * Real service names, as GET /api/catalogue returns them. The previous build
+ * invented "St. Jude's Hospital" and "High Street GP Surgery"; neither exists
+ * in the simulator.
+ */
+const SERVICE_NAMES: Record<string, string> = {
+  gp: 'Riverside Practice',
+  hospital: 'Northbank General',
+  pharmacy: 'High Street Pharmacy',
+  community: 'Community visiting team',
+  wearables: 'Home Health',
+  diagnostics: 'Diagnostics',
+  referrals: 'Referrals',
+}
+
 function ownerLabel(teamId: string): string {
-  return teamId === 'hospital' ? "St. Jude's Hospital" : 'High Street GP Surgery'
+  return SERVICE_NAMES[teamId] ?? teamId
 }
 
 function BoltIcon() {
@@ -166,16 +273,25 @@ export function CommandCockpit({
   const [receipt, setReceipt] = useState<LoopActReceipt | null>(initialReceipt ?? null)
   const [receiptNotice, setReceiptNotice] = useState<string | null>(null)
 
-  const isAccepted = data.caseSnapshot.case.ownershipState === 'ACCEPTED'
-  const isTransferRequested = data.caseSnapshot.case.ownershipState === 'TRANSFER_REQUESTED'
-  const currentOwner = data.caseSnapshot.case.currentAccountableOwner.teamId
+  const snapshot = data.caseSnapshot
+  const isAccepted = snapshot?.case.ownershipState === 'ACCEPTED'
+  const isTransferRequested = snapshot?.case.ownershipState === 'TRANSFER_REQUESTED'
+  const currentOwner = snapshot?.case.currentAccountableOwner.teamId ?? 'not yet determined'
   const lab = data.patient.recentLab
-  const refLow = lab.refLow ?? 0
-  const refHigh = lab.refHigh ?? 5
+  // The source's own range, or nothing. A default range would silently change
+  // whether a value reads as normal.
+  const refLow = lab?.refLow
+  const refHigh = lab?.refHigh
   const clockFace = formatClock(data.clock.now)
-  const telemetry =
-    data.patient.observations[0]?.detail ??
-    'Continuous wearable telemetry: resting heart rate 72 bpm, ambulatory activity within baseline.'
+  const telemetry = data.patient.observations[0]?.detail ?? null
+
+  // Most recent real letter, and the follow-up instruction it actually
+  // contains. These are the free-text fields the brief asks us to mine.
+  const letter = data.patient.documents?.[0] ?? null
+  const followUpText =
+    letter?.sections.find((s) => s.key === 'followUp')?.text ??
+    letter?.sections.find((s) => s.key === 'gpActions')?.text ??
+    null
 
   const ledger = useMemo(() => [...data.tasks, ...localTasks], [data.tasks, localTasks])
 
@@ -189,7 +305,7 @@ export function CommandCockpit({
     })
 
     next.sort((a, b) => {
-      if (sort === 'priority') return PRIORITY_RANK[a.clinical_priority] - PRIORITY_RANK[b.clinical_priority]
+      if (sort === 'priority') return priorityRank(a.clinical_priority) - priorityRank(b.clinical_priority)
       if (sort === 'status') {
         return Number(isClosedTask(a, isAccepted)) - Number(isClosedTask(b, isAccepted))
       }
@@ -260,7 +376,15 @@ export function CommandCockpit({
     setComposerOpen(false)
   }
 
-  const agentState = isActing ? 'EXECUTING' : isAccepted ? 'CLOSED' : data.caseSnapshot.proposal ? 'READY' : 'STANDBY'
+  const agentState = isActing
+    ? 'SENDING'
+    : data.agentPending
+      ? 'THINKING'
+      : isAccepted
+        ? 'CLOSED'
+        : snapshot?.proposal
+          ? 'READY'
+          : 'NO SUGGESTION'
 
   return (
     <div className={styles.cockpit}>
@@ -275,13 +399,19 @@ export function CommandCockpit({
               <span className={styles.idBadge}>{data.patient.id}</span>
             </div>
             <p className={styles.demographics}>
-              {data.patient.age}yo {data.patient.gender}
+              {data.patient.age === null ? 'Age not recorded' : `${data.patient.age} years`}
               <span className={styles.dotSep} aria-hidden="true">
                 ·
               </span>
-              <span className={styles.nhs}>
-                NHS <span className={styles.nhsNumber}>#{NHS_NUMBER}</span>
-              </span>
+              <span className={styles.nhs}>Synthetic patient</span>
+              {data.patient.localIds?.gp ? (
+                <>
+                  <span className={styles.dotSep} aria-hidden="true">
+                    ·
+                  </span>
+                  <span>Practice ref {data.patient.localIds.gp}</span>
+                </>
+              ) : null}
             </p>
             <ul className={styles.conditions} aria-label="Active clinical conditions">
               {data.patient.problems.length === 0 ? (
@@ -325,17 +455,33 @@ export function CommandCockpit({
         </div>
         <div className={styles.bannerBody}>
           <p className={styles.bannerKicker}>
-            {isAccepted ? 'Clinical task closed & evidenced' : 'Unclosed clinical task detected'}
+            {ledger.length === 0
+              ? 'No unfinished work found for this patient'
+              : `${ledger.length} unfinished ${ledger.length === 1 ? 'item' : 'items'} for this patient`}
           </p>
-          <h3 className={styles.bannerTitle}>
-            {isAccepted ? 'Acknowledged' : 'Elevated'} {lab.name} {lab.value} {lab.unit}{' '}
-            <span className={styles.bannerRef}>
-              (Ref {refLow.toFixed(1)} – {refHigh.toFixed(1)} {lab.unit})
-            </span>
-          </h3>
-          <p className={styles.bannerRule}>
-            An analyte value lies outside source reference range. No automated diagnosis inferred.
-          </p>
+          {lab === null ? (
+            <>
+              <h3 className={styles.bannerTitle}>No result held for this patient</h3>
+              <p className={styles.bannerRule}>
+                The simulator returned no laboratory report, so no value is shown.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 className={styles.bannerTitle}>
+                {lab.name} {num(lab.value)} {lab.unit}{' '}
+                <span className={styles.bannerRef}>
+                  ({rangeLabel(lab)}){flagOf(lab) ? ` · ${flagOf(lab)}` : ''}
+                </span>
+              </h3>
+              <p className={styles.bannerRule}>
+                {lab.panel ? `${lab.panel}. ` : ''}
+                {flagOf(lab) === 'Normal' || flagOf(lab) === null
+                  ? 'Compared against the range supplied by the source. No clinical interpretation applied.'
+                  : 'Outside the range supplied by the source. No clinical interpretation applied.'}
+              </p>
+            </>
+          )}
         </div>
       </section>
 
@@ -350,30 +496,80 @@ export function CommandCockpit({
           </header>
 
           <ol className={styles.timeline}>
-            <li className={`${styles.feedCard} ${lab.isAbnormal && !isAccepted ? styles.feedAlert : ''}`}>
-              <div className={styles.feedMeta}>
-                <span className={styles.feedSource}>City Pathology Lab</span>
-                <time className={styles.feedTime}>{formatFeedTime(data.clock.now, -90 * 60 * 1000)}</time>
-              </div>
-              <p className={styles.feedLead}>
-                Serum {lab.name}: {lab.value} {lab.unit}
-                {lab.isAbnormal ? ' · outside source range' : ''}
-              </p>
-              <p className={styles.feedCopy}>
-                Reference {refLow.toFixed(1)}–{refHigh.toFixed(1)} {lab.unit}. Automated notification sent to
-                St. Jude Hospital acute ward. Classification is source-supplied only.
-              </p>
-            </li>
+            {lab === null ? (
+              <li className={styles.feedCard}>
+                <p className={styles.feedLead}>No laboratory report held for this patient</p>
+                <p className={styles.feedCopy}>
+                  The diagnostics service returned no result, so nothing is shown here.
+                </p>
+              </li>
+            ) : (
+              <li className={`${styles.feedCard} ${lab.isAbnormal ? styles.feedAlert : ''}`}>
+                <div className={styles.feedMeta}>
+                  <span className={styles.feedSource}>
+                    {lab.laboratory ?? 'Laboratory not named by source'}
+                  </span>
+                  {lab.collectedAt ? (
+                    <time className={styles.feedTime} dateTime={new Date(lab.collectedAt).toISOString()}>
+                      {new Date(lab.collectedAt).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </time>
+                  ) : null}
+                </div>
+                <p className={styles.feedLead}>
+                  {lab.name} {num(lab.value)} {lab.unit}
+                  {flagOf(lab) ? ` · ${flagOf(lab)}` : ''}
+                </p>
+                <p className={styles.feedCopy}>
+                  Reference {rangeLabel(lab)}
+                  {lab.panel ? `. Panel: ${lab.panel}` : ''}
+                  {data.patient.labTrend && data.patient.labTrend.length > 1
+                    ? `. ${data.patient.labTrend.length} serial results held for this analyte.`
+                    : '.'}
+                </p>
+              </li>
+            )}
             <li className={styles.feedCard}>
               <div className={styles.feedMeta}>
-                <span className={styles.feedSource}>Hospital Discharge Summary</span>
-                <time className={styles.feedTime}>{formatFeedTime(data.clock.now, -24 * 60 * 60 * 1000)}</time>
+                <span className={styles.feedSource}>
+                  {letter ? ownerLabel(letter.site) : 'Correspondence'}
+                </span>
+                {letter?.sentAt ? (
+                  <time className={styles.feedTime} dateTime={new Date(letter.sentAt).toISOString()}>
+                    {new Date(letter.sentAt).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </time>
+                ) : null}
               </div>
-              <p className={styles.feedLead}>Discharged following IV antibiotic course</p>
-              <p className={styles.feedCopy}>
-                Free-text instruction recorded: “Arrange 4-week kidney function review &amp; post-discharge
-                monitoring.” Extracted as operational work, not a diagnosis.
-              </p>
+              {letter ? (
+                <>
+                  <p className={styles.feedLead}>{letter.title}</p>
+                  <p className={styles.feedCopy}>
+                    {letter.sentBy ? `Written by ${letter.sentBy}. ` : ''}
+                    {letter.reviewed
+                      ? 'Reviewed by the receiving service.'
+                      : 'Not yet reviewed or filed by the receiving service.'}
+                  </p>
+                  {followUpText ? (
+                    <p className={styles.feedCopy}>
+                      Free text recorded: “{followUpText}”
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <p className={styles.feedLead}>No correspondence held</p>
+                  <p className={styles.feedCopy}>
+                    The simulator returned no discharge letter for this patient.
+                  </p>
+                </>
+              )}
             </li>
             <li className={styles.feedCard}>
               <div className={styles.feedMeta}>
@@ -522,9 +718,11 @@ export function CommandCockpit({
                     value={newOwner}
                     onChange={(event) => setNewOwner(event.target.value)}
                   >
-                    <option>High St GP Surgery</option>
-                    <option>St. Jude Hospital Acute Team</option>
-                    <option>Duty clinician (app-side)</option>
+                    {Object.entries(SERVICE_NAMES).map(([id, name]) => (
+                      <option key={id} value={id}>
+                        {name}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label className={styles.field}>
@@ -558,7 +756,13 @@ export function CommandCockpit({
         <section className={styles.panel} aria-labelledby="adk-heading">
           <header className={styles.panelHead}>
             <div className={styles.agentRow}>
-              <span className={agentState === 'EXECUTING' ? styles.pulseBusy : styles.pulse} />
+              <span
+                className={
+                  agentState === 'SENDING' || agentState === 'THINKING'
+                    ? styles.pulseBusy
+                    : styles.pulse
+                }
+              />
               <div>
                 <h3 id="adk-heading">Anima ADK loop-closer</h3>
                 <p className={styles.panelSub}>Accountability handover, human-approved writes only</p>
@@ -570,11 +774,11 @@ export function CommandCockpit({
             </span>
           </header>
 
-          <h4 className={styles.proposalTitle}>Clinical handover proposal</h4>
+          <h4 className={styles.proposalTitle}>Suggested next action</h4>
           <p className={styles.proposalCopy}>
-            The agent compared the source-classified {lab.name} result with the hospital discharge record and
-            drafted a schema-bound covenant: keep St. Jude accountable until a named Duty GP accepts. No
-            diagnosis, urgency or treatment is inferred.
+            {ledger.length === 0
+              ? 'Nothing is outstanding for this patient in the records read, so no action is suggested.'
+              : `${ledger.length} ${ledger.length === 1 ? 'item was' : 'items were'} found written down and not finished. Responsibility stays with the sending service until a named person at the receiving service accepts it. Nothing is sent until you approve it, and no diagnosis, urgency or treatment is decided here.`}
           </p>
 
           <dl className={styles.covenant}>
@@ -583,14 +787,20 @@ export function CommandCockpit({
               <dd>{ownerLabel(currentOwner)}</dd>
             </div>
             <div>
-              <dt>Covenant state</dt>
+              <dt>Handover state</dt>
               <dd>
-                <span className={styles.covenantState}>{data.caseSnapshot.case.ownershipState}</span>
+                <span className={styles.covenantState}>
+                  {snapshot
+                    ? handoverLabel(snapshot.case.ownershipState)
+                    : data.agentPending
+                      ? 'Working it out…'
+                      : 'Not determined'}
+                </span>
               </dd>
             </div>
             <div>
               <dt>Requested receiver</dt>
-              <dd>High Street GP · Duty GP</dd>
+              <dd>{snapshot?.case.requestedReceiver ?? 'Not recorded by the source'}</dd>
             </div>
             <div>
               <dt>Acknowledgement window</dt>
@@ -639,8 +849,11 @@ export function CommandCockpit({
                 <div>
                   <h4>Loop closed</h4>
                   <p>
-                    Duty GP Dr Ada Sim accepted accountability. Downstream visibility was checked in Anima GP
-                    Connect. This does not claim a clinical outcome.
+                    {snapshot?.case.currentAccountableOwner.actorId
+                      ? `Accepted by ${snapshot.case.currentAccountableOwner.actorId} at ${ownerLabel(snapshot.case.currentAccountableOwner.teamId)}.`
+                      : `Responsibility now sits with ${ownerLabel(currentOwner)}.`}{' '}
+                    Confirmed by re-reading the record. This says nothing about the clinical
+                    outcome.
                   </p>
                 </div>
               </div>

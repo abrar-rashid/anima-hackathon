@@ -177,3 +177,31 @@ const TERMINAL_STATUSES = new Set(['completed', 'filed', 'rejected', 'collected'
 export function isTerminal(status: string): boolean {
   return TERMINAL_STATUSES.has(status.toLowerCase())
 }
+
+/**
+ * Strip the simulator's generator prefixes from an audit action.
+ *
+ * Seeded history records the document workflow as `seed_document_reviewed`
+ * rather than `review`. Matching on the raw string made every seeded review
+ * invisible, which reported 62 of 62 discharge letters as never reviewed. The
+ * transition is real; only the name is generated.
+ */
+export function bareAction(action: string): string {
+  return action.toLowerCase().replace(/^(seed|generate)_/, '')
+}
+
+/**
+ * True when any audit entry records one of these verbs.
+ *
+ * Matches on substring of the de-prefixed action so `seed_document_reviewed`
+ * satisfies `review` and `document_filed` satisfies `file`.
+ */
+export function hasAction(resource: SimResource, verbs: string[]): boolean {
+  const entries = resource.provenance.created
+    ? [resource.provenance.created, ...resource.provenance.changes]
+    : resource.provenance.changes
+  return entries.some((entry) => {
+    const action = bareAction(entry.action)
+    return verbs.some((verb) => action.includes(verb.toLowerCase()))
+  })
+}

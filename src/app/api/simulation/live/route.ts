@@ -1,32 +1,154 @@
 import { NextResponse } from 'next/server'
 import { getContainer } from '@/services/container'
-import { createAnimaClient } from '@/adapters/anima/client'
-import { bloodReportFrom } from '@/adapters/anima/mapping'
+import {
+  findPatient,
+  readCatalogue,
+  readClock,
+  readPatientAcrossSites,
+  readTeam,
+} from '@/anima/readers'
+import { runDetectors } from '@/ctl/detect'
+import { ageFrom } from '@/ctl/normalise/resources'
+import { SITES, type Finding, type SimResource } from '@/ctl/contracts'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-interface RawClockEvent {
-  id?: string
-  time?: number
-  type?: string
-  actor?: string
-  detail?: string
-  patientId?: string
-  resourceId?: string
+/**
+ * Everything the cockpit and the neighbourhood render, assembled from the
+ * simulator.
+ *
+ * This route previously carried a `PATIENT_NAMES` map, a hardcoded three-row
+ * task ledger, invented site names and a fallback CRP of 5.6 mg/L. Every one of
+ * those is gone: if the simulator does not supply a field, the response says so
+ * rather than substituting something plausible.
+ */
+
+interface LabAnalyte {
+  name: string
+  value: number
+  unit: string
+  referenceLow?: number
+  referenceHigh?: number
 }
 
-interface ClockBody {
-  now?: number
-  paused?: boolean
-  speed?: number
-  events?: RawClockEvent[]
+function analytesOf(resource: SimResource): LabAnalyte[] {
+  const data = resource.data as { analytes?: unknown }
+  if (!Array.isArray(data.analytes)) return []
+  return data.analytes.flatMap((raw) => {
+    if (typeof raw !== 'object' || raw === null) return []
+    const a = raw as Record<string, unknown>
+    if (typeof a.name !== 'string' || typeof a.value !== 'number') return []
+    return [
+      {
+        name: a.name,
+        value: a.value,
+        unit: typeof a.unit === 'string' ? a.unit : '',
+        ...(typeof a.referenceLow === 'number' ? { referenceLow: a.referenceLow } : {}),
+        ...(typeof a.referenceHigh === 'number' ? { referenceHigh: a.referenceHigh } : {}),
+      },
+    ]
+  })
 }
 
-const PATIENT_NAMES: Record<string, { name: string; age: number; gender: string }> = {
-  'SIM-000001': { name: 'Amira Khan', age: 64, gender: 'Female' },
-  'SIM-000006': { name: 'Eleanor Chen', age: 58, gender: 'Female' },
-  'SIM-000007': { name: 'David Wilson', age: 71, gender: 'Male' },
+function collectedAt(resource: SimResource): number {
+  const data = resource.data as { collectedAt?: unknown }
+  if (typeof data.collectedAt === 'number') return data.collectedAt
+  return resource.createdAt ?? resource.provenance.created?.time ?? 0
+}
+
+/** Outside the source's own reference range. Arithmetic, not interpretation. */
+function outOfRange(a: LabAnalyte): boolean {
+  if (a.referenceLow !== undefined && a.value < a.referenceLow) return true
+  if (a.referenceHigh !== undefined && a.value > a.referenceHigh) return true
+  return false
+}
+
+/**
+ * The most recent result for this patient, preferring an analyte the source's
+ * own range flags. Returns null when the simulator holds no result, so the UI
+ * can say so instead of showing a number nobody measured.
+ */
+function latestLab(resources: SimResource[]): {
+  name: string
+  value: number
+  unit: string
+  refLow?: number
+  refHigh?: number
+  isAbnormal: boolean
+  panel?: string
+  laboratory?: string
+  collectedAt: number
+} | null {
+  const reports = resources
+    .filter((r) => r.kind === 'report' && (r.data as { kind?: unknown }).kind === 'blood-result')
+    .sort((a, b) => collectedAt(b) - collectedAt(a))
+
+  for (const report of reports) {
+    const analytes = analytesOf(report)
+    if (analytes.length === 0) continue
+    const chosen = analytes.find(outOfRange) ?? analytes[0]!
+    const data = report.data as { panel?: { name?: unknown }; laboratory?: unknown }
+    return {
+      name: chosen.name,
+      value: chosen.value,
+      unit: chosen.unit,
+      ...(chosen.referenceLow !== undefined ? { refLow: chosen.referenceLow } : {}),
+      ...(chosen.referenceHigh !== undefined ? { refHigh: chosen.referenceHigh } : {}),
+      isAbnormal: outOfRange(chosen),
+      ...(typeof data.panel?.name === 'string' ? { panel: data.panel.name } : {}),
+      ...(typeof data.laboratory === 'string' ? { laboratory: data.laboratory } : {}),
+      collectedAt: collectedAt(report),
+    }
+  }
+  return null
+}
+
+/** Serial values for one analyte, oldest first, so a trend can be drawn. */
+function analyteTrend(
+  resources: SimResource[],
+  analyteName: string,
+): Array<{ collectedAt: number; value: number; unit: string; refLow?: number; refHigh?: number }> {
+  return resources
+    .filter((r) => r.kind === 'report')
+    .flatMap((r) =>
+      analytesOf(r)
+        .filter((a) => a.name === analyteName)
+        .map((a) => ({
+          collectedAt: collectedAt(r),
+          value: a.value,
+          unit: a.unit,
+          ...(a.referenceLow !== undefined ? { refLow: a.referenceLow } : {}),
+          ...(a.referenceHigh !== undefined ? { refHigh: a.referenceHigh } : {}),
+        })),
+    )
+    .sort((a, b) => a.collectedAt - b.collectedAt)
+}
+
+/** A detector finding, in the shape the task ledger already renders. */
+function toLedgerItem(finding: Finding, patientId: string): Record<string, unknown> {
+  const citation = finding.citations[0]
+  return {
+    task_id: finding.id,
+    episode_id: citation ? `${citation.site}:${citation.resourceId}` : finding.id,
+    timestamp: new Date(finding.createdAt ?? finding.dueAt ?? Date.now()).toISOString(),
+    title: finding.summary,
+    status: finding.status,
+    owner: finding.owner ?? 'not-supplied-by-source',
+    note: citation
+      ? `Read from ${citation.site} record ${citation.resourceId} version ${citation.version}.`
+      : 'No source citation available.',
+    deadline: finding.dueAt ? new Date(finding.dueAt).toISOString() : '',
+    clinical_priority: finding.priority ?? 'not-supplied-by-source',
+    snomed_id: 'not-supplied-by-source',
+    performed_by: 'not-supplied-by-source',
+    requested_id: finding.owner ?? 'not-supplied-by-source',
+    patient_id: finding.patientId ?? patientId,
+    detector: finding.detector,
+    breach: finding.breach,
+    overdueMs: finding.overdueMs ?? null,
+    site: finding.site,
+  }
 }
 
 export async function GET(request: Request) {
@@ -35,220 +157,152 @@ export async function GET(request: Request) {
     const patientId = searchParams.get('patientId') ?? 'SIM-000001'
 
     const container = getContainer()
-    const clock = await container.clock.read()
-
-    // Read live clock events if live mode
-    let liveEvents: RawClockEvent[] = []
-    if (container.live) {
-      try {
-        const client = createAnimaClient()
-        const { status, body } = await client.request<ClockBody>('/api/clock')
-        if (status === 200 && Array.isArray(body?.events)) {
-          liveEvents = body.events.slice(0, 30)
-        }
-      } catch {
-        // Fallback gracefully
-      }
-    }
-
-    // Open/read the case snapshot for this patient
-    let caseSnapshot
-    try {
-      caseSnapshot = await container.cases.open({ patientId })
-    } catch {
-      caseSnapshot = await container.cases.open({ patientId: 'SIM-000001' })
-    }
-
-    // Check if store has updated state after execution
-    const storedCase = container.store.get(caseSnapshot.case.caseId)
-    if (storedCase) {
-      caseSnapshot.case = storedCase.case
-    }
-
-    // Also get patient EHR records
-    const [gpRecords, _hospitalRecords, diagRecords] = await Promise.all([
-      container.read.getSiteRecords('gp', patientId),
-      container.read.getSiteRecords('hospital', patientId),
-      container.read.getSiteRecords('diagnostics', patientId),
+    // The clock anchors every deadline calculation, so read it first; the rest
+    // fans out in parallel because each site read is independently useful.
+    const { clock, events } = await readClock()
+    const [team, patient, catalogue, patientSites] = await Promise.all([
+      readTeam(),
+      findPatient(patientId),
+      readCatalogue(clock.now),
+      readPatientAcrossSites(patientId),
     ])
+    const { slices, failedSites } = patientSites
+    const patientResources = slices.flatMap((s) => s.resources)
 
-    // Extract problems from EHR
-    const ehrRecord = gpRecords.items.find((r) => r.kind === 'ehr-record')
-    const problems = (ehrRecord?.data as { problems?: Array<{ term: string; code: string; status: string; date: string }> })?.problems ?? [
-      { term: 'Heart failure', code: 'SIM-PROBLEM-1', status: 'resolved', date: '2026-08-13' },
-      { term: 'Chronic Kidney Disease (CKD Stage 3)', code: 'SIM-PROBLEM-2', status: 'active', date: '2026-05-15' },
-    ]
+    // Findings for this patient come from their own records; the neighbourhood
+    // counters need the wider scan.
+    const patientFindings = runDetectors(patientResources, clock.now)
 
-    // Extract latest blood result
-    const rawReport = diagRecords.items.find((r) => r.kind === 'report')
-    const reportData = rawReport ? bloodReportFrom(rawReport) : null
-    const crpAnalyte = reportData?.analytes?.find((a) => a.name.toLowerCase().includes('crp') || a.name.toLowerCase().includes('c-reactive'))
-    const recentLab = {
-      name: crpAnalyte ? crpAnalyte.name : 'C-reactive protein',
-      value: crpAnalyte ? crpAnalyte.value : 5.6,
-      unit: crpAnalyte ? crpAnalyte.unit : 'mg/L',
-      refLow: crpAnalyte ? crpAnalyte.referenceLow : 0,
-      refHigh: crpAnalyte ? crpAnalyte.referenceHigh : 5.0,
-      isAbnormal: crpAnalyte ? (crpAnalyte.value < crpAnalyte.referenceLow || crpAnalyte.value > crpAnalyte.referenceHigh) : true,
-    }
+    const lab = latestLab(patientResources)
+    const trend = lab ? analyteTrend(patientResources, lab.name) : []
 
-    // Extract recent observations (home monitor, etc.)
-    const observations = liveEvents
-      .filter((e) => e.patientId === patientId || e.type?.includes('observation'))
+    const ehr = patientResources.find((r) => r.kind === 'ehr-record')
+    const problems =
+      (ehr?.data as { problems?: Array<{ term: string; code: string; status: string; date: string }> })
+        ?.problems ?? []
+
+    // Real correspondence, with the free text the source actually wrote. The
+    // cockpit previously showed an invented "Discharged following IV antibiotic
+    // course" card quoting a letter that does not exist.
+    const documents = patientResources
+      .filter((r) => r.kind === 'discharge-summary' || r.kind === 'document')
+      .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
       .slice(0, 6)
-      .map((e) => ({
-        time: e.time ?? clock.now,
-        type: e.type ?? 'observation',
-        detail: e.detail ?? 'Home activity reading recorded',
+      .map((r) => {
+        const data = r.data as {
+          sections?: Record<string, unknown>
+          sentBy?: unknown
+          sentAt?: unknown
+          stage?: unknown
+        }
+        const sections = Object.entries(data.sections ?? {})
+          .filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+          .map(([key, text]) => ({ key, text }))
+        return {
+          id: r.id,
+          site: r.site,
+          title: r.title,
+          version: r.version,
+          status: r.status,
+          stage: typeof data.stage === 'string' ? data.stage : null,
+          sentBy: typeof data.sentBy === 'string' ? data.sentBy : null,
+          sentAt: typeof data.sentAt === 'number' ? data.sentAt : (r.createdAt ?? null),
+          sections,
+          reviewed: r.provenance.changes.some((c) => /review|file/i.test(c.action)),
+        }
+      })
+
+    const observations = patientResources
+      .filter((r) => r.kind === 'observation')
+      .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+      .slice(0, 6)
+      .map((r) => ({
+        time: r.createdAt ?? clock.now,
+        type: r.kind,
+        detail: r.title || 'Observation recorded',
       }))
 
-    // Build the Team 12 task ledger rows
-    const tasks = [
-      {
-        task_id: 'TASK-CRP-TRANSFER',
-        episode_id: `EP-${patientId}-01`,
-        timestamp: new Date(clock.now - 20 * 60 * 1000).toISOString(),
-        title: 'Acknowledge abnormal CRP handover',
-        status: caseSnapshot.case.ownershipState === 'ACCEPTED' ? 'COMPLETED' : 'OPEN',
-        owner: caseSnapshot.case.currentAccountableOwner.teamId === 'hospital' ? 'St. Jude Hospital Acute Team' : 'High St GP Surgery',
-        note: `Blood test result: CRP ${recentLab.value} ${recentLab.unit} exceeds reference range (${recentLab.refLow}-${recentLab.refHigh} ${recentLab.unit}). Accountability transfer to Duty GP required.`,
-        deadline: new Date(clock.now + 30 * 60 * 1000).toISOString(),
-        clinical_priority: 'urgent',
-        snomed_id: 'not-supplied-by-source',
-        performed_by: caseSnapshot.case.acceptingActor ? caseSnapshot.case.acceptingActor.name : 'Unassigned',
-        requested_id: 'Dr Morgan Bell (Hospital)',
-      },
-      {
-        task_id: 'TASK-DISCHARGE-MONITOR',
-        episode_id: `EP-${patientId}-01`,
-        timestamp: new Date(clock.now - 60 * 60 * 1000).toISOString(),
-        title: 'Arrange post-discharge monitoring',
-        status: 'OPEN',
-        owner: 'High St GP Surgery',
-        note: 'Review kidney function and electrolytes following hospital attendance.',
-        deadline: new Date(clock.now + 24 * 60 * 60 * 1000).toISOString(),
-        clinical_priority: 'urgent',
-        snomed_id: 'not-supplied-by-source',
-        performed_by: 'Unassigned',
-        requested_id: 'Acute Care Coordinator',
-      },
-      {
-        task_id: 'TASK-MED-REVIEW',
-        episode_id: `EP-${patientId}-01`,
-        timestamp: new Date(clock.now - 120 * 60 * 1000).toISOString(),
-        title: '4-Week CKD Medication Review',
-        status: 'PENDING_LABS',
-        owner: 'High St GP Surgery (Community Pharmacy)',
-        note: 'Extracted from free-text discharge summary: "Book follow-up review in 4 weeks post discharge"',
-        deadline: new Date(clock.now + 28 * 24 * 60 * 60 * 1000).toISOString(),
-        clinical_priority: 'standard',
-        snomed_id: 'not-supplied-by-source',
-        performed_by: 'Unassigned',
-        requested_id: 'Ward 4 Senior Registrar',
-      },
-    ]
+    // The agent's proposal is deliberately NOT assembled here. Opening a case
+    // runs the ADK sequence through a language model and costs about seven and
+    // a half seconds, which held the whole first paint hostage. The page loads
+    // this payload, then fetches /api/simulation/case for the proposal.
 
-    // District statuses for town view
-    const districts = {
-      hospital: {
-        id: 'hospital',
-        name: "St. Jude's Acute Hospital",
-        code: 'acute-flow',
-        activeCount: caseSnapshot.case.orderingTeamId === 'hospital' ? 1 : 0,
-        status: caseSnapshot.case.ownershipState === 'ORDERER_OWNS' ? 'Holding Accountable' : 'Handed Over',
-        recentEvent: liveEvents.find((e) => e.actor?.includes('acute') || e.type?.includes('emergency'))?.detail ?? 'Acute admissions monitored',
-      },
-      diagnostics: {
-        id: 'diagnostics',
-        name: 'City Pathology & Diagnostics Lab',
-        code: 'diagnostics',
-        activeCount: 1,
-        status: 'Result Released',
-        recentEvent: `Automated lab assay: ${recentLab.name} ${recentLab.value} ${recentLab.unit}`,
-      },
-      gp: {
-        id: 'gp',
-        name: 'High Street GP Practice',
-        code: 'primary-care',
-        activeCount: caseSnapshot.case.currentAccountableOwner.teamId === 'gp' || caseSnapshot.case.currentAccountableOwner.teamId === 'gp-duty' ? 1 : 0,
-        status: caseSnapshot.case.ownershipState === 'ACCEPTED' ? 'Duty GP Active' : 'Awaiting Acceptance',
-        recentEvent: liveEvents.find((e) => e.type === 'accept' || e.actor?.includes('gp'))?.detail ?? 'Duty GP on duty: Dr Ada Sim',
-      },
-      patient: {
-        id: 'patient',
-        name: "Amira Khan's Residence",
-        code: 'home-monitor',
-        activeCount: 1,
-        status: 'Connected',
-        recentEvent: observations[0]?.detail ?? 'Home activity reading recorded',
-      },
-      pharmacy: {
-        id: 'pharmacy',
-        name: 'Community Care Pharmacy',
-        code: 'pharmacy',
-        activeCount: 0,
-        status: 'Standing by',
-        recentEvent: 'Repeat prescription dispatch queue active',
-      },
-      community: {
-        id: 'community',
-        name: 'Community Rehabilitation Pavilion',
-        code: 'community',
-        activeCount: 0,
-        status: 'Step-down ready',
-        recentEvent: 'Recovery garden open. No rehab outcome inferred.',
-      },
-      referrals: {
-        id: 'referrals',
-        name: 'Specialist Referrals Center',
-        code: 'referrals',
-        activeCount: 0,
-        status: 'Suites open',
-        recentEvent: 'No specialist referral opened for this result.',
-      },
-      wearables: {
-        id: 'wearables',
-        name: 'Remote Telemetry & Wearables Hub',
-        code: 'wearables',
-        activeCount: 1,
-        status: 'Monitoring',
-        recentEvent: observations[0]?.detail ?? 'Wearable stream connected',
-      },
-    }
-
-    const patientProfile = PATIENT_NAMES[patientId] ?? { name: 'Amira Khan', age: 64, gender: 'Female' }
+    // Districts describe where THIS patient's work sits. A population-wide scan
+    // cost 20 of the route's 24 seconds and answered a question the product no
+    // longer asks, so it is gone.
+    const byId = new Map(catalogue.data.map((site) => [site.id, site]))
+    const districts = Object.fromEntries(
+      SITES.map((site) => {
+        const described = byId.get(site)
+        const open = patientFindings.filter((f) => f.site === site)
+        const resources = patientResources.filter((r) => r.site === site)
+        return [
+          site,
+          {
+            id: site,
+            name: described?.name ?? site,
+            subtitle: described?.subtitle ?? '',
+            color: described?.color ?? '',
+            /** False when the catalogue does not describe this scope. */
+            namedByCatalogue: described !== undefined,
+            activeCount: open.length,
+            overdueCount: open.filter((f) => f.breach === 'breached').length,
+            resourceCount: resources.length,
+            recentEvent:
+              events.find((e) => e.visibleTo.includes(site))?.detail ??
+              'No recent activity recorded',
+          },
+        ]
+      }),
+    )
 
     return NextResponse.json({
-      world: caseSnapshot.connection.world,
+      world: team.world,
+      team: team.team,
+      scopes: team.scopes,
       live: container.live,
-      clock: {
-        now: clock.now,
-        paused: clock.paused,
-        speed: clock.speed,
+      clock,
+      dataQuality: {
+        failedSites,
+        patientResourcesScanned: patientResources.length,
+        sitesRead: slices.map((s) => s.site),
+        catalogueStale: catalogue.stale,
+        labPresent: lab !== null,
       },
       patient: {
         id: patientId,
-        ...patientProfile,
+        name: patient?.name ?? 'not-supplied-by-source',
+        age: ageFrom(patient?.birthDate, clock.now) ?? null,
+        birthDate: patient?.birthDate ?? null,
+        conditions: patient?.conditions ?? [],
+        goals: patient?.goals ?? [],
+        needs: patient?.needs ?? [],
+        localIds: patient?.localIds ?? {},
+        synthetic: patient?.synthetic ?? true,
         problems,
-        recentLab,
+        recentLab: lab,
+        labTrend: trend,
+        documents,
         observations,
       },
-      caseSnapshot,
-      tasks,
-      districts,
-      recentEvents: liveEvents,
-      adkStatus: {
-        framework: '@animahealth/adk',
-        status: 'READY',
-        sessionInitialized: true,
-        proposalAvailable: Boolean(caseSnapshot.proposal),
-        actions: caseSnapshot.proposal?.actions ?? [],
+      tasks: patientFindings.map((f) => toLedgerItem(f, patientId)),
+      counts: {
+        total: patientFindings.length,
+        overdue: patientFindings.filter((f) => f.breach === 'breached').length,
+        awaitingResult: patientFindings.filter((f) => f.detector === 'awaiting-result').length,
+        unreviewedHandovers: patientFindings.filter((f) => f.detector === 'unprocessed-handover')
+          .length,
       },
+      districts,
+      recentEvents: events.slice(0, 30),
     })
   } catch (error) {
-    console.error('Failed to get live simulation state:', error)
+    console.error('Failed to assemble live simulation state:', error)
     return NextResponse.json(
-      { error: 'failed_to_fetch_live_state', message: error instanceof Error ? error.message : String(error) },
+      {
+        error: 'failed_to_fetch_live_state',
+        message: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 },
     )
   }

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://medlatency.local/schemas/patient_bundle.schema.json",
+  "title": "MedLatency portable patient bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "patient",
+    "dataset",
+    "coverage",
+    "resources",
+    "events",
+    "links"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "medlatency.patient.v1"
+    },
+    "patient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "display_name", "synthetic"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string", "minLength": 1 },
+        "synthetic": { "const": true },
+        "demographics": { "type": "object" }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "source", "captured_at"],
+      "properties": {
+        "mode": { "enum": ["fixture", "live"] },
+        "source": { "type": "string", "minLength": 1 },
+        "captured_at": { "type": "string", "format": "date-time" },
+        "simulation_as_of": { "type": ["string", "null"], "format": "date-time" },
+        "world_id": { "type": ["string", "null"] },
+        "integrity": {
+          "type": "object",
+          "properties": {
+            "bundle_sha256": { "type": "string" },
+            "raw_manifest": { "type": "array" }
+          }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["full_history_guaranteed", "sources", "limitations"],
+      "properties": {
+        "full_history_guaranteed": { "type": "boolean" },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "status"],
+            "properties": {
+              "id": { "type": "string" },
+              "kind": { "type": "string" },
+              "status": { "enum": ["ok", "partial", "failed", "skipped", "capped"] },
+              "detail": { "type": "string" },
+              "retrieved_at": { "type": ["string", "null"], "format": "date-time" }
+            }
+          }
+        },
+        "limitations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/resource" }
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    },
+    "links": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/link" }
+    },
+    "service_context": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/resource" }
+    }
+  },
+  "$defs": {
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "patient_id",
+        "kind",
+        "source_status",
+        "data",
+        "provenance",
+        "source_locations"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "patient_id": { "type": ["string", "null"] },
+        "kind": { "type": "string", "minLength": 1 },
+        "title": { "type": ["string", "null"] },
+        "source_status": { "type": ["string", "null"] },
+        "version": { "type": ["integer", "null"] },
+        "record_created_at": { "type": ["string", "null"], "format": "date-time" },
+        "event_time": { "type": ["string", "null"], "format": "date-time" },
+        "retrieved_at": { "type": ["string", "null"], "format": "date-time" },
+        "clock": { "enum": ["simulation", "wall", "unknown"] },
+        "site": { "type": ["string", "null"] },
+        "content_sha256": { "type": ["string", "null"] },
+        "data": { "type": "object" },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["retrieved_at", "route"],
+            "properties": {
+              "retrieved_at": { "type": "string", "format": "date-time" },
+              "route": { "type": "string" },
+              "response_sha256": { "type": ["string", "null"] },
+              "page_offset": { "type": ["integer", "null"] }
+            }
+          }
+        },
+        "source_locations": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "clock"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "type": "string" },
+        "title": { "type": ["string", "null"] },
+        "at": { "type": ["string", "null"], "format": "date-time" },
+        "clock": { "enum": ["simulation", "wall", "unknown"] },
+        "patient_id": { "type": ["string", "null"] },
+        "resource_id": { "type": ["string", "null"] },
+        "visibility": { "enum": ["clinical", "communication", "plan", "record_metadata", "technical"] },
+        "data": { "type": "object" }
+      }
+    },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from_id", "to_id", "rel"],
+      "properties": {
+        "from_id": { "type": "string" },
+        "to_id": { "type": "string" },
+        "rel": { "type": "string" },
+        "documented": { "type": "boolean" }
+      }
+    }
+  }
+}

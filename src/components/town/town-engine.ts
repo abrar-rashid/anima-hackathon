@@ -19,7 +19,8 @@ export interface TownSimulationData {
   patient: {
     id: string
     name: string
-    recentLab: TownLab
+    /** Null when the simulator holds no result for this patient. */
+    recentLab: TownLab | null
     observations?: Array<{ time: number; type: string; detail: string }>
   }
   caseStatus: {
@@ -79,8 +80,8 @@ export interface PlacedBubble extends SpeechRequest, Rect {
 export const BUILDINGS: BuildingDef[] = [
   {
     id: 'hospital',
-    name: "St. Jude's Acute Hospital",
-    role: 'Ordering Clinician (Acute)',
+    name: 'Hospital EPR',
+    role: 'Northbank General · secondary care',
     x: 140,
     y: 90,
     width: 320,
@@ -89,13 +90,13 @@ export const BUILDINGS: BuildingDef[] = [
     roofColor: '#1d4f9c',
     accentColor: '#dc2626',
     icon: '🏥',
-    sign: "ST. JUDE'S A&E",
+    sign: 'NORTHBANK GENERAL',
     short: 'Hospital',
   },
   {
     id: 'diagnostics',
-    name: 'City Pathology & Diagnostics Lab',
-    role: 'Automated Blood Analysis',
+    name: 'Diagnostics',
+    role: 'Laboratory reports',
     x: 880,
     y: 70,
     width: 280,
@@ -104,13 +105,13 @@ export const BUILDINGS: BuildingDef[] = [
     roofColor: '#0e7490',
     accentColor: '#22d3ee',
     icon: '🔬',
-    sign: 'PATHOLOGY LAB',
+    sign: 'DIAGNOSTICS',
     short: 'Diagnostics',
   },
   {
     id: 'gp',
-    name: 'High Street GP Practice',
-    role: 'Duty GP (Primary Care)',
+    name: 'GP Records',
+    role: 'Riverside Practice · primary care',
     x: 1860,
     y: 80,
     width: 300,
@@ -119,13 +120,13 @@ export const BUILDINGS: BuildingDef[] = [
     roofColor: '#166534',
     accentColor: '#4ade80',
     icon: '🩺',
-    sign: 'HIGH STREET GP',
+    sign: 'RIVERSIDE PRACTICE',
     short: 'GP Practice',
   },
   {
     id: 'pharmacy',
-    name: 'Community Care Pharmacy',
-    role: 'Medication & Dispensing',
+    name: 'Pharmacy',
+    role: 'High Street Pharmacy',
     x: 120,
     y: 580,
     width: 260,
@@ -134,13 +135,13 @@ export const BUILDINGS: BuildingDef[] = [
     roofColor: '#b45309',
     accentColor: '#facc15',
     icon: '💊',
-    sign: 'CARE PHARMACY',
+    sign: 'HIGH ST PHARMACY',
     short: 'Pharmacy',
   },
   {
     id: 'wearables',
-    name: 'Remote Telemetry & Wearables Hub',
-    role: 'Home Monitoring Consoles',
+    name: 'Home Health',
+    role: 'Personal health journal',
     x: 1860,
     y: 540,
     width: 280,
@@ -149,13 +150,13 @@ export const BUILDINGS: BuildingDef[] = [
     roofColor: '#312e81',
     accentColor: '#c4b5fd',
     icon: '⌚',
-    sign: 'TELEMETRY HUB',
+    sign: 'HOME HEALTH',
     short: 'Wearables',
   },
   {
     id: 'patient',
-    name: "Amira Khan's Residence",
-    role: 'Patient Home (SIM-000001)',
+    name: 'Patient home',
+    role: 'Home of the selected patient',
     x: 110,
     y: 1120,
     width: 280,
@@ -164,13 +165,13 @@ export const BUILDINGS: BuildingDef[] = [
     roofColor: '#7e22ce',
     accentColor: '#f0abfc',
     icon: '🏡',
-    sign: 'KHAN COTTAGE',
+    sign: 'PATIENT HOME',
     short: 'Residence',
   },
   {
     id: 'community',
-    name: 'Community Rehabilitation Pavilion',
-    role: 'Step-down Care & Recovery Garden',
+    name: 'Community Care',
+    role: 'Community visiting team',
     x: 860,
     y: 1140,
     width: 320,
@@ -179,13 +180,13 @@ export const BUILDINGS: BuildingDef[] = [
     roofColor: '#3f6212',
     accentColor: '#bef264',
     icon: '🌿',
-    sign: 'REHAB PAVILION',
+    sign: 'COMMUNITY CARE',
     short: 'Rehab',
   },
   {
     id: 'referrals',
-    name: 'Specialist Referrals Center',
-    role: 'Regional Clinic · Specialist Suites',
+    name: 'Referrals',
+    role: 'e-Referral Service',
     x: 1840,
     y: 1120,
     width: 300,
@@ -194,7 +195,7 @@ export const BUILDINGS: BuildingDef[] = [
     roofColor: '#1e293b',
     accentColor: '#cbd5e1',
     icon: '🏢',
-    sign: 'REFERRALS CENTER',
+    sign: 'REFERRALS',
     short: 'Referrals',
   },
 ]
@@ -486,25 +487,29 @@ export function composeCharacterSpeech(data: TownSimulationData): Record<string,
 
   return {
     'doctor-morgan': accepted
-      ? 'Handover complete. Duty GP is the accountable owner.'
-      : `${labPhrase(lab)} Transfer to GP needed.`,
-    'lab-tech': `${lab.name} ${lab.value} ${lab.unit} released to the ordering team.`,
+      ? 'Handover accepted. The practice is now responsible.'
+      : lab
+        ? `${labPhrase(lab)} Needs handing over to the practice.`
+        : 'No result held for this patient yet.',
+    'lab-tech': lab
+      ? `${lab.name} ${lab.value} ${lab.unit} released to the ordering team.`
+      : 'No result released for this patient.',
     'duty-gp': accepted
-      ? 'Handover accepted. Review scheduled.'
+      ? 'Handover accepted. Review booked.'
       : transfer
-        ? 'Incoming covenant transfer. Awaiting my sign-off.'
-        : 'On call. No accepted handover on this result yet.',
+        ? 'Handover received. Waiting for me to accept it.'
+        : 'On call. Nothing accepted on this result yet.',
     'patient-amira': observation
       ? observation
       : accepted
-        ? 'Appointment notice received from the GP practice.'
-        : 'Home telemetry online. Waiting for follow-up.',
-    pharmacist: 'Dispensary standing by. Repeat-script queue is open.',
+        ? 'Appointment notice received from the practice.'
+        : 'Home readings are being sent. Waiting on follow-up.',
+    pharmacist: 'Dispensary open. Repeat prescriptions queued.',
     'runner-adk': accepted
-      ? 'Loop closed. Provenance recorded on the destination record.'
+      ? 'Loop closed. Confirmed on the receiving record.'
       : transfer
-        ? 'Covenant packet in flight. Courier en route to High Street.'
-        : `Loop runner active. Accountable owner: ${owner}.`,
+        ? 'Handover in transit to the practice.'
+        : `Watching for unfinished work. Currently responsible: ${owner}.`,
   }
 }
 

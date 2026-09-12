@@ -185,10 +185,21 @@ export async function searchPatients(
   }
 }
 
-/** Resolve one patient by exact ID via the directory search. */
+/**
+ * Resolve one patient by exact ID via the directory search.
+ *
+ * Cached because the directory search costs about 2.7 seconds upstream and a
+ * patient's demographics do not change as the simulator clock advances.
+ */
 export async function findPatient(patientId: string, site: Site = 'gp'): Promise<SimPatient | null> {
+  const key = `patient:${site}:${patientId}`
+  const hit = cache.get(key)
+  if (hit) return hit.value as SimPatient | null
+
   const page = await searchPatients({ q: patientId, site })
-  return page.items.find((p) => p.id === patientId) ?? null
+  const found = page.items.find((p) => p.id === patientId) ?? null
+  cache.set(key, { value: found, fetchedAt: Date.now(), simNow: 0 })
+  return found
 }
 
 // ---------------------------------------------------------------------------
@@ -299,12 +310,57 @@ export async function scanSitesForWork(
     if (result.status === 'fulfilled') slices.push(result.value)
   })
 
+  const merged = mergeSlices(slices)
   return {
-    slices,
+    slices: merged,
     failedSites,
-    scanned: slices.reduce((sum, s) => sum + s.resources.length, 0),
-    total: totalAcross(slices),
+    scanned: merged.reduce((sum, s) => sum + s.resources.length, 0),
+    total: totalAcross(merged),
   }
+}
+
+/**
+ * Collapse the head and tail slices for each site into one, dropping records
+ * that appear in both windows.
+ *
+ * The windows can overlap when a site holds only a little more than the head
+ * limit, which double-counted records and produced duplicate findings for the
+ * same record. Where a record appears twice, the higher version wins.
+ */
+function mergeSlices(slices: SiteViewSlice[]): SiteViewSlice[] {
+  const bySite = new Map<Site, SiteViewSlice>()
+
+  for (const slice of slices) {
+    const existing = bySite.get(slice.site)
+    if (!existing) {
+      bySite.set(slice.site, {
+        ...slice,
+        resources: dedupeResources(slice.resources),
+        events: [...slice.events],
+      })
+      continue
+    }
+    existing.total = Math.max(existing.total, slice.total)
+    existing.resources = dedupeResources([...existing.resources, ...slice.resources])
+    existing.events = dedupeEvents([...existing.events, ...slice.events])
+  }
+
+  return [...bySite.values()]
+}
+
+function dedupeResources(resources: SimResource[]): SimResource[] {
+  const byId = new Map<string, SimResource>()
+  for (const resource of resources) {
+    const seen = byId.get(resource.id)
+    if (!seen || resource.version > seen.version) byId.set(resource.id, resource)
+  }
+  return [...byId.values()]
+}
+
+function dedupeEvents(events: SimEvent[]): SimEvent[] {
+  const byId = new Map<string, SimEvent>()
+  for (const event of events) byId.set(event.id, event)
+  return [...byId.values()]
 }
 
 /** Sum each site's reported total once, since head and tail share a site. */

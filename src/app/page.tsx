@@ -31,6 +31,7 @@ export default function Home() {
   const [isActing, setIsActing] = useState(false)
   const [ledgerExtras, setLedgerExtras] = useState<TaskLedgerItem[]>([])
   const [lastReceipt, setLastReceipt] = useState<LoopActReceipt | null>(null)
+  const [agentPending, setAgentPending] = useState(false)
 
   const fetchLiveState = useCallback(async (pId: string) => {
     try {
@@ -41,19 +42,43 @@ export default function Home() {
       setError(null)
     } catch (err) {
       console.error('Failed to load simulation state:', err)
-      setError('Failed to connect to Anima live simulator.')
+      setError('Could not reach the Anima simulator.')
     } finally {
       setLoading(false)
     }
   }, [])
 
+  /**
+   * The agent's proposal arrives separately because it runs a model and takes
+   * several seconds. The clinical records must never wait on it.
+   */
+  const fetchProposal = useCallback(async (pId: string) => {
+    setAgentPending(true)
+    try {
+      const res = await fetch(`/api/simulation/case?patientId=${pId}`, { cache: 'no-store' })
+      const body = (await res.json()) as { caseSnapshot: LiveSimulation['caseSnapshot'] }
+      setSimData((prev) => (prev ? { ...prev, caseSnapshot: body.caseSnapshot } : prev))
+    } catch (err) {
+      console.error('Agent proposal unavailable:', err)
+    } finally {
+      setAgentPending(false)
+    }
+  }, [])
+
   useEffect(() => {
-    void fetchLiveState(patientId)
+    let cancelled = false
+    void (async () => {
+      await fetchLiveState(patientId)
+      if (!cancelled) void fetchProposal(patientId)
+    })()
     const interval = window.setInterval(() => {
       void fetchLiveState(patientId)
-    }, 6000)
-    return () => window.clearInterval(interval)
-  }, [fetchLiveState, patientId])
+    }, 15000)
+    return () => {
+      cancelled = true
+      window.clearInterval(interval)
+    }
+  }, [fetchLiveState, fetchProposal, patientId])
 
   const handleAdvanceClock = async (minutes: 10 | 30 | 90) => {
     try {
@@ -106,10 +131,14 @@ export default function Home() {
           observations: simData.patient.observations ?? [],
         },
         caseStatus: {
-          ownershipState: simData.caseSnapshot.case.ownershipState,
-          closureState: simData.caseSnapshot.case.closureState,
-          currentOwner: simData.caseSnapshot.case.currentAccountableOwner.teamId,
-          deadlineMinutes: 30,
+          ownershipState: simData.caseSnapshot?.case.ownershipState ?? 'UNKNOWN',
+          closureState: simData.caseSnapshot?.case.closureState ?? 'UNKNOWN',
+          currentOwner: simData.caseSnapshot?.case.currentAccountableOwner.teamId ?? 'unassigned',
+          // How overdue the worst outstanding item is, from the records — not
+          // the fixed 30 minutes this previously asserted.
+          deadlineMinutes: Math.round(
+            Math.max(0, ...(simData.tasks ?? []).map((t) => Number(t.overdueMs ?? 0) / 60000)),
+          ),
         },
         recentEvents: simData.recentEvents ?? [],
         districts: simData.districts,
@@ -230,12 +259,17 @@ export default function Home() {
 
             {viewMode === 'lab' && simData ? (
               <div className={styles.labCard}>
-                <h2>Operational Latency Twin — Protocol Lab</h2>
+                <h2>Where time is lost</h2>
                 <p>
-                  Replay the identical immutable failure trace under Legacy Protocol v3 versus Accountable
-                  Team Protocol v4.
+                  Replays one recorded case that went wrong through the current process and a
+                  proposed one, so the difference is measured rather than argued. Nothing here is
+                  sent to the simulator.
                 </p>
-                <ProtocolLab caseId={simData.caseSnapshot.case.caseId} />
+                {simData.caseSnapshot ? (
+                  <ProtocolLab caseId={simData.caseSnapshot.case.caseId} />
+                ) : (
+                  <p>Waiting for the case to open before the comparison can run.</p>
+                )}
               </div>
             ) : null}
           </>

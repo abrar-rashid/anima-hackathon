@@ -1,0 +1,78 @@
+{
+  "schema_version": "medlatency.templates.v1",
+  "note": "These are possible stages, not universally mandatory sequences. Unknown families stay usable without a forced template.",
+  "families": {
+    "diagnostic_testing": {
+      "label": "Diagnostic testing",
+      "stages": [
+        "requested",
+        "ordered",
+        "collected",
+        "received",
+        "analysed",
+        "result_available",
+        "reviewed",
+        "communicated"
+      ],
+      "fulfillment_stage": "reviewed",
+      "parallel_allowed": false,
+      "notes": "An available result does not establish review or communication. Collection time is not review time."
+    },
+    "document_follow_up": {
+      "label": "Document follow-up",
+      "stages": [
+        "instruction_identified",
+        "assigned",
+        "prerequisites_addressed",
+        "processing_outcome_recorded"
+      ],
+      "fulfillment_stage": "processing_outcome_recorded",
+      "parallel_allowed": true,
+      "notes": "A sent letter is source status, not closure of embedded instructions."
+    },
+    "appointment_coordination": {
+      "label": "Appointment coordination",
+      "stages": [
+        "requested",
+        "booking_arranged",
+        "confirmed",
+        "attendance_outcome"
+      ],
+      "fulfillment_stage": "confirmed",
+      "parallel_allowed": true,
+      "parallel_requirements": ["access", "transport"],
+      "notes": "A booking does not prove access, transport, or patient confirmation. Preferences are constraints, not orders."
+    },
+    "communication": {
+      "label": "Communication",
+      "stages": [
+        "prepared",
+        "queued_or_sent",
+        "delivered",
+        "response_received"
+      ],
+      "fulfillment_stage": "delivered",
+      "parallel_allowed": false,
+      "notes": "Delivery of a reminder is not completion of the requested downstream action. A queued telephone script is not a transcript."
+    },
+    "external_document": {
+      "label": "Obtaining an external document",
+      "stages": [
+        "needed",
+        "requested",
+        "received",
+        "reviewed"
+      ],
+      "fulfillment_stage": "received",
+      "parallel_allowed": false,
+      "notes": "Requesting a note is not receiving it or completing reconciliation."
+    },
+    "unknown": {
+      "label": "Unclassified task",
+      "stages": ["identified", "progress_evidenced", "outcome_recorded"],
+      "fulfillment_stage": "outcome_recorded",
+      "parallel_allowed": true,
+      "notes": "Unknown families remain usable. Do not force them into an unsuitable template."
+    }
+  }
+}

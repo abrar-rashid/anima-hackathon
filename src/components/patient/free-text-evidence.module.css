@@ -1,0 +1,31 @@
+.docHead {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-sm);
+}
+
+.freeText {
+  margin: 0;
+  line-height: var(--ds-leading-body);
+}
+
+.mark {
+  background-color: var(--ds-surface-awaiting);
+  color: var(--ds-text-ink);
+  text-decoration-line: underline;
+  text-decoration-color: var(--ds-border-awaiting);
+  padding: 0 0.15em;
+  border-radius: var(--ds-radius-sm);
+}
+
+.candidateRow {
+  border-top: var(--ds-border-thin) solid var(--ds-border-default);
+  padding-top: var(--ds-space-sm);
+  scroll-margin-top: var(--ds-space-lg);
+}
+
+.tag {
+  font-family: var(--ds-font-data);
+  font-size: var(--ds-text-meta);
+  color: var(--ds-text-muted);
+}
