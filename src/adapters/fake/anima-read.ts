@@ -1,5 +1,6 @@
-import { bloodReportFrom, classifyBloodReport } from '@/adapters/anima/mapping'
+import { bloodReportFrom } from '@/adapters/anima/mapping'
 import { FakeClock } from '@/adapters/fake/clock'
+import { classify } from '@/domain/eligibility'
 import type { SiteId } from '@/domain/types'
 import type {
   ActivityEntry,
@@ -64,8 +65,8 @@ export class FakeRead implements AnimaReadPort {
     const latest = reports
       .filter((report) => report.collectedAt === latestCollected)
       .sort((a, b) => {
-        const aOut = classifyBloodReport(a) ? 0 : 1
-        const bOut = classifyBloodReport(b) ? 0 : 1
+        const aOut = classify(a) ? 0 : 1
+        const bOut = classify(b) ? 0 : 1
         return aOut - bOut || a.id.localeCompare(b.id)
       })
     const chosen = latest[0]
@@ -78,7 +79,7 @@ export class FakeRead implements AnimaReadPort {
       visibleTo: chosen.visibleTo,
       owner: chosen.owner,
       status: chosen.status,
-      classification: classifyBloodReport(chosen),
+      classification: classify(chosen),
       analytes: chosen.analytes,
     }
   }

@@ -1,8 +1,5 @@
-import type { EvidenceRef, SiteId, SourceClassification } from '@/domain/types'
+import type { EvidenceRef, SiteId } from '@/domain/types'
 import type { VersionedRecord } from '@/ports/anima-read-port'
-
-const RULE_TEXT =
-  'An analyte value lies outside the reference range supplied by the source laboratory (referenceLow..referenceHigh). No urgency, diagnosis or treatment is inferred.'
 
 export interface BloodAnalyte {
   id: string
@@ -106,38 +103,6 @@ export function bloodReportFrom(resource: unknown): BloodReportRecord | null {
     status: asString(record.status),
     analytes,
   }
-}
-
-export function classifyBloodReport(report: BloodReportRecord): SourceClassification | null {
-  for (const analyte of report.analytes) {
-    if (analyte.value < analyte.referenceLow) {
-      return {
-        rule: 'source-reference-range',
-        ruleText: RULE_TEXT,
-        analyteId: analyte.id,
-        analyteName: analyte.name,
-        value: analyte.value,
-        unit: analyte.unit,
-        referenceLow: analyte.referenceLow,
-        referenceHigh: analyte.referenceHigh,
-        direction: 'below',
-      }
-    }
-    if (analyte.value > analyte.referenceHigh) {
-      return {
-        rule: 'source-reference-range',
-        ruleText: RULE_TEXT,
-        analyteId: analyte.id,
-        analyteName: analyte.name,
-        value: analyte.value,
-        unit: analyte.unit,
-        referenceLow: analyte.referenceLow,
-        referenceHigh: analyte.referenceHigh,
-        direction: 'above',
-      }
-    }
-  }
-  return null
 }
 
 export function taskReadbackFrom(bundle: unknown, resourceId: string): TaskReadback | null {

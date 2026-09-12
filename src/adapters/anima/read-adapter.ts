@@ -1,6 +1,7 @@
 import type { SiteId } from '@/domain/types'
 import type { AnimaClient } from '@/adapters/anima/client'
-import { bloodReportFrom, classifyBloodReport, toVersionedRecord } from '@/adapters/anima/mapping'
+import { bloodReportFrom, toVersionedRecord } from '@/adapters/anima/mapping'
+import { classify } from '@/domain/eligibility'
 import type {
   ActivityEntry,
   AnimaReadPort,
@@ -13,6 +14,8 @@ import type {
 } from '@/ports/anima-read-port'
 
 const PAGE_LIMIT = 100
+const MAX_VIEW_PAGES = 20
+const DEFAULT_ACTIVITY_SITES: SiteId[] = ['gp', 'hospital']
 
 interface ViewBody {
   now?: number
@@ -41,12 +44,24 @@ interface RawEvent {
 }
 
 export class AnimaReadAdapter implements AnimaReadPort {
-  constructor(private readonly client: AnimaClient) {}
+  private readonly activitySites: SiteId[]
+
+  constructor(
+    private readonly client: AnimaClient,
+    options?: { activitySites?: SiteId[] },
+  ) {
+    this.activitySites = options?.activitySites ?? DEFAULT_ACTIVITY_SITES
+  }
 
   async getTeam(): Promise<TeamContext> {
-    const { status, body } = await this.client.request<TeamContext>('/api/team')
+    const { status, body } = await this.client.request<unknown>('/api/team')
     if (status !== 200) throw new Error(`Anima getTeam failed: ${status}`)
-    return { team: body.team, world: body.world, scopes: body.scopes }
+    const record = asRecord(body)
+    return {
+      team: asString(record.team),
+      world: asString(record.world),
+      scopes: asStringArray(record.scopes),
+    }
   }
 
   async getClock(): Promise<SimulatorClock> {
@@ -71,8 +86,8 @@ export class AnimaReadAdapter implements AnimaReadPort {
     const latestCollected = Math.max(...reports.map((report) => report.collectedAt))
     const latest = reports.filter((report) => report.collectedAt === latestCollected)
     latest.sort((a, b) => {
-      const aOut = classifyBloodReport(a) ? 0 : 1
-      const bOut = classifyBloodReport(b) ? 0 : 1
+      const aOut = classify(a) ? 0 : 1
+      const bOut = classify(b) ? 0 : 1
       return aOut - bOut || a.id.localeCompare(b.id)
     })
     const chosen = latest[0]
@@ -85,7 +100,7 @@ export class AnimaReadAdapter implements AnimaReadPort {
       visibleTo: chosen.visibleTo,
       owner: chosen.owner,
       status: chosen.status,
-      classification: classifyBloodReport(chosen),
+      classification: classify(chosen),
       analytes: chosen.analytes,
     }
   }
@@ -95,8 +110,10 @@ export class AnimaReadAdapter implements AnimaReadPort {
     const items: VersionedRecord[] = []
     let offset = Number.isFinite(startOffset) && startOffset > 0 ? startOffset : 0
     let total = 0
+    let pages = 0
 
-    while (true) {
+    while (pages < MAX_VIEW_PAGES) {
+      pages += 1
       const query = new URLSearchParams({
         patient: patientId,
         offset: String(offset),
@@ -120,11 +137,17 @@ export class AnimaReadAdapter implements AnimaReadPort {
     }
   }
 
-  async getActivity(caseId: string, resourceIds: string[]): Promise<ActivityEntry[]> {
+  async getActivity(caseId: string, resourceIds: string[], sites?: SiteId[]): Promise<ActivityEntry[]> {
     void caseId
+    const polled = sites && sites.length > 0 ? sites : this.activitySites
     const clock = await this.client.request<ClockBody>('/api/clock')
-    const view = await this.client.request<ViewBody>('/api/sites/gp/view?offset=0&limit=100')
-    const merged = [...asEvents(clock.body?.events), ...asEvents(view.body?.events)]
+    const views = await Promise.all(
+      polled.map((site) => this.client.request<ViewBody>(`/api/sites/${site}/view?offset=0&limit=100`)),
+    )
+    const merged = [
+      ...asEvents(clock.body?.events),
+      ...views.flatMap((view) => asEvents(view.body?.events)),
+    ]
     const seen = new Set<string>()
     const allow = new Set(resourceIds)
     const entries: ActivityEntry[] = []
@@ -144,6 +167,18 @@ export class AnimaReadAdapter implements AnimaReadPort {
     }
     return entries.sort((a, b) => a.time - b.time || a.id.localeCompare(b.id))
   }
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
+}
+
+function asString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback
+}
+
+function asStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
 }
 
 function asEvents(value: unknown): RawEvent[] {

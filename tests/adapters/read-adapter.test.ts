@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { ELIGIBILITY_RULE_TEXT } from '@/domain/eligibility'
 
 const DUMMY_KEY = 'test-anima-sim-key'
 
@@ -95,8 +96,7 @@ describe('read-adapter', () => {
     expect(result?.owner).toBe('diagnostics')
     expect(result?.classification).toEqual({
       rule: 'source-reference-range',
-      ruleText:
-        'An analyte value lies outside the reference range supplied by the source laboratory (referenceLow..referenceHigh). No urgency, diagnosis or treatment is inferred.',
+      ruleText: ELIGIBILITY_RULE_TEXT,
       analyteId: 'crp',
       analyteName: 'C-reactive protein',
       value: 5.6,
@@ -105,6 +105,7 @@ describe('read-adapter', () => {
       referenceHigh: 5,
       direction: 'above',
     })
+    expect(result?.classification?.ruleText).toBe(ELIGIBILITY_RULE_TEXT)
     expect(result).not.toHaveProperty('abnormal')
   })
 
@@ -159,6 +160,16 @@ describe('read-adapter', () => {
             ],
           })
         }
+        if (url.includes('/api/sites/hospital/view')) {
+          return jsonResponse({
+            now: 1789286400000,
+            resources: [],
+            resourceTotal: 0,
+            resourceOffset: 0,
+            resourceLimit: 100,
+            events: [],
+          })
+        }
         throw new Error(`unexpected ${url}`)
       }),
     )
@@ -167,5 +178,62 @@ describe('read-adapter', () => {
     expect(activity.map((entry) => entry.id).sort()).toEqual(['clock-1', 'e-task'])
     expect(activity.every((entry) => entry.resourceId === 'r-2')).toBe(true)
     expect(activity.some((entry) => entry.id === 'e-other')).toBe(false)
+  })
+
+  it('getActivity returns a hospital-only activity record', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input)
+        if (url.endsWith('/api/clock') || url.includes('/api/clock?')) {
+          return jsonResponse({ now: 1789286400000, paused: true, speed: 0, events: [] })
+        }
+        if (url.includes('/api/sites/gp/view')) {
+          return jsonResponse({
+            now: 1789286400000,
+            resources: [],
+            resourceTotal: 0,
+            resourceOffset: 0,
+            resourceLimit: 100,
+            events: [],
+          })
+        }
+        if (url.includes('/api/sites/hospital/view')) {
+          return jsonResponse({
+            now: 1789286400000,
+            resources: [],
+            resourceTotal: 0,
+            resourceOffset: 0,
+            resourceLimit: 100,
+            events: [
+              {
+                id: 'e-hospital-only',
+                time: 1789200001000,
+                type: 'task.created',
+                actor: 'hospital',
+                detail: '[redacted]',
+                resourceId: 'r-hospital-task',
+                patientId: 'SIM-000001',
+                visibleTo: ['hospital'],
+              },
+            ],
+          })
+        }
+        throw new Error(`unexpected ${url}`)
+      }),
+    )
+    const read = await loadRead()
+    const activity = await read.getActivity('case-gp-orders', ['r-hospital-task'])
+    expect(activity).toEqual([
+      {
+        id: 'e-hospital-only',
+        time: 1789200001000,
+        type: 'task.created',
+        actor: 'hospital',
+        resourceId: 'r-hospital-task',
+        patientId: 'SIM-000001',
+        detail: '[redacted]',
+      },
+    ])
   })
 })
