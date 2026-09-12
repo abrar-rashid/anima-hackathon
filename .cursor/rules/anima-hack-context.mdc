@@ -1,0 +1,17 @@
+---
+description: Durable context and safety boundaries for the Anima hackathon
+alwaysApply: true
+---
+
+# Anima hackathon context
+
+Before planning or changing this project, read
+[`docs/context/README.md`](../../docs/context/README.md) and follow the linked
+topic documents. Treat the approved design in
+[`docs/superpowers/specs/2026-09-12-care-covenant-design.md`](../../docs/superpowers/specs/2026-09-12-care-covenant-design.md)
+as the source of truth.
+
+Keep the five-hour boundary fixed. Use only synthetic simulator data, keep team
+credentials server-side, require human approval for writes, never infer clinical
+meaning, and advance state only from current returned evidence. Do not claim
+clinical outcomes or deployability that the evidence does not establish.
