@@ -8,3 +8,9 @@ coverage/
 .env.*.local
 *.log
 .DS_Store
+.data/
+.superpowers/
+playwright-report/
+test-results/
+next-env.d.ts
+tsconfig.tsbuildinfo
