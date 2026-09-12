@@ -244,6 +244,9 @@ export class CaseService {
 
   async approve(caseId: string, body: ApproveRequestBody): Promise<ApproveResult> {
     const stored = this.require(caseId)
+    if (stored.replay !== null || this.deps.replay !== null) {
+      throw new ServiceError('replay-mode', 409)
+    }
     if (!stored.proposal) throw new ServiceError('proposal-missing', 409, 'No proposal is available to approve.')
     if (hashProposal(stored.proposal) !== body.proposalHash) {
       throw new ServiceError('proposal-stale', 409)

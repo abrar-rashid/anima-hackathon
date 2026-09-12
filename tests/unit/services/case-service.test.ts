@@ -100,6 +100,47 @@ describe('CaseService', () => {
     expect(snapshot.snapshot?.result.id).toBe('blood-v1-SIM-000001-crp-5')
   })
 
+  it('refuses approve in recorded replay mode and never calls the write port', async () => {
+    const deps = ports()
+    const proposal = heroProposal()
+    persist(deps.store, openedCase(), proposal)
+    const replay = {
+      label: 'Recorded simulator replay' as const,
+      world: 'team-ea32f6302052',
+      capturedAt: '2026-09-12T12:21:05.075Z',
+    }
+    const stored = deps.store.get(CASE_ID)
+    if (!stored) throw new Error('expected stored case')
+    deps.store.save({ ...stored, replay })
+    const cases = new CaseService({
+      read: deps.read,
+      clock: deps.clock,
+      runtime: new AdkRuntime(),
+      store: deps.store,
+      execution: new ExecutionService({
+        read: deps.read,
+        write: deps.write,
+        store: deps.store,
+        acceptSupported: true,
+      }),
+      acceptSupported: true,
+      live: false,
+      world: 'team-ea32f6302052',
+      replay,
+    })
+
+    await expect(
+      cases.approve(CASE_ID, {
+        proposalHash: hashProposal(proposal),
+        approverId: staff.id,
+        staff,
+        actionIndexes: [0],
+      }),
+    ).rejects.toMatchObject({ code: 'replay-mode', status: 409 })
+    expect(deps.write.calls).toHaveLength(0)
+    expect(deps.store.get(CASE_ID)?.receipts ?? []).toHaveLength(0)
+  })
+
   it('rejects a stale proposal hash without calling the write port', async () => {
     const deps = ports()
     persist(deps.store, openedCase(), heroProposal())
