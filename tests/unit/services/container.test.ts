@@ -20,6 +20,7 @@ describe('container', () => {
   })
 
   it('labels recorded replay only behind the explicit opt-in flag', async () => {
+    vi.stubEnv('COVENANT_FAKE_PORTS', '')
     vi.stubEnv('COVENANT_RECORDED_REPLAY', '1')
     const { getContainer, resetContainer } = await import('@/services/container')
     resetContainer()
