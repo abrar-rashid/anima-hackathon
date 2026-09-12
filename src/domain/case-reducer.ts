@@ -1,6 +1,6 @@
 import { isBackwardClosure, isSkippedClosure, reduceClosure } from '@/domain/closure-reducer'
 import { ELIGIBILITY_RULE_TEXT } from '@/domain/eligibility'
-import { lastTransferToActorId, reduceOwnership } from '@/domain/ownership-reducer'
+import { isOutstandingTransfer, lastTransferToActorId, reduceOwnership } from '@/domain/ownership-reducer'
 import { rememberProtocol } from '@/domain/protocol'
 import type {
   CovenantCase,
@@ -80,7 +80,7 @@ function canAccept(
   actorId: string,
   protocol: ProtocolVersion,
 ): boolean {
-  if (state.ownershipState !== 'TRANSFER_REQUESTED' && state.ownershipState !== 'OVERDUE') {
+  if (!isOutstandingTransfer(state)) {
     return false
   }
   if (state.requestedReceiver == null || actorTeamId !== state.requestedReceiver) return false
@@ -152,54 +152,41 @@ function applyClockTick(
   const deadline = state.deadlines.ackDeadlineAt
   if (deadline == null || now < deadline) return { ok: true, state }
 
-  const lastFallbackAt = lastFallbackTime(state)
-  const withinWindow =
-    lastFallbackAt != null && now - lastFallbackAt <= protocol.dedupeWindowMinutes * 60_000
+  if (!isOutstandingTransfer(state)) return { ok: true, state }
 
-  if (state.ownershipState === 'TRANSFER_REQUESTED') {
+  const lastFallbackAt = lastFallbackTime(state)
+  const windowMs = protocol.dedupeWindowMinutes * 60_000
+  const withinWindow =
+    protocol.dedupeWindowMinutes > 0 &&
+    lastFallbackAt != null &&
+    now - lastFallbackAt <= windowMs
+
+  let next = state
+  if (state.ownershipState !== 'OVERDUE') {
     const afterTimeout = reduce(
-      state,
-      generatedEnvelope(envelope, state, { type: 'TransferTimedOut' }, 'TransferTimedOut'),
+      next,
+      generatedEnvelope(envelope, next, { type: 'TransferTimedOut' }, 'TransferTimedOut'),
       protocol,
     )
-    const timedOut = afterTimeout.state
-    if (withinWindow) {
-      return { ok: true, state: { ...timedOut, duplicateSuppressed: timedOut.duplicateSuppressed + 1 } }
-    }
-    const exceptionId = `${envelope.eventId}:exception`
-    const afterFallback = reduce(
-      timedOut,
-      generatedEnvelope(
-        envelope,
-        timedOut,
-        { type: 'FallbackNotified', toTeam: protocol.fallbackTeamId, exceptionId },
-        'FallbackNotified',
-      ),
-      protocol,
-    )
-    return { ok: true, state: afterFallback.state }
+    next = afterTimeout.state
   }
 
   if (withinWindow) {
-    return { ok: true, state: { ...state, duplicateSuppressed: state.duplicateSuppressed + 1 } }
+    return { ok: true, state: { ...next, duplicateSuppressed: next.duplicateSuppressed + 1 } }
   }
 
-  if (lastFallbackAt != null) {
-    const exceptionId = `${envelope.eventId}:exception`
-    const afterFallback = reduce(
-      state,
-      generatedEnvelope(
-        envelope,
-        state,
-        { type: 'FallbackNotified', toTeam: protocol.fallbackTeamId, exceptionId },
-        'FallbackNotified',
-      ),
-      protocol,
-    )
-    return { ok: true, state: afterFallback.state }
-  }
-
-  return { ok: true, state }
+  const exceptionId = `${envelope.eventId}:exception`
+  const afterFallback = reduce(
+    next,
+    generatedEnvelope(
+      envelope,
+      next,
+      { type: 'FallbackNotified', toTeam: protocol.fallbackTeamId, exceptionId },
+      'FallbackNotified',
+    ),
+    protocol,
+  )
+  return { ok: true, state: afterFallback.state }
 }
 
 export function reduce(

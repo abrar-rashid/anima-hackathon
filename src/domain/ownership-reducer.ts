@@ -67,6 +67,14 @@ export function reduceOwnership(
   }
 }
 
+export function isOutstandingTransfer(state: CovenantCase): boolean {
+  return (
+    state.ownershipState === 'TRANSFER_REQUESTED' ||
+    state.ownershipState === 'OVERDUE' ||
+    state.ownershipState === 'OWNER_UNAVAILABLE'
+  )
+}
+
 export function lastTransferToActorId(state: CovenantCase): string | undefined {
   for (let i = state.eventLog.length - 1; i >= 0; i -= 1) {
     const event = state.eventLog[i]?.event

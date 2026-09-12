@@ -217,7 +217,7 @@ describe('case-reducer', () => {
     expect(state.acceptingActor).toBeNull()
   })
 
-  it('TransferAccepted requires TRANSFER_REQUESTED|OVERDUE and actor.teamId === requestedReceiver', () => {
+  it('TransferAccepted requires TRANSFER_REQUESTED|OVERDUE|OWNER_UNAVAILABLE and actor.teamId === requestedReceiver', () => {
     const beforeRequest = mustOk(apply([resultAvailable()]))
     const tooEarly = reduce(
       beforeRequest,
@@ -235,6 +235,64 @@ describe('case-reducer', () => {
     )
     expect(wrongTeam.ok).toBe(false)
     expect(wrongTeam.state.ownershipState).toBe('TRANSFER_REQUESTED')
+  })
+
+  it('TransferAccepted from OWNER_UNAVAILABLE is valid under ACCOUNTABLE_TEAM', () => {
+    const unavailable = mustOk(
+      apply([
+        resultAvailable(),
+        transferRequested(),
+        envelope('unavail-acc', { type: 'ReceiverUnavailable', actorId: 'staff-gp-1' }),
+      ]),
+    )
+    expect(unavailable.ownershipState).toBe('OWNER_UNAVAILABLE')
+    expect(unavailable.currentAccountableOwner.teamId).toBe('hospital')
+
+    const accepted = mustOk(
+      reduce(
+        unavailable,
+        envelope('acc-from-unavail', { type: 'TransferAccepted', actor: gpClinician }),
+        protocol,
+      ),
+    )
+    expect(accepted.ownershipState).toBe('ACCEPTED')
+    expect(accepted.currentAccountableOwner).toEqual({ teamId: 'gp', actorId: 'staff-gp-1' })
+    expect(accepted.acceptingActor).toEqual(gpClinician)
+  })
+
+  it('TransferAccepted from OWNER_UNAVAILABLE is invalid under NAMED_ACTOR for a non-matching actor', () => {
+    const unavailable = mustOk(
+      apply(
+        [
+          resultAvailable(),
+          transferRequested(NOW, 'staff-gp-1'),
+          envelope('unavail-named', { type: 'ReceiverUnavailable', actorId: 'staff-gp-1' }),
+        ],
+        namedProtocol,
+      ),
+    )
+    expect(unavailable.ownershipState).toBe('OWNER_UNAVAILABLE')
+
+    const duty: StaffIdentity = { ...gpClinician, id: 'gp-duty-1', name: 'Dr Duty' }
+    const rejected = mustFail(
+      reduce(
+        unavailable,
+        envelope('acc-duty-named', { type: 'TransferAccepted', actor: duty }),
+        namedProtocol,
+      ),
+    )
+    expect(rejected.state.ownershipState).toBe('OWNER_UNAVAILABLE')
+    expect(rejected.state.acceptingActor).toBeNull()
+
+    const accepted = mustOk(
+      reduce(
+        unavailable,
+        envelope('acc-named-from-unavail', { type: 'TransferAccepted', actor: gpClinician }),
+        namedProtocol,
+      ),
+    )
+    expect(accepted.ownershipState).toBe('ACCEPTED')
+    expect(accepted.currentAccountableOwner).toEqual({ teamId: 'gp', actorId: 'staff-gp-1' })
   })
 
   it('TransferAccepted under NAMED_ACTOR also requires actor.id === toActorId from the request', () => {
@@ -314,7 +372,7 @@ describe('case-reducer', () => {
     expect(timedOut.currentAccountableOwner.teamId).toBe('hospital')
   })
 
-  it('ClockTick past ackDeadlineAt while TRANSFER_REQUESTED auto-emits TransferTimedOut then FallbackNotified once', () => {
+  it('ClockTick past ackDeadlineAt while a transfer is outstanding auto-emits TransferTimedOut then FallbackNotified once', () => {
     const requested = mustOk(apply([resultAvailable(), transferRequested(NOW)]))
     const tickAt = NOW + protocol.ackDeadlineMinutes * 60_000
     const ticked = mustOk(
@@ -363,6 +421,77 @@ describe('case-reducer', () => {
     )
     expect(afterSecond.exceptionsEmitted).toHaveLength(1)
     expect(afterSecond.duplicateSuppressed).toBe(1)
+  })
+
+  it('ClockTick past the deadline while OWNER_UNAVAILABLE still times out and keeps a non-empty owner team', () => {
+    const unavailable = mustOk(
+      apply([
+        resultAvailable(),
+        transferRequested(NOW),
+        envelope('unavail-tick', { type: 'ReceiverUnavailable', actorId: 'staff-gp-1' }),
+      ]),
+    )
+    const tickAt = NOW + protocol.ackDeadlineMinutes * 60_000
+    const ticked = mustOk(
+      reduce(
+        unavailable,
+        envelope('tick-unavail', { type: 'ClockTick', now: tickAt }, tickAt),
+        protocol,
+      ),
+    )
+    const types = ticked.eventLog.map((e) => e.event.type)
+    expect(types.indexOf('TransferTimedOut')).toBeGreaterThan(-1)
+    expect(types.indexOf('FallbackNotified')).toBeGreaterThan(types.indexOf('TransferTimedOut'))
+    expect(ticked.ownershipState).toBe('OVERDUE')
+    expect(ticked.currentAccountableOwner.teamId).toBe('hospital')
+    expect(ticked.exceptionsEmitted).toHaveLength(1)
+  })
+
+  it('ClockTick deadline logic stops once TransferAccepted occurs', () => {
+    const accepted = mustOk(
+      apply([
+        resultAvailable(),
+        transferRequested(NOW),
+        envelope('acc-before-tick', { type: 'TransferAccepted', actor: gpClinician }),
+      ]),
+    )
+    const lateTick = NOW + protocol.ackDeadlineMinutes * 60_000 + 60_000
+    const ticked = mustOk(
+      reduce(
+        accepted,
+        envelope('tick-after-accept', { type: 'ClockTick', now: lateTick }, lateTick),
+        protocol,
+      ),
+    )
+    expect(ticked.ownershipState).toBe('ACCEPTED')
+    expect(ticked.eventLog.some((e) => e.event.type === 'TransferTimedOut')).toBe(false)
+    expect(ticked.exceptionsEmitted).toHaveLength(0)
+  })
+
+  it('dedupeWindowMinutes 0 emits a further FallbackNotified on every later tick past the deadline', () => {
+    const zeroDedupe: ProtocolVersion = { ...protocol, id: 'proto-zero-dedupe', dedupeWindowMinutes: 0 }
+    const requested = mustOk(apply([resultAvailable(), transferRequested(NOW)], zeroDedupe))
+    const firstTickAt = NOW + zeroDedupe.ackDeadlineMinutes * 60_000
+    const afterFirst = mustOk(
+      reduce(
+        requested,
+        envelope('tick-zero-a', { type: 'ClockTick', now: firstTickAt }, firstTickAt),
+        zeroDedupe,
+      ),
+    )
+    expect(afterFirst.exceptionsEmitted).toHaveLength(1)
+
+    const secondTickAt = firstTickAt + 60_000
+    const afterSecond = mustOk(
+      reduce(
+        afterFirst,
+        envelope('tick-zero-b', { type: 'ClockTick', now: secondTickAt }, secondTickAt),
+        zeroDedupe,
+      ),
+    )
+    expect(afterSecond.exceptionsEmitted).toHaveLength(2)
+    expect(afterSecond.duplicateSuppressed).toBe(0)
+    expect(afterSecond.eventLog.filter((e) => e.event.type === 'TransferTimedOut')).toHaveLength(1)
   })
 
   it('ReceiverUnavailable -> OWNER_UNAVAILABLE, owner team remains and is never blank', () => {
