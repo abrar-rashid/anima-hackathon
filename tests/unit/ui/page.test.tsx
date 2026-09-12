@@ -13,11 +13,8 @@ afterEach(() => {
 })
 
 describe('app pages', () => {
-  // `/` is now an async server component (the Close The Loop worklist) that
-  // reads the simulator directly via `assembleWorklist`. It is covered by the
-  // component-level suites in tests/unit/worklist/*, which exercise
-  // `WorklistView` with fixture props instead of rendering the page function
-  // (an async server component cannot be rendered synchronously by RTL).
+  // `/` is the client Command Cockpit. The worklist lives at `/worklist` and is
+  // covered by tests/unit/worklist/*.
 
   it('renders an honest error panel when the case API cannot be loaded', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')))

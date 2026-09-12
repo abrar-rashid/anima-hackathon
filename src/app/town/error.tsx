@@ -39,7 +39,7 @@ export default function TownError({
             retry
           </button>
           <Link className={styles.button} href="/">
-            back to the worklist
+            back to the cockpit
           </Link>
         </div>
       </div>

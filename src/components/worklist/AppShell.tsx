@@ -5,7 +5,7 @@ import type { WorklistNavCurrent } from './types'
 import styles from './AppShell.module.css'
 
 const LINKS: Array<{ href: string; id: WorklistNavCurrent; label: string }> = [
-  { href: '/', id: 'worklist', label: 'Worklist' },
+  { href: '/worklist', id: 'worklist', label: 'Worklist' },
   { href: '/insights', id: 'insights', label: 'Insights' },
   { href: '/town', id: 'town', label: 'Neighbourhood' },
 ]

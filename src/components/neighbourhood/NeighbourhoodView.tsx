@@ -15,6 +15,8 @@ import type { TownDoc, TownModel } from './model'
 
 export interface NeighbourhoodViewProps {
   initial: TownModel
+  /** Hide the standalone header when the map sits inside the cockpit. */
+  embedded?: boolean
 }
 
 const POLL_MS = 20_000
@@ -27,7 +29,7 @@ function atHour(now: number, hour: number): number {
   return day + hour * 3_600_000
 }
 
-export function NeighbourhoodView({ initial }: NeighbourhoodViewProps) {
+export function NeighbourhoodView({ initial, embedded = false }: NeighbourhoodViewProps) {
   const reduced = useReducedMotion()
   const [model, setModel] = useState<TownModel>(initial)
   const [selected, setSelected] = useState<Site | null>(null)
@@ -95,23 +97,26 @@ export function NeighbourhoodView({ initial }: NeighbourhoodViewProps) {
   }, [])
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-embedded={embedded ? 'true' : 'false'}>
       <a className={styles.skipLink} href="#neighbourhood-as-data">
         Skip the map and read the neighbourhood as data
       </a>
 
       <div className={styles.shell} data-aside={selectedSite ? 'open' : 'closed'}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>The neighbourhood</h1>
-          <p className={styles.headerNote}>
-            Synthetic simulator world. Every building, name, count and document is a field from an
-            Anima simulator response.
-          </p>
-          <nav className={styles.headerLinks}>
-            <Link href="/">Worklist</Link>
-            <Link href="/insights">Insights</Link>
-          </nav>
-        </header>
+        {embedded ? null : (
+          <header className={styles.header}>
+            <h1 className={styles.title}>The neighbourhood</h1>
+            <p className={styles.headerNote}>
+              Synthetic simulator world. Every building, name, count and document is a field from an
+              Anima simulator response.
+            </p>
+            <nav className={styles.headerLinks}>
+              <Link href="/">Cockpit</Link>
+              <Link href="/worklist">Worklist</Link>
+              <Link href="/insights">Insights</Link>
+            </nav>
+          </header>
+        )}
 
         <div className={styles.rail}>
           <section className={styles.card}>

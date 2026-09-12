@@ -14,5 +14,10 @@ export default defineConfig({
     // UI test files opt into jsdom with a `// @vitest-environment jsdom` docblock.
     environment: 'node',
   },
-  resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src') } },
+  resolve: {
+    alias: {
+      '@': path.resolve(import.meta.dirname, 'src'),
+      'server-only': path.resolve(import.meta.dirname, 'tests/shims/server-only.ts'),
+    },
+  },
 })
