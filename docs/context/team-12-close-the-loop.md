@@ -10,8 +10,17 @@ govern, because they are what keep the product honest.
 
 ## 1. The product, in the team's words
 
-**Problem.** Clinical work is started and not closed. Tasks live in free-text notes, in orders with
-no result, and in results with no follow-up, spread across fragmented EHR sources. Nobody holds the
+**Problem** (from the updated deck, verbatim in substance):
+
+- There is a lack of transparency into tasks tracked for patients. Unexpected tasks, if not
+  prioritised, can be lethal.
+- There is no system in place that can speak to patients at home on a regular basis, following up
+  with their symptoms.
+- Existing software keeps track of tasks requested *by* patients, when it should be the other way
+  round.
+
+Restated: clinical work is started and not closed. Tasks live in free-text notes, in orders with no
+result, and in results with no follow-up, spread across fragmented EHR sources. Nobody holds the
 gap.
 
 **Basic functionality.**
@@ -19,6 +28,7 @@ gap.
 - Input the patient's records: documents, notes, clinical requests/orders and results.
 - From the free-text notes and labs, extract tasks that need to be actioned. These include reading
   "Book follow up appointment in 4 weeks" or "Chase blood culture results" from free-text notes.
+  Free text could be mapped into a task tag drawn from a **bank of potential tasks**.
 - Some tasks can be inferred from incomplete actions in the EHR, such as a blood test with no
   result yet — meaning a clinician needs to wait until the result is released and then act on it.
 - Extract the timestamps and values from each entry and recreate a clinical workflow timeline
@@ -28,8 +38,10 @@ gap.
 
 - Parse the fragmented EHR data sources for clinical tasks, surface unexecuted tasks, and display
   them in a dashboard along with key metrics of workflow latency.
-- Have an effectuator agent that can action, or propose, the outstanding work.
-- Surface the latency of each workflow step.
+- Have an effectuator agent that can action the work, or reduce the friction for completing it:
+  organise a follow-up, request a blood test, or book a review call itself.
+- Surface the latency of each workflow step, so an admin can see the critical bottlenecks and
+  time-sinks in each clinical workflow.
 - Scheduled jobs ("ChronJobs") that keep the ledger current and close the loop.
 - Compare the ledger against subsequent actions and free text to detect what was never closed.
 
@@ -69,6 +81,46 @@ An episode groups tasks: `{ tasks: [task ids], episode_id: string }`.
 The ledger is append-only: each entry is an observation of a task at a point in time, and the
 timeline is reconstructed by replaying entries in `timestamp` order. A task's current state is
 derived, never edited in place.
+
+### 3a. The formal schema, and the conflict it creates
+
+The updated deck specifies a JSON Schema (draft 2020-12), `title: "ClinicalTaskEpisode"`, with
+`additionalProperties: false` and **all twelve fields in `required`**, every one typed `string`
+(`timestamp` and `deadline` as `format: date-time`; `clinical_priority` as an enum of
+`emergency | urgent | standard`; `owner`, `performed_by` and `requested_id` each described as a
+"Clinician identifier"; `snomed_id` as a "SNOMED CT concept identifier"). Note the field is
+`requested_id`, not `requested_by`.
+
+**This schema cannot be satisfied honestly against the simulator, and satisfying it literally would
+force the system to invent clinical data.** Concretely:
+
+1. `snomed_id` is required and typed `string`, but there is no SNOMED anywhere in the simulator
+   (verified: zero matches; codes are local `SIM-PROBLEM-N`). A required string field means every
+   entry must carry a SNOMED CT concept id, so the only way to emit a conforming entry is to
+   generate one. Generating a clinical code is a mis-coding hazard that propagates downstream.
+2. `sample_id`, `performed_by` and `requested_id` are required, and no corresponding field exists on
+   any captured record.
+3. `owner`, `performed_by` and `requested_id` are described as clinician identifiers, but simulator
+   attribution is **team-level** — `provenance.changes[].actor.kind` is `'team'` and an `Action`
+   carries no staff field. A clinician identifier from the source does not exist.
+4. `clinical_priority` is required with a three-value enum and no "unknown" member. Source tasks
+   sometimes carry `priority` (real example: `'urgent'`) but often carry none. A required enum forces
+   a default, and defaulting to `standard` is a clinical judgement the system is not permitted to
+   make. Note the deck's own problem statement — "unexpected tasks, if not prioritised, can be
+   lethal" — which is precisely why a *fabricated* priority is worse than an absent one.
+5. `timestamp` and `deadline` as ISO date-time strings lose the distinction between **simulator
+   time** and wall-clock time. The captured world runs paused at speed 60 from epoch
+   1789286400000; an ISO string with no marker invites someone to read simulator time as real time.
+
+**Resolution adopted.** The internal ledger (`src/tasks/types.ts`) keeps provenance mandatory in the
+type system: a present value must cite the source field that supplied it or the rule that derived
+it, and `snomedId` is source-only, so an invented code is a compile error. For interchange we emit
+the team's `ClinicalTaskEpisode` shape through an explicit boundary that either
+(a) widens the unavailable fields to `["string", "null"]` and records the deviation, or
+(b) refuses to emit an entry it cannot populate from the source, and says which field was missing.
+It must never silently fill a required field. If the team wants strict conformance to the schema as
+written, that is a decision to take knowingly, and the honest options are to relax `required`, add a
+null union, or add an `unknown` member to the priority enum.
 
 ## 4. Reconciliation with what the simulator actually supplies
 
@@ -123,6 +175,32 @@ nobody wrote is clinical inference and is forbidden. Therefore:
 - `clinical_priority` may only be populated from a source-supplied priority. An agent must never
   assign or upgrade urgency. If the source gives no priority, the field is null and displays as
   "no priority supplied by source" — not "standard".
+
+**Prioritisation is not ours to do.** The deck's motivation is that unprioritised tasks can be
+lethal, which makes it tempting to have the system rank work. It must not. What the system may do
+is surface (i) the priority the source itself supplied, (ii) the fact that a task is outstanding,
+(iii) how long it has been outstanding, and (iv) that its deadline has passed. Those are facts.
+"This task matters more than that one" is a clinical judgement and stays with the clinician.
+
+**Talking to patients at home.** The deck asks for regular follow-up contact about symptoms. The
+simulator does expose messaging, conversations and message templates, so this is buildable — but
+only against synthetic `SIM-*` patients, never real messaging, and every outbound contact goes
+through the same human approval gate and the same evidence rules as any other write: submitted is
+not delivered, and delivered is not "the patient understood". Symptom responses collected this way
+are patient-reported inputs, never a triage verdict.
+
+**The effectuator that acts.** "Organise a follow-up, request a blood test, book a review call
+itself" is a write, so it inherits every existing constraint without exception: the agent proposes,
+a human approves the exact thing they were shown, only the execution service writes, the action
+carries an idempotency key, and an HTTP 200 means submitted rather than done. Requesting a blood
+test is a clinical order — it may only ever be proposed for a human to approve, never issued
+autonomously.
+
+**The task tag bank is the safe version of extraction.** Mapping free text onto a closed vocabulary
+of known task kinds is far safer than letting a model invent a task description, and it matches the
+existing `src/tasks/task-kinds.ts` design. The tag must still carry the quoted source span that
+produced it, and text that matches nothing in the bank must surface as unmapped rather than be
+forced into the nearest tag.
 
 **Out of scope for now, and why.** NICE guidance, BNF checks and QOF all require the system to
 assert clinical correctness. That is exactly the line this product does not cross. If they are ever
