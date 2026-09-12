@@ -1,4 +1,9 @@
-import { ORDER_WITHOUT_RESULT, SOURCE_RECORDED } from '@/tasks/task-kinds'
+import {
+  ORDER_WITHOUT_RESULT,
+  SOURCE_RECORDED,
+  type FreeTextTagMapper,
+  type FreeTextTagMapping,
+} from '@/tasks/task-kinds'
 import {
   clinicalPriorityFromSource,
   derived,
@@ -93,7 +98,11 @@ export type FreeTextExtractionInput = {
 /** Implemented by a different worker. This module does not parse free text. */
 export interface FreeTextExtractor {
   propose(input: FreeTextExtractionInput): readonly FreeTextTaskProposal[]
+  /** Tag-bank mapping. Unmatched text must be UNMAPPED, never the nearest tag. */
+  mapTags?: FreeTextTagMapper['map']
 }
+
+export type { FreeTextTagMapper, FreeTextTagMapping }
 
 function cite(record: ExtractionSourceRecord, fieldPath: string): CitationRef {
   return { resourceId: record.id, resourceVersion: record.version, fieldPath }

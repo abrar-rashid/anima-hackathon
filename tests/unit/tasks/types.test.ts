@@ -101,7 +101,15 @@ describe('task ledger types', () => {
   })
 
   it('owned modules stay pure: no adapters, fetch, Date.now, or team key', () => {
-    const files = ['types.ts', 'task-kinds.ts', 'ledger.ts', 'extraction.ts', 'invariants.ts']
+    const files = [
+      'types.ts',
+      'task-kinds.ts',
+      'ledger.ts',
+      'extraction.ts',
+      'invariants.ts',
+      'episode-schema.ts',
+      'episode-export.ts',
+    ]
     for (const file of files) {
       const src = readFileSync(join(TASKS_DIR, file), 'utf8')
       expect(src, file).not.toMatch(/from ['"]@\/adapters/)

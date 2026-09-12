@@ -74,3 +74,72 @@ const FALLBACK_KIND: Omit<TaskKindDefinition, 'id'> = {
 export function getTaskKind(id: string): TaskKindDefinition {
   return TASK_KINDS.find((kind) => kind.id === id) ?? { id, ...FALLBACK_KIND }
 }
+
+/** Closed vocabulary the free-text extractor must map onto. Unknown text is UNMAPPED. */
+export const UNMAPPED_TASK_TAG = 'UNMAPPED' as const
+
+export type TaskTag = {
+  id: string
+  title: string
+  kindId: string
+}
+
+export const TASK_TAG_BANK: readonly TaskTag[] = TASK_KINDS.map((kind) => ({
+  id: kind.id,
+  title: kind.title,
+  kindId: kind.id,
+}))
+
+export type QuotedSourceSpan = {
+  resourceId: string
+  resourceVersion: number
+  quotedSpan: string
+}
+
+export type MappedTaskTag = {
+  tagId: string
+  kindId: string
+  citation: QuotedSourceSpan
+}
+
+export type UnmappedTaskTag = {
+  tagId: typeof UNMAPPED_TASK_TAG
+  kindId: null
+  citation: QuotedSourceSpan
+}
+
+export type FreeTextTagMapping = MappedTaskTag | UnmappedTaskTag
+
+/**
+ * Contract for the free-text extractor another worker will implement.
+ * It must return a tag from TASK_TAG_BANK plus a quoted source span, or UNMAPPED.
+ * It must not parse here, call a model, or force unmatched text into the nearest tag.
+ */
+export interface FreeTextTagMapper {
+  map(input: {
+    patientId: string
+    now: number
+    note: { resourceId: string; resourceVersion: number; text: string }
+  }): FreeTextTagMapping
+}
+
+export function tagFromBank(id: string): TaskTag | null {
+  return TASK_TAG_BANK.find((tag) => tag.id === id) ?? null
+}
+
+export function resolveTagMapping(input: { tagId: string; citation: QuotedSourceSpan }): FreeTextTagMapping {
+  const tag = tagFromBank(input.tagId)
+  if (!tag || input.tagId === UNMAPPED_TASK_TAG) {
+    return { tagId: UNMAPPED_TASK_TAG, kindId: null, citation: input.citation }
+  }
+  return { tagId: tag.id, kindId: tag.kindId, citation: input.citation }
+}
+
+export function isValidTagMapping(mapping: FreeTextTagMapping): boolean {
+  if (mapping.citation.quotedSpan.trim().length === 0) return false
+  if (mapping.citation.resourceId.length === 0) return false
+  if (!Number.isFinite(mapping.citation.resourceVersion)) return false
+  if (mapping.tagId === UNMAPPED_TASK_TAG) return mapping.kindId === null
+  const tag = tagFromBank(mapping.tagId)
+  return tag != null && mapping.kindId === tag.kindId
+}

@@ -34,6 +34,8 @@ export function makeEntry(input: {
   episodeId?: TaskLedgerEntry['episodeId']
   snomedId?: TaskLedgerEntry['snomedId']
   sampleId?: TaskLedgerEntry['sampleId']
+  performedBy?: TaskLedgerEntry['performedBy']
+  requestedBy?: TaskLedgerEntry['requestedBy']
 }): TaskLedgerEntry {
   const timestamp = input.timestamp ?? T0
   const resourceId = input.resourceId ?? 'r-2'
@@ -78,9 +80,9 @@ export function makeEntry(input: {
           ? notSupplied()
           : sourceOnly(input.priority, cite(resourceId, 'priority', resourceVersion)),
     snomedId: input.snomedId ?? notSupplied(),
-    performedBy: notSupplied(),
+    performedBy: input.performedBy ?? notSupplied(),
     sampleId: input.sampleId ?? notSupplied(),
-    requestedBy: notSupplied(),
+    requestedBy: input.requestedBy ?? notSupplied(),
     episodeId: input.episodeId ?? notSupplied(),
     citation:
       input.citation ??

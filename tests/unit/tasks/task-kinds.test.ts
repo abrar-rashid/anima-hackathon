@@ -5,7 +5,11 @@ import {
   CHASE_OUTSTANDING_RESULT,
   ORDER_WITHOUT_RESULT,
   TASK_KINDS,
+  TASK_TAG_BANK,
+  UNMAPPED_TASK_TAG,
   getTaskKind,
+  isValidTagMapping,
+  resolveTagMapping,
 } from '@/tasks/task-kinds'
 
 describe('task vocabulary', () => {
@@ -59,5 +63,35 @@ describe('task vocabulary', () => {
     expect(custom.id).toBe('community-visit-unclosed')
     expect(custom.requiredEvidence).toEqual(['source-task-completed'])
     expect(custom.closesWhen.length).toBeGreaterThan(0)
+  })
+
+  it('exposes a stable tag bank whose ids match the built-in kinds', () => {
+    expect(TASK_TAG_BANK.map((tag) => tag.id)).toEqual(TASK_KINDS.map((kind) => kind.id))
+    expect(new Set(TASK_TAG_BANK.map((tag) => tag.id)).size).toBe(TASK_TAG_BANK.length)
+  })
+
+  it('maps a bank tag plus citation, and surfaces unknown text as UNMAPPED rather than the nearest tag', () => {
+    const citation = {
+      resourceId: 'note-1',
+      resourceVersion: 3,
+      quotedSpan: 'Book follow up appointment in 4 weeks',
+    }
+    const mapped = resolveTagMapping({ tagId: BOOK_FOLLOW_UP, citation })
+    expect(mapped).toEqual({ tagId: BOOK_FOLLOW_UP, kindId: BOOK_FOLLOW_UP, citation })
+    expect(isValidTagMapping(mapped)).toBe(true)
+
+    const nearMiss = resolveTagMapping({ tagId: 'book-followup', citation })
+    expect(nearMiss.tagId).toBe(UNMAPPED_TASK_TAG)
+    expect(nearMiss.kindId).toBeNull()
+    expect(nearMiss.citation).toEqual(citation)
+    expect(isValidTagMapping(nearMiss)).toBe(true)
+  })
+
+  it('rejects a tag mapping with no quoted source span', () => {
+    const empty = resolveTagMapping({
+      tagId: BOOK_FOLLOW_UP,
+      citation: { resourceId: 'note-1', resourceVersion: 1, quotedSpan: '   ' },
+    })
+    expect(isValidTagMapping(empty)).toBe(false)
   })
 })
