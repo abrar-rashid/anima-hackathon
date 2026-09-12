@@ -86,7 +86,7 @@ export function NeighbourhoodCanvas({
   const worldRef = useRef<WorldState | null>(null)
   const sheetRef = useRef<ActorSheet | null>(null)
   const groundRef = useRef<HTMLCanvasElement | null>(null)
-  const structuresRef = useRef<{ canvas: HTMLCanvasElement; lamps: { x: number; y: number }[] } | null>(null)
+  const structuresRef = useRef<ReturnType<typeof bakeStructures> | null>(null)
   const skyRef = useRef<{ canvas: HTMLCanvasElement; key: string } | null>(null)
   const hoveredRef = useRef<Site | null>(null)
   const dragRef = useRef<{ active: boolean; moved: number; x: number; y: number } | null>(null)
@@ -309,6 +309,7 @@ export function NeighbourhoodCanvas({
         ground,
         structures: structures.canvas,
         lamps: structures.lamps,
+        litPanes: structures.litPanes,
         sheet,
         world,
         model: modelRef.current,
@@ -462,7 +463,7 @@ export function NeighbourhoodCanvas({
     return () => canvas.removeEventListener('wheel', block)
   }, [])
 
-  const namedSites = model.sites.map((site) => site.name ?? site.site).join(', ')
+  const namedSites = model.sites.map((site) => site.placeName ?? site.site).join(', ')
 
   return (
     <div className={styles.stage} ref={stageRef}>

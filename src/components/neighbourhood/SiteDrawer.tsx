@@ -2,7 +2,15 @@
 
 import Link from 'next/link'
 import styles from './neighbourhood.module.css'
-import { BREACH_LABEL, SOURCE_LABEL, formatCount, formatDuration, formatSimTime, withDenominator } from './format'
+import {
+  BREACH_LABEL,
+  PLACE_SOURCE_LABEL,
+  SOURCE_LABEL,
+  formatCount,
+  formatDuration,
+  formatSimTime,
+  withDenominator,
+} from './format'
 import type { TownModel, TownSite } from './model'
 
 export interface SiteDrawerProps {
@@ -18,7 +26,7 @@ export interface SiteDrawerProps {
  * a failed read is named rather than rendered as an empty site.
  */
 export function SiteDrawer({ site, model, onClose }: SiteDrawerProps) {
-  const heading = site.name ?? site.site
+  const heading = site.placeName ?? site.site
 
   return (
     <aside className={styles.aside} aria-label={`${heading} detail`}>
@@ -26,9 +34,16 @@ export function SiteDrawer({ site, model, onClose }: SiteDrawerProps) {
         <div>
           <h2 className={styles.asideTitle}>{heading}</h2>
           <p className={styles.asideSource}>
-            site id <code>{site.site}</code> · {SOURCE_LABEL[site.nameSource]}
+            site id <code>{site.site}</code> · {PLACE_SOURCE_LABEL[site.placeNameSource]}
           </p>
-          {site.subtitle ? <p className={styles.asideSource}>{site.subtitle}</p> : null}
+          {site.name ? (
+            <p className={styles.asideSource}>
+              catalogue name &ldquo;{site.name}&rdquo; · {SOURCE_LABEL[site.nameSource]}
+            </p>
+          ) : null}
+          {site.subtitle ? (
+            <p className={styles.asideSource}>catalogue subtitle &ldquo;{site.subtitle}&rdquo;</p>
+          ) : null}
         </div>
         <button type="button" className={styles.closeButton} onClick={onClose}>
           close

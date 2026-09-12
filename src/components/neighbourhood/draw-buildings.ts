@@ -27,6 +27,12 @@ export interface BuildingStyle {
   siteId: string
   /** Seeds the deterministic details, so a building never changes between frames. */
   seed: string
+  /**
+   * Called with each lit pane. The night wash is laid over the whole world
+   * after the structures layer, so a lit window baked underneath it comes out
+   * grey. Collecting the panes lets the renderer put the glow back on top.
+   */
+  onLitPane?: (rect: Rect) => void
 }
 
 const OVERHANG = 5
@@ -120,7 +126,7 @@ function drawAntenna(ctx: Ctx2D, x: number, y: number): void {
 }
 
 /** Facade: plaster with a brick plinth, quoined corners and storey banding. */
-function drawFacade(ctx: Ctx2D, plot: Plot, style: BuildingStyle): void {
+function drawFacade(ctx: Ctx2D, plot: Plot, _style: BuildingStyle): void {
   const { rect } = plot
   const plinthH = 10
 
@@ -216,6 +222,7 @@ function drawWindows(ctx: Ctx2D, plot: Plot, style: BuildingStyle): void {
       const lit = style.lit && hashIndex(key, 3) !== 0
       const blind = !style.lit && hashIndex(`b${key}`, 5) === 0
       drawWindow(ctx, x, y, lit, blind)
+      if (lit) style.onLitPane?.({ x: x + 1, y: y + 1, w: WIN_W - 2, h: WIN_H - 2 })
     }
   }
 }
@@ -245,6 +252,7 @@ function drawDoor(ctx: Ctx2D, plot: Plot, style: BuildingStyle): void {
   const panel = style.lit ? PALETTE.glassLit : PALETTE.glass
   px(ctx, panel.base, x + 3, y + 3, doorW - 6, 8)
   px(ctx, panel.light, x + 3, y + 3, doorW - 6, 3)
+  if (style.lit) style.onLitPane?.({ x: x + 3, y: y + 3, w: doorW - 6, h: 8 })
   px(ctx, INK, x + Math.floor(doorW / 2), y + 3, 1, 8)
   px(ctx, PALETTE.steel.highlight, x + doorW - 5, y + 15, 2, 2)
 

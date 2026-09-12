@@ -12,7 +12,6 @@
  * dynamic apart is what lets the town be dense without costing frame rate.
  */
 
-import type { Site } from '@/ctl/contracts'
 import { INK, PALETTE, hashIndex, rampFromHex, type SkyPhase } from './palette'
 import { createSurface, dither, px, rampGradientV, scatter, type Ctx2D } from './pixel'
 import {
@@ -43,49 +42,49 @@ const TILE = 16
 /**
  * Grass.
  *
- * Four deterministic tile treatments mixed across the map, plus tufts and dry
- * patches, so no two screens of grass look the same and none of it is a single
- * flat green.
+ * Variation is chosen per 32px macro-cell and applied as a 25% speckle rather
+ * than a 50% checkerboard, and it only ever steps one rung of the ramp. Both
+ * choices are deliberate: at 16px with a 50% mix between distant ramp steps the
+ * field stops reading as grass and starts reading as a broken quilt, which is
+ * exactly what the first pass of this looked like.
  */
 function drawGrass(ctx: Ctx2D): void {
   const g = PALETTE.grass
   const dry = PALETTE.grassDry
+  const MACRO = TILE * 2
 
   px(ctx, g.base, 0, 0, WORLD_W, WORLD_H)
 
-  for (let ty = 0; ty < WORLD_H; ty += TILE) {
-    for (let tx = 0; tx < WORLD_W; tx += TILE) {
-      const variant = hashIndex(`g${tx}:${ty}`, 8)
-      if (variant < 3) {
-        dither(ctx, g.base, g.dark, tx, ty, TILE, TILE, 'coarse')
-      } else if (variant < 6) {
-        dither(ctx, g.base, g.light, tx, ty, TILE, TILE, 'checker')
-      } else if (variant === 6) {
-        // A patch of drier grass, which breaks up the field at distance.
-        dither(ctx, g.light, dry.base, tx, ty, TILE, TILE, 'coarse')
+  for (let my = 0; my < WORLD_H; my += MACRO) {
+    for (let mx = 0; mx < WORLD_W; mx += MACRO) {
+      const mood = hashIndex(`mood${mx}:${my}`, 20)
+      if (mood < 9) {
+        dither(ctx, g.base, g.dark, mx, my, MACRO, MACRO, 'sparse')
+      } else if (mood < 15) {
+        dither(ctx, g.base, g.light, mx, my, MACRO, MACRO, 'sparse')
+      } else if (mood < 18) {
+        // A shaded hollow: the darker step carries the area, base speckles it.
+        px(ctx, g.dark, mx, my, MACRO, MACRO)
+        dither(ctx, g.dark, g.base, mx, my, MACRO, MACRO, 'dense')
       } else {
-        px(ctx, g.base, tx, ty, TILE, TILE)
-        dither(ctx, g.light, g.base, tx + 4, ty + 4, 8, 8, 'checker')
+        // A drier patch, kept rare because it is the loudest of the four.
+        dither(ctx, g.base, g.light, mx, my, MACRO, MACRO, 'sparse')
+        scatter(ctx, dry.dark, mx, my, MACRO, MACRO, 42, mx + my + 5)
       }
 
-      // Tufts: three pixels in an L, which reads as a blade at this scale.
-      const tuft = hashIndex(`t${tx}:${ty}`, 4)
-      if (tuft === 0) {
-        const ox = tx + 3 + hashIndex(`x${tx}${ty}`, 8)
-        const oy = ty + 4 + hashIndex(`y${tx}${ty}`, 8)
-        px(ctx, g.highlight, ox, oy, 1, 2)
-        px(ctx, g.light, ox + 1, oy + 1, 1, 1)
-        px(ctx, g.dark, ox - 1, oy + 2, 3, 1)
+      // Tufts: a two-pixel blade with a shadow, one per macro-cell at most.
+      if (hashIndex(`tuft${mx}:${my}`, 3) === 0) {
+        const ox = mx + 4 + hashIndex(`x${mx}${my}`, MACRO - 8)
+        const oy = my + 5 + hashIndex(`y${mx}${my}`, MACRO - 8)
+        px(ctx, g.light, ox, oy, 1, 2)
+        px(ctx, g.light, ox + 2, oy + 1, 1, 1)
+        px(ctx, g.dark, ox - 1, oy + 2, 4, 1)
       }
-      if (tuft === 1) {
-        scatter(ctx, g.highlight, tx, ty, TILE, TILE, 60, tx + ty + 3)
-      }
-      if (tuft === 2 && hashIndex(`f${tx}${ty}`, 3) === 0) {
-        // Wildflowers.
-        const ox = tx + 5
-        const oy = ty + 7
+      if (hashIndex(`flower${mx}:${my}`, 6) === 0) {
+        const ox = mx + 9 + hashIndex(`fx${mx}${my}`, 12)
+        const oy = my + 11 + hashIndex(`fy${mx}${my}`, 12)
         px(ctx, g.dark, ox, oy + 1, 1, 2)
-        px(ctx, hashIndex(`c${tx}${ty}`, 2) === 0 ? PALETTE.lamp.highlight : PALETTE.paper.highlight, ox, oy, 1, 1)
+        px(ctx, hashIndex(`c${mx}${my}`, 2) === 0 ? PALETTE.lamp.light : PALETTE.amber.light, ox, oy, 1, 1)
       }
     }
   }
@@ -364,19 +363,41 @@ function propBaseline(prop: PropPlacement): number {
 // Structures
 // ---------------------------------------------------------------------------
 
-/** Sign text: the name if a source gave one, otherwise the real site id. */
-export function signLinesFor(site: TownSite): string[] {
-  if (!site.name) return []
-  const words = site.name.toUpperCase().split(/\s+/)
-  if (words.length <= 2) return [words.join(' ')]
-  const mid = Math.ceil(words.length / 2)
-  return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')]
+/**
+ * Sign text.
+ *
+ * The place name from the catalogue, uppercased and word-wrapped to whatever
+ * fits the building, over at most two lines. Returns nothing when no source
+ * named the site: the board then carries only the real site id, which
+ * `drawSign` always draws.
+ */
+export function signLinesFor(site: TownSite, buildingWidth = 160): string[] {
+  const label = site.placeName
+  if (!label) return []
+  // 6px per glyph including tracking, less the board's own padding.
+  const maxChars = Math.max(6, Math.floor((buildingWidth - 22) / 6))
+  const words = label.toUpperCase().split(/\s+/)
+  const lines: string[] = []
+  let current = ''
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word
+    if (next.length > maxChars && current) {
+      lines.push(current)
+      current = word
+    } else {
+      current = next
+    }
+  }
+  if (current) lines.push(current)
+  return lines.slice(0, 2).map((line) => line.slice(0, maxChars))
 }
 
 export interface StructureBake {
   canvas: HTMLCanvasElement
   /** Lamp head positions, so the render loop can add glow at night. */
   lamps: { x: number; y: number }[]
+  /** Lit panes, redrawn above the night wash so windows stay warm. */
+  litPanes: Rect[]
 }
 
 export function bakeStructures(sites: TownSite[], phase: SkyPhase): StructureBake {
@@ -384,6 +405,8 @@ export function bakeStructures(sites: TownSite[], phase: SkyPhase): StructureBak
   const byId = new Map(sites.map((site) => [site.site, site]))
   const props = propPlacements()
   const sun = { dx: phase.shadowDx, dy: phase.shadowDy, length: phase.shadowLength }
+  const litPanes: Rect[] = []
+  const collect = (pane: Rect) => litPanes.push(pane)
 
   // Shadows first, so nothing in front of a building is painted over by its
   // own neighbour's shadow.
@@ -428,9 +451,10 @@ export function bakeStructures(sites: TownSite[], phase: SkyPhase): StructureBak
     const style: BuildingStyle = {
       roof: rampFromHex(data?.colorHex ?? '', PALETTE.slate),
       lit: phase.windowsLit,
-      signLines: data ? signLinesFor(data) : [],
+      signLines: data ? signLinesFor(data, plot.rect.w) : [],
       siteId: site,
       seed: site,
+      onLitPane: collect,
     }
     drawables.push({ baseline: plot.rect.y + plot.rect.h, draw: () => drawBuilding(ctx, plot, style) })
   }
@@ -438,7 +462,7 @@ export function bakeStructures(sites: TownSite[], phase: SkyPhase): StructureBak
   PATIENT_HOMES.forEach((home, index) => {
     drawables.push({
       baseline: home.y + home.h,
-      draw: () => drawHome(ctx, home, `home-${index}`, phase.windowsLit),
+      draw: () => drawHome(ctx, home, `home-${index}`, phase.windowsLit, collect),
     })
   })
 
@@ -460,5 +484,5 @@ export function bakeStructures(sites: TownSite[], phase: SkyPhase): StructureBak
   drawables.sort((a, b) => a.baseline - b.baseline)
   for (const drawable of drawables) drawable.draw()
 
-  return { canvas, lamps: props.filter((p) => p.kind === 'lamp').map(lampHead) }
+  return { canvas, lamps: props.filter((p) => p.kind === 'lamp').map(lampHead), litPanes }
 }

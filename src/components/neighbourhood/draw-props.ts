@@ -218,7 +218,13 @@ export function lampHead(prop: PropPlacement): { x: number; y: number } {
  * Deliberately smaller and warmer than the seven service buildings: homes are
  * where the work lands, and they should not compete with the catalogue sites.
  */
-export function drawHome(ctx: Ctx2D, rect: Rect, seed: string, lit: boolean): void {
+export function drawHome(
+  ctx: Ctx2D,
+  rect: Rect,
+  seed: string,
+  lit: boolean,
+  onLitPane?: (pane: Rect) => void,
+): void {
   const variant = hashIndex(seed, 3)
   const wallRamps: Ramp[] = [PALETTE.brick, PALETTE.plaster, PALETTE.kerb]
   const wall = wallRamps[variant]!
@@ -242,12 +248,22 @@ export function drawHome(ctx: Ctx2D, rect: Rect, seed: string, lit: boolean): vo
   px(ctx, PALETTE.brick.base, rect.x + rect.w - 14, rect.y - roofH - 6, 6, 8)
   px(ctx, PALETTE.brick.light, rect.x + rect.w - 14, rect.y - roofH - 6, 6, 1)
 
-  // Wall.
+  // Wall: one lit plane, one shaded plane, and a 25% speckle for material.
+  // A 50% checker across the whole wall reads as a chequered tablecloth, so the
+  // texture stays sparse and only steps one rung of the ramp.
   px(ctx, wall.base, rect.x, rect.y, rect.w, rect.h)
-  dither(ctx, wall.base, wall.light, rect.x, rect.y, rect.w, rect.h, 'coarse')
+  dither(ctx, wall.base, wall.light, rect.x, rect.y, rect.w, rect.h, 'sparse')
   px(ctx, wall.light, rect.x, rect.y, 2, rect.h)
-  dither(ctx, wall.base, wall.dark, rect.x + rect.w - 6, rect.y, 6, rect.h, 'checker')
+  px(ctx, wall.light, rect.x, rect.y, rect.w, 1)
+  dither(ctx, wall.base, wall.dark, rect.x + rect.w - 7, rect.y, 7, rect.h, 'sparse')
+  px(ctx, wall.dark, rect.x + rect.w - 2, rect.y, 2, rect.h)
+  // Eaves shadow, the cue that the roof overhangs the wall.
   dither(ctx, wall.dark, wall.base, rect.x, rect.y, rect.w, 3, 'checker')
+  if (wall === PALETTE.brick) {
+    for (let by = rect.y + 4; by < rect.y + rect.h - 1; by += 4) {
+      px(ctx, wall.dark, rect.x, by, rect.w, 1)
+    }
+  }
   px(ctx, INK, rect.x, rect.y, 1, rect.h)
   px(ctx, INK, rect.x + rect.w - 1, rect.y, 1, rect.h)
   px(ctx, INK, rect.x, rect.y + rect.h - 1, rect.w, 1)
@@ -259,8 +275,12 @@ export function drawHome(ctx: Ctx2D, rect: Rect, seed: string, lit: boolean): vo
   px(ctx, INK, wx, wy, 14, 12)
   px(ctx, glass.base, wx + 1, wy + 1, 12, 10)
   px(ctx, glass.light, wx + 1, wy + 1, 12, 4)
-  if (lit) px(ctx, glass.highlight, wx + 2, wy + 6, 10, 4)
-  else dither(ctx, glass.base, glass.dark, wx + 1, wy + 6, 12, 5, 'checker')
+  if (lit) {
+    px(ctx, glass.highlight, wx + 2, wy + 6, 10, 4)
+    onLitPane?.({ x: wx + 1, y: wy + 1, w: 12, h: 10 })
+  } else {
+    dither(ctx, glass.base, glass.dark, wx + 1, wy + 6, 12, 5, 'checker')
+  }
   px(ctx, PALETTE.coat.light, wx + 6, wy + 1, 1, 10)
   px(ctx, PALETTE.coat.light, wx + 1, wy + 5, 12, 1)
   px(ctx, PALETTE.plaster.highlight, wx - 1, wy + 12, 16, 2)

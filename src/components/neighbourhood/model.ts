@@ -11,6 +11,9 @@ import type { BreachState, Site } from '@/ctl/contracts'
 /** Where a displayed site name or colour actually came from. */
 export type ValueSource = 'catalogue' | 'capture' | 'site-id' | 'palette'
 
+/** Which catalogue field the name on a building's sign was read from. */
+export type PlaceNameSource = 'catalogue-subtitle' | 'capture-subtitle' | 'catalogue-name' | 'site-id'
+
 /**
  * One unclosed record above a building.
  *
@@ -45,10 +48,17 @@ export interface TownPatientRef {
 
 export interface TownSite {
   site: Site
-  /** Exactly as supplied. `null` means no source gave this site a name. */
+  /** The catalogue `name` field, verbatim. `null` when no source supplied one. */
   name: string | null
   nameSource: ValueSource
+  /** The catalogue `subtitle` field, verbatim. */
   subtitle: string | null
+  /**
+   * What goes on the building's sign: the place the subtitle leads with, e.g.
+   * "Riverside Practice". A verbatim substring of a real field, never composed.
+   */
+  placeName: string | null
+  placeNameSource: PlaceNameSource
   colorHex: string | null
   colorSource: ValueSource
   /** Resources we read, and what the API says exists in total. */

@@ -52,6 +52,7 @@ export interface RenderInput {
   ground: HTMLCanvasElement
   structures: HTMLCanvasElement
   lamps: { x: number; y: number }[]
+  litPanes: { x: number; y: number; w: number; h: number }[]
   sheet: ActorSheet
   world: WorldState
   model: TownModel
@@ -112,6 +113,29 @@ function drawMarkers(input: RenderInput): void {
       px(ctx, INK, x, y, w, 9)
       bitmapText(ctx, label, x + 2, y + 1, PALETTE.paper.highlight)
     }
+  }
+}
+
+/**
+ * Put the window light back.
+ *
+ * Lit panes are baked into the structures layer and then dimmed by the night
+ * wash laid over it, which turns a warm window grey. Redrawing the pane and a
+ * small spill above the wash is what makes a lit town read as lit.
+ */
+function drawWindowGlow(input: RenderInput): void {
+  const { ctx, phase, litPanes } = input
+  if (!phase.windowsLit) return
+  for (const pane of litPanes) {
+    ctx.globalAlpha = 0.1
+    px(ctx, PALETTE.glassLit.highlight, pane.x - 4, pane.y - 3, pane.w + 8, pane.h + 7)
+    ctx.globalAlpha = 1
+    px(ctx, PALETTE.glassLit.base, pane.x, pane.y, pane.w, pane.h)
+    dither(ctx, PALETTE.glassLit.light, PALETTE.glassLit.base, pane.x, pane.y, pane.w, pane.h, 'checker')
+    px(ctx, PALETTE.glassLit.highlight, pane.x + 1, pane.y + pane.h - 4, pane.w - 2, 3)
+    // Glazing bars, so a glowing pane is still a window and not a lamp.
+    px(ctx, PALETTE.slate.base, pane.x + Math.floor(pane.w / 2), pane.y, 1, pane.h)
+    px(ctx, PALETTE.slate.base, pane.x, pane.y + Math.floor(pane.h / 2), pane.w, 1)
   }
 }
 
@@ -255,6 +279,7 @@ export function renderFrame(input: RenderInput): void {
     ctx.globalAlpha = 1
   }
 
+  drawWindowGlow(input)
   drawLampGlow(input)
 
   if (input.hovered && input.hovered !== input.selected) {

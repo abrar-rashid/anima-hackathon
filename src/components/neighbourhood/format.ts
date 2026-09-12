@@ -51,3 +51,11 @@ export const SOURCE_LABEL: Record<string, string> = {
   'site-id': 'name not supplied by source; showing site id',
   palette: 'presentation colour, not from source',
 }
+
+/** Which catalogue field the name on the sign came from. Always displayed. */
+export const PLACE_SOURCE_LABEL: Record<string, string> = {
+  'catalogue-subtitle': 'place name read from the catalogue subtitle',
+  'capture-subtitle': 'place name from the last-known catalogue subtitle',
+  'catalogue-name': 'catalogue supplied no subtitle; showing the catalogue name',
+  'site-id': 'no source named this site; showing its site id',
+}

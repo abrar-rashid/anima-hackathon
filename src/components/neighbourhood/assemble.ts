@@ -15,7 +15,7 @@
 
 import type { SimEvent, SimPatient, SimResource, SiteDescriptor, Site, Sourced } from '@/ctl/contracts'
 import { SITES } from '@/ctl/contracts'
-import { CAPTURED_CATALOGUE, PALETTE_SITE_COLORS } from './captured-catalogue'
+import { CAPTURED_CATALOGUE, PALETTE_SITE_COLORS, placeNameFromSubtitle } from './captured-catalogue'
 import { anchorFor } from './layout'
 import {
   OPEN_STATUSES,
@@ -28,6 +28,7 @@ import {
   type TownPatientRef,
   type TownSite,
   type TownWork,
+  type PlaceNameSource,
   type ValueSource,
 } from './model'
 
@@ -64,16 +65,35 @@ const WORK_PER_SITE = 24
 const PATIENTS_PER_SITE = 24
 const DOCS = 40
 
-function descriptorFor(
-  site: Site,
-  catalogue: SiteDescriptor[] | null,
-): { name: string | null; nameSource: ValueSource; subtitle: string | null; colorHex: string | null; colorSource: ValueSource } {
+interface SiteNaming {
+  name: string | null
+  nameSource: ValueSource
+  subtitle: string | null
+  placeName: string | null
+  placeNameSource: PlaceNameSource
+  colorHex: string | null
+  colorSource: ValueSource
+}
+
+/**
+ * Resolve what a building is called, and record where each string came from.
+ *
+ * Three descending sources: the live catalogue, the recorded capture of it, and
+ * — when neither names the site — the real site id. The sign prefers the place
+ * name the subtitle leads with, because "Riverside Practice" is the town's name
+ * for the building while "GP Records" is the system's; both are real fields and
+ * both are shown.
+ */
+function descriptorFor(site: Site, catalogue: SiteDescriptor[] | null): SiteNaming {
   const live = catalogue?.find((entry) => entry.id === site)
   if (live?.name) {
+    const place = placeNameFromSubtitle(live.subtitle)
     return {
       name: live.name,
       nameSource: 'catalogue',
       subtitle: live.subtitle ?? null,
+      placeName: place ?? live.name,
+      placeNameSource: place ? 'catalogue-subtitle' : 'catalogue-name',
       colorHex: live.color ?? PALETTE_SITE_COLORS[site] ?? null,
       colorSource: live.color ? 'catalogue' : 'palette',
     }
@@ -81,21 +101,26 @@ function descriptorFor(
 
   const captured = CAPTURED_CATALOGUE[site]
   if (captured) {
+    const place = placeNameFromSubtitle(captured.subtitle)
     return {
       name: captured.name,
       nameSource: 'capture',
-      subtitle: null,
+      subtitle: captured.subtitle,
+      placeName: place ?? captured.name,
+      placeNameSource: place ? 'capture-subtitle' : 'catalogue-name',
       colorHex: captured.colorHex,
       colorSource: 'capture',
     }
   }
 
-  // No source has ever given this site a name. Show the real site id instead of
+  // No source has ever named this site. Show the real site id rather than
   // making one up, and record that that is what happened.
   return {
     name: null,
     nameSource: 'site-id',
     subtitle: null,
+    placeName: null,
+    placeNameSource: 'site-id',
     colorHex: PALETTE_SITE_COLORS[site] ?? null,
     colorSource: 'palette',
   }
@@ -240,10 +265,11 @@ export function assembleTown(input: AssembleInput): TownModel {
 }
 
 /**
- * Every site name the model is allowed to render, for the honesty check.
+ * Every site label the model is allowed to render, for the honesty check.
  *
- * If a label appears on the canvas or in the DOM that is not in here, it was
- * invented, and the test that calls this will fail.
+ * If a site label appears on the canvas or in the DOM that is not a member of
+ * this set — or a substring of one, since the sign wraps onto two lines — it was
+ * invented, and the test that calls this fails.
  */
 export function permittedSiteLabels(model: TownModel): string[] {
   const labels: string[] = []
@@ -251,6 +277,7 @@ export function permittedSiteLabels(model: TownModel): string[] {
     labels.push(site.site)
     if (site.name) labels.push(site.name)
     if (site.subtitle) labels.push(site.subtitle)
+    if (site.placeName) labels.push(site.placeName)
   }
   return labels
 }

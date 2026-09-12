@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import styles from './neighbourhood.module.css'
-import { BREACH_LABEL, SOURCE_LABEL, formatCount, formatSimTime, withDenominator } from './format'
+import { BREACH_LABEL, PLACE_SOURCE_LABEL, formatCount, formatSimTime, withDenominator } from './format'
 import type { TownModel } from './model'
 
 export interface AccessibleNeighbourhoodProps {
@@ -44,9 +44,11 @@ export function AccessibleNeighbourhood({
           <caption>Sites drawn as buildings</caption>
           <thead>
             <tr>
-              <th scope="col">Displayed name</th>
+              <th scope="col">Name on the sign</th>
               <th scope="col">Site id</th>
-              <th scope="col">Name source</th>
+              <th scope="col">Where the sign name came from</th>
+              <th scope="col">Catalogue name</th>
+              <th scope="col">Catalogue subtitle</th>
               <th scope="col">Scanned</th>
               <th scope="col">Site total</th>
               <th scope="col">Unclosed</th>
@@ -58,16 +60,18 @@ export function AccessibleNeighbourhood({
           <tbody>
             {model.sites.length === 0 ? (
               <tr>
-                <td colSpan={9}>No site read returned data.</td>
+                <td colSpan={11}>No site read returned data.</td>
               </tr>
             ) : (
               model.sites.map((site) => (
                 <tr key={site.site} data-row-site={site.site}>
-                  <th scope="row">{site.name ?? site.site}</th>
+                  <th scope="row">{site.placeName ?? site.site}</th>
                   <td>
                     <code>{site.site}</code>
                   </td>
-                  <td>{SOURCE_LABEL[site.nameSource]}</td>
+                  <td>{PLACE_SOURCE_LABEL[site.placeNameSource]}</td>
+                  <td>{site.name ?? 'not supplied by source'}</td>
+                  <td>{site.subtitle ?? 'not supplied by source'}</td>
                   <td>{formatCount(site.scanned)}</td>
                   <td>{formatCount(site.total)}</td>
                   <td>{formatCount(site.work.length)}</td>
@@ -112,7 +116,7 @@ export function AccessibleNeighbourhood({
                         {item.resourceId} v{item.version}
                       </code>
                     </th>
-                    <td>{site.name ?? site.site}</td>
+                    <td>{site.placeName ?? site.site}</td>
                     <td>{item.kind}</td>
                     <td>{item.title || 'no title supplied by source'}</td>
                     <td>{item.status}</td>
@@ -210,7 +214,7 @@ export function AccessibleNeighbourhood({
                     <th scope="row">
                       <Link href={`/patient/${patient.patientId}`}>{patient.patientId}</Link>
                     </th>
-                    <td>{site.name ?? site.site}</td>
+                    <td>{site.placeName ?? site.site}</td>
                     <td>{patient.name ?? 'not in the directory page this view read'}</td>
                     <td>{formatCount(patient.resourceCount)}</td>
                   </tr>

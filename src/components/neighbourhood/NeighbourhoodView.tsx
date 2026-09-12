@@ -188,7 +188,7 @@ export function NeighbourhoodView({ initial }: NeighbourhoodViewProps) {
                       className={styles.swatch}
                       style={{ background: site.colorHex ?? PALETTE.slate.base }}
                     />
-                    <span className={styles.siteButtonName}>{site.name ?? site.site}</span>
+                    <span className={styles.siteButtonName}>{site.placeName ?? site.site}</span>
                     <span className={styles.siteButtonCount}>
                       {site.readFailed ? 'read failed' : `${site.work.length}/${site.breachedCount}`}
                     </span>
@@ -306,7 +306,7 @@ export function NeighbourhoodView({ initial }: NeighbourhoodViewProps) {
         <p className={styles.status} aria-live="polite">
           <span>
             {hoveredSite
-              ? `${hoveredSite.name ?? hoveredSite.site} — ${hoveredSite.work.length} unclosed of ${formatCount(
+              ? `${hoveredSite.placeName ?? hoveredSite.site} — ${hoveredSite.work.length} unclosed of ${formatCount(
                   hoveredSite.scanned,
                 )} scanned, ${hoveredSite.breachedCount} past a deadline`
               : 'Hover a building to read its counts. Click it to open the drawer.'}
