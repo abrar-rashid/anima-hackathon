@@ -41,6 +41,23 @@ describe('WorldView', () => {
     expect(screen.queryByRole('button', { name: /approve/i })).toBeNull()
   })
 
+  it('puts the replay comparison above the sparse live case', () => {
+    render(
+      <WorldView
+        snapshot={snapshot()}
+        comparison={{
+          left: { heading: 'Protocol ochre', snapshots: [snapshot()] },
+          right: { heading: 'Protocol teal', snapshots: [snapshot({ now: snapshot().now + 1 })] },
+        }}
+      />,
+    )
+    expect(screen.getByRole('heading', { name: 'Same immutable trace' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Current stored case' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Protocol ochre' })).toBeTruthy()
+    expect(document.querySelectorAll('[data-world-atlas]').length).toBeGreaterThan(1)
+    expect(document.querySelector('[data-live-case]')).toBeTruthy()
+  })
+
   it('does not treat direction as severity', () => {
     render(<WorldView snapshot={snapshot()} />)
     expect(document.body.textContent).toMatch(/source-supplied reference range/)

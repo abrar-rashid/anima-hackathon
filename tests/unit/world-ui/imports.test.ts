@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 const ROOTS = [
   join(process.cwd(), 'src/components/world'),
   join(process.cwd(), 'src/app/world'),
+  join(process.cwd(), 'src/app/api/world'),
 ]
 
 const FORBIDDEN = [

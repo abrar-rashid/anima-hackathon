@@ -1,9 +1,17 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import WorldError from '@/app/world/error'
 import WorldLoading from '@/app/world/loading'
-import WorldPage from '@/app/world/page'
+
+vi.mock('@/app/world/assemble', () => ({
+  assembleWorld: vi.fn(async () => ({
+    snapshot: null,
+    replay: null,
+    comparison: null,
+    error: null,
+  })),
+}))
 
 afterEach(() => {
   cleanup()
@@ -11,6 +19,7 @@ afterEach(() => {
 
 describe('world route', () => {
   it('renders an honest empty atlas when no snapshot is assembled', async () => {
+    const { default: WorldPage } = await import('@/app/world/page')
     const ui = await WorldPage()
     render(ui)
     expect(screen.getByRole('heading', { name: 'Pixel Societies' })).toBeTruthy()

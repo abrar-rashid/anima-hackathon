@@ -126,6 +126,19 @@
   max-width: 60ch;
 }
 
+.primary,
+.secondary {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.primary h2,
+.secondary h2 {
+  margin: 0;
+  font-size: 1.5625rem;
+  letter-spacing: -0.02em;
+}
+
 .well {
   position: relative;
   background: var(--water);

@@ -39,6 +39,16 @@ export function WorldComparison({ left, right }: WorldComparisonProps) {
 
   return (
     <div className={styles.pair} data-world-comparison="">
+      <div className={styles.span}>
+        <TimeScrubber
+          now={now}
+          min={range.min}
+          max={range.max}
+          paused={leftSnap?.paused ?? rightSnap?.paused ?? true}
+          speed={leftSnap?.speed ?? rightSnap?.speed ?? 0}
+          onSeek={setNow}
+        />
+      </div>
       <SocietyColumn
         heading={left.heading}
         snapshot={leftSnap}
@@ -51,16 +61,6 @@ export function WorldComparison({ left, right }: WorldComparisonProps) {
         reducedMotion={reducedMotion}
         side="right"
       />
-      <div className={styles.span}>
-        <TimeScrubber
-          now={now}
-          min={range.min}
-          max={range.max}
-          paused={leftSnap?.paused ?? rightSnap?.paused ?? true}
-          speed={leftSnap?.speed ?? rightSnap?.speed ?? 0}
-          onSeek={setNow}
-        />
-      </div>
     </div>
   )
 }
