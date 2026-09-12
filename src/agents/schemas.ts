@@ -82,6 +82,15 @@ export const SnapshotSchema = z.object({
   citations: z.array(EvidenceRefSchema),
 })
 
+export const ActionPayloadSchema = z.object({
+  type: z.string(),
+  resourceId: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
+  owner: z.string().nullable().optional(),
+  patientId: z.string().nullable().optional(),
+  message: z.string().nullable().optional(),
+})
+
 export const ProposalSchema = z.object({
   transfer: z.object({
     toTeam: TeamIdSchema,
@@ -96,7 +105,7 @@ export const ProposalSchema = z.object({
     z.object({
       kind: z.enum(['create_task', 'accept', 'messaging_action']),
       site: SiteIdSchema,
-      payload: z.unknown(),
+      payload: ActionPayloadSchema,
       expectedReadback: z.string(),
       sourceVersions: z.array(z.object({ id: z.string(), version: z.number() })),
       idempotencyKey: z.string(),
