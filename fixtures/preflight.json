@@ -1,0 +1,540 @@
+{
+  "world": "team-ea32f6302052",
+  "team": {
+    "team": "team12",
+    "world": "team-ea32f6302052",
+    "scopes": [
+      "gp",
+      "hospital",
+      "community",
+      "pharmacy",
+      "diagnostics",
+      "referrals",
+      "wearables"
+    ]
+  },
+  "capturedAt": "2026-09-12T12:12:40.886Z",
+  "simulatorNow": 1789286400000,
+  "acceptSupported": null,
+  "probeDetail": null,
+  "eligibilityRuleText": "An analyte value lies outside the reference range supplied by the source laboratory (referenceLow..referenceHigh). No urgency, diagnosis or treatment is inferred.",
+  "selectedPatientId": "SIM-000001",
+  "selectedResultId": "blood-v1-SIM-000001-crp-5",
+  "selectedResultVersion": 1,
+  "selectedClassification": {
+    "patientId": "SIM-000001",
+    "resultId": "blood-v1-SIM-000001-crp-5",
+    "version": 1,
+    "analyte": "C-reactive protein",
+    "value": 5.6,
+    "referenceLow": 0,
+    "referenceHigh": 5,
+    "collectedAt": 1789113600000,
+    "visibleTo": [
+      "gp",
+      "hospital",
+      "diagnostics"
+    ]
+  },
+  "candidateCount": 728,
+  "candidates": [
+    {
+      "patientId": "SIM-000006",
+      "resultId": "blood-v1-SIM-000006-fbc-5",
+      "version": 1,
+      "analyte": "White cell count",
+      "value": 2.1,
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000006",
+      "resultId": "blood-v1-SIM-000006-hba1c-5",
+      "version": 1,
+      "analyte": "HbA1c",
+      "value": 49,
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000006",
+      "resultId": "blood-v1-SIM-000006-lft-5",
+      "version": 1,
+      "analyte": "Bilirubin",
+      "value": 25,
+      "referenceLow": 0,
+      "referenceHigh": 21,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000007",
+      "resultId": "blood-v1-SIM-000007-crp-5",
+      "version": 1,
+      "analyte": "C-reactive protein",
+      "value": 9.9,
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000007",
+      "resultId": "blood-v1-SIM-000007-hba1c-5",
+      "version": 1,
+      "analyte": "HbA1c",
+      "value": 70,
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000007",
+      "resultId": "blood-v1-SIM-000007-lft-5",
+      "version": 1,
+      "analyte": "Bilirubin",
+      "value": 22,
+      "referenceLow": 0,
+      "referenceHigh": 21,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000007",
+      "resultId": "blood-v1-SIM-000007-lipids-5",
+      "version": 1,
+      "analyte": "Total cholesterol",
+      "value": 5.6,
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000007",
+      "resultId": "blood-v1-SIM-000007-ue-5",
+      "version": 1,
+      "analyte": "eGFR",
+      "value": 54,
+      "referenceLow": 60,
+      "referenceHigh": 120,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000010",
+      "resultId": "blood-v1-SIM-000010-crp-5",
+      "version": 1,
+      "analyte": "C-reactive protein",
+      "value": 8.7,
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000010",
+      "resultId": "blood-v1-SIM-000010-hba1c-5",
+      "version": 1,
+      "analyte": "HbA1c",
+      "value": 47,
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000010",
+      "resultId": "blood-v1-SIM-000010-lipids-5",
+      "version": 1,
+      "analyte": "Triglycerides",
+      "value": 2,
+      "referenceLow": 0,
+      "referenceHigh": 1.7,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000010",
+      "resultId": "blood-v1-SIM-000010-ue-5",
+      "version": 1,
+      "analyte": "Urea",
+      "value": 9,
+      "referenceLow": 2.5,
+      "referenceHigh": 7.8,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000013",
+      "resultId": "blood-v1-SIM-000013-lipids-5",
+      "version": 1,
+      "analyte": "Triglycerides",
+      "value": 2,
+      "referenceLow": 0,
+      "referenceHigh": 1.7,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000013",
+      "resultId": "blood-v1-SIM-000013-ue-5",
+      "version": 1,
+      "analyte": "Sodium",
+      "value": 147,
+      "referenceLow": 133,
+      "referenceHigh": 146,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000014",
+      "resultId": "blood-v1-SIM-000014-crp-5",
+      "version": 1,
+      "analyte": "C-reactive protein",
+      "value": 8.6,
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000014",
+      "resultId": "blood-v1-SIM-000014-fbc-5",
+      "version": 1,
+      "analyte": "White cell count",
+      "value": 3,
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000014",
+      "resultId": "blood-v1-SIM-000014-hba1c-5",
+      "version": 1,
+      "analyte": "HbA1c",
+      "value": 59,
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000014",
+      "resultId": "blood-v1-SIM-000014-ue-5",
+      "version": 1,
+      "analyte": "Potassium",
+      "value": 3,
+      "referenceLow": 3.5,
+      "referenceHigh": 5.3,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000015",
+      "resultId": "blood-v1-SIM-000015-crp-5",
+      "version": 1,
+      "analyte": "C-reactive protein",
+      "value": 12.2,
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000015",
+      "resultId": "blood-v1-SIM-000015-lipids-5",
+      "version": 1,
+      "analyte": "Total cholesterol",
+      "value": 6.9,
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000016",
+      "resultId": "blood-v1-SIM-000016-fbc-5",
+      "version": 1,
+      "analyte": "White cell count",
+      "value": 11.1,
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000016",
+      "resultId": "blood-v1-SIM-000016-lft-5",
+      "version": 1,
+      "analyte": "Albumin",
+      "value": 34,
+      "referenceLow": 35,
+      "referenceHigh": 50,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000016",
+      "resultId": "blood-v1-SIM-000016-lipids-5",
+      "version": 1,
+      "analyte": "Total cholesterol",
+      "value": 5.9,
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000016",
+      "resultId": "blood-v1-SIM-000016-ue-5",
+      "version": 1,
+      "analyte": "Sodium",
+      "value": 132,
+      "referenceLow": 133,
+      "referenceHigh": 146,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    },
+    {
+      "patientId": "SIM-000017",
+      "resultId": "blood-v1-SIM-000017-crp-5",
+      "version": 1,
+      "analyte": "C-reactive protein",
+      "value": 12.7,
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "collectedAt": 1789200000000,
+      "visibleTo": [
+        "gp",
+        "hospital",
+        "diagnostics"
+      ]
+    }
+  ],
+  "boundOperations": {
+    "actions": [
+      "hospital_note",
+      "save_discharge_summary",
+      "process_document",
+      "messaging_action",
+      "place_pharmacy_order",
+      "update_pharmacy_basket",
+      "remove_pharmacy_basket_line",
+      "checkout_pharmacy_basket",
+      "cancel_pharmacy_order",
+      "receive_pharmacy_order",
+      "receive_pharmacy_referral",
+      "update_pharmacy_referral",
+      "receive_stock",
+      "update_stock_price",
+      "link_prescription_stock",
+      "register_attendance",
+      "update_attendance",
+      "connect_device",
+      "create_task",
+      "create_referral",
+      "order_test",
+      "draft_prescription",
+      "book_appointment",
+      "create_appointment_session",
+      "set_appointment_slot",
+      "arrive_appointment",
+      "cancel_appointment",
+      "save_consultation",
+      "save_problem",
+      "save_allergy",
+      "send_message",
+      "schedule_visit",
+      "dispatch_robot",
+      "review",
+      "accept",
+      "complete",
+      "reject",
+      "dispense",
+      "collect",
+      "share_record",
+      "report_absence",
+      "restore_staff",
+      "allocate_shift"
+    ],
+    "hasIdempotencyHeader": true,
+    "paths": [
+      "/healthz",
+      "/api/catalogue",
+      "/api/telephony/live",
+      "/openapi.json",
+      "/api/openapi.json",
+      "/api/keys",
+      "/api/team",
+      "/api/session",
+      "/api/clock",
+      "/api/plan-lab",
+      "/api/sites/{site}/view",
+      "/api/sites/{site}/patients",
+      "/api/sites/{site}/actions",
+      "/api/sites/{site}/appointments",
+      "/api/sites/hospital/attendances",
+      "/api/sites/hospital/documents",
+      "/api/sites/gp/documents",
+      "/api/sites/pharmacy/pharmacy-workspace",
+      "/api/sites/gp/messaging-workspace",
+      "/api/sites/patient/messaging-workspace",
+      "/api/sites/wearables/devices",
+      "/api/sites/wearables/readings",
+      "/api/nhs/pds",
+      "/api/nhs/pds/actions",
+      "/api/nhs/ods",
+      "/api/nhs/ods/actions",
+      "/api/nhs/dos",
+      "/api/nhs/dos/actions",
+      "/api/nhs/ers",
+      "/api/nhs/ers/actions",
+      "/api/nhs/eps",
+      "/api/nhs/eps/actions",
+      "/api/nhs/eps-tracker",
+      "/api/nhs/eps-tracker/actions",
+      "/api/nhs/gp-connect",
+      "/api/nhs/gp-connect/actions",
+      "/api/nhs/mesh",
+      "/api/nhs/mesh/actions",
+      "/api/nhs/scr",
+      "/api/nhs/scr/actions",
+      "/api/nhs/pathology",
+      "/api/nhs/pathology/actions",
+      "/api/nhs/radiology",
+      "/api/nhs/radiology/actions",
+      "/api/nhs/appointments",
+      "/api/nhs/appointments/actions",
+      "/api/nhs/pds/metadata",
+      "/api/nhs/pds/Patient",
+      "/api/nhs/pds/Patient/{id}",
+      "/api/nhs/ods/metadata",
+      "/api/nhs/ods/Organization",
+      "/api/nhs/ods/Organization/{id}",
+      "/api/control/worlds",
+      "/api/control/teams",
+      "/api/control/teams/{world}",
+      "/api/control/teams/delete",
+      "/api/control/incidents/all",
+      "/api/control/teams/{world}/activity",
+      "/api/control/teams/{world}/session",
+      "/api/control/snapshot",
+      "/api/control/incidents",
+      "/api/control/agents",
+      "/api/control/model-propose",
+      "/api/control/population",
+      "/api/control/population/publish",
+      "/api/control/population/attach",
+      "/api/operator/cis2",
+      "/cis2/.well-known/openid-configuration",
+      "/cis2/jwks",
+      "/cis2/session",
+      "/cis2/userinfo",
+      "/cis2/authorize",
+      "/cis2/token"
+    ]
+  }
+}

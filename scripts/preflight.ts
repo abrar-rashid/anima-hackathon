@@ -123,7 +123,7 @@ async function main() {
   if (!hasActions) throw new Error('POST /api/sites/{site}/actions missing')
   await writeFile(path.join(FIXTURES, 'openapi.redacted.json'), JSON.stringify(redact(doc), null, 2))
 
-  const team = await get<{ id?: string; name?: string; scopes?: string[] }>('/api/team')
+  const team = await get<{ team?: string; world?: string; scopes?: string[] }>('/api/team')
   const clock = await get<{ now: number; paused: boolean; speed: number }>('/api/clock')
   console.log('team', JSON.stringify(team.body))
   console.log('clock', JSON.stringify({ now: clock.body?.now, paused: clock.body?.paused, speed: clock.body?.speed }))
@@ -246,7 +246,7 @@ async function main() {
   }
 
   const preflight = {
-    world: (team.body as { id?: string })?.id ?? 'unknown',
+    world: (team.body as { world?: string })?.world ?? 'unknown',
     team: team.body,
     capturedAt: new Date().toISOString(),
     simulatorNow: clock.body?.now ?? null,
