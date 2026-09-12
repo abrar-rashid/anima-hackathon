@@ -1,0 +1,51 @@
+.frame {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.frame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 320 / 200;
+  background: var(--water);
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+}
+
+.pixel {
+  shape-rendering: crispEdges;
+}
+
+.label {
+  font-size: 8px;
+  font-weight: 700;
+  fill: var(--lantern);
+  letter-spacing: 0.02em;
+}
+
+.overdue {
+  font-size: 8px;
+  font-weight: 700;
+  fill: var(--brass);
+}
+
+.threadInflight {
+  animation: stitch 1.2s linear infinite;
+}
+
+.atlas[data-motion='static'] .threadInflight {
+  animation: none;
+}
+
+@keyframes stitch {
+  to {
+    stroke-dashoffset: -7;
+  }
+}
+
+.caption {
+  margin: 0;
+  color: var(--lantern-dim);
+  font-size: 1rem;
+}

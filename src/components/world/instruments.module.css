@@ -1,0 +1,232 @@
+.ticker {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ticker h2,
+.legend h2,
+.tables h2,
+.scrubber h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.ticker ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+  max-height: 18rem;
+  overflow: auto;
+}
+
+.ticker li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid var(--cobble);
+}
+
+.kind {
+  color: var(--phosphor);
+}
+
+.detail {
+  margin: 0;
+  color: var(--lantern);
+}
+
+.time {
+  color: var(--lantern-dim);
+  font-size: 1rem;
+}
+
+.scrubber {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.scrubber label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.scrubber input[type='range'] {
+  width: 100%;
+  accent-color: var(--phosphor);
+}
+
+.clock {
+  margin: 0;
+  color: var(--lantern-dim);
+}
+
+.legend {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.legend li {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 0.55rem;
+  align-items: start;
+}
+
+.swatch {
+  width: 1.25rem;
+  height: 1.25rem;
+  box-shadow: 2px 2px 0 var(--ink);
+  background: var(--lantern);
+}
+
+.swatch[data-swatch='occupied'],
+.swatch[data-swatch='REQUESTED'] {
+  background: var(--phosphor);
+}
+
+.swatch[data-swatch='empty-district'] {
+  background: var(--cobble-light);
+}
+
+.swatch[data-swatch='above'] {
+  background: var(--above);
+}
+
+.swatch[data-swatch='below'] {
+  background: var(--below);
+}
+
+.swatch[data-swatch='fresh'] {
+  background: var(--lantern);
+}
+
+.swatch[data-swatch='dust'],
+.swatch[data-swatch='STALE'] {
+  background: var(--dust);
+}
+
+.swatch[data-swatch='crack'] {
+  background: var(--moss);
+}
+
+.swatch[data-swatch='rot'] {
+  background: var(--rot);
+}
+
+.swatch[data-swatch='ACCEPTED'] {
+  background: var(--accepted);
+}
+
+.swatch[data-swatch='DECLINED'] {
+  background: var(--declined);
+}
+
+.swatch[data-swatch='OVERDUE'],
+.swatch[data-swatch='pending-tray'] {
+  background: var(--brass);
+}
+
+.swatch[data-swatch='RECEIVER_UNAVAILABLE'] {
+  background: var(--lantern-dim);
+}
+
+.legend p {
+  margin: 0;
+  color: var(--lantern-dim);
+}
+
+.tables {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.tableWrap {
+  overflow: auto;
+}
+
+.tables table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 36rem;
+}
+
+.tables th,
+.tables td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.4rem 0.55rem 0.4rem 0;
+  border-bottom: 1px solid var(--cobble);
+  overflow-wrap: anywhere;
+}
+
+.tables th {
+  color: var(--brass);
+  font-weight: 700;
+}
+
+.tables caption {
+  text-align: left;
+  font-weight: 700;
+  margin: 0 0 0.45rem;
+  color: var(--lantern);
+}
+
+.provenance {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--cobble);
+  border-bottom: 1px solid var(--cobble);
+}
+
+.provenance p {
+  margin: 0;
+}
+
+.replay {
+  color: var(--phosphor);
+}
+
+.pair {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 56rem) {
+  .pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.side {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.side h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.span {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 40rem) {
+  .tables table {
+    min-width: 100%;
+  }
+}

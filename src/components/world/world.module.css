@@ -1,0 +1,163 @@
+.shell {
+  --ink: #100e16;
+  --lantern: #f3e6c4;
+  --lantern-dim: #c4b48a;
+  --brass: #c4a35a;
+  --phosphor: #d6e37a;
+  --cobble: #2a2833;
+  --water: #1a2430;
+  --above: #7f93a8;
+  --below: #a89068;
+  --accepted: #7ea87a;
+  --declined: #8a6a6a;
+  --dust: #6a5c4e;
+  --rot: #3d2a22;
+  --moss: #3d5c45;
+  --cobble-light: #3a3846;
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--lantern);
+  font-family: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  caret-color: var(--phosphor);
+  scrollbar-color: var(--brass) var(--ink);
+}
+
+.shell ::selection {
+  background: var(--phosphor);
+  color: var(--ink);
+}
+
+.shell :focus-visible {
+  outline: 3px solid var(--phosphor);
+  outline-offset: 2px;
+}
+
+.shell a {
+  color: var(--phosphor);
+  text-underline-offset: 0.18em;
+}
+
+.page {
+  display: grid;
+  gap: 1.75rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 3rem;
+}
+
+.mast {
+  display: grid;
+  gap: 0.65rem;
+  padding-bottom: 0.25rem;
+}
+
+.mast h1 {
+  margin: 0;
+  font-size: 1.953125rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  max-width: 18ch;
+}
+
+.mast p {
+  margin: 0;
+  color: var(--lantern-dim);
+  max-width: 62ch;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.25rem;
+  align-items: baseline;
+}
+
+.instruments {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 56rem) {
+  .instruments {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.skip {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  transform: translateY(-220%);
+  background: var(--ink);
+  color: var(--lantern);
+  padding: 0.4rem 0.65rem;
+  z-index: 4;
+}
+
+.skip:focus {
+  transform: none;
+}
+
+.status {
+  margin: 0;
+  color: var(--lantern-dim);
+}
+
+.empty {
+  display: grid;
+  gap: 0.75rem;
+  min-height: 16rem;
+  padding: 1.5rem 0 2rem;
+  border-top: 1px solid var(--cobble);
+  border-bottom: 1px solid var(--cobble);
+}
+
+.empty h2 {
+  margin: 0;
+  font-size: 1.5625rem;
+  letter-spacing: -0.02em;
+}
+
+.empty p {
+  margin: 0;
+  color: var(--lantern-dim);
+  max-width: 60ch;
+}
+
+.well {
+  position: relative;
+  background: var(--water);
+  box-shadow: 2px 2px 0 var(--ink);
+  padding: 0.5rem;
+}
+
+.live {
+  margin: 0;
+  color: var(--lantern-dim);
+}
+
+.retry {
+  appearance: none;
+  border: 1px solid var(--brass);
+  background: var(--ink);
+  color: var(--lantern);
+  padding: 0.45rem 0.8rem;
+  width: max-content;
+}
+
+.retry:hover {
+  background: var(--cobble);
+}
+
+@media (max-width: 40rem) {
+  .page {
+    padding: 1rem 0.75rem 2.5rem;
+    gap: 1.25rem;
+  }
+
+  .mast h1 {
+    max-width: none;
+  }
+}
