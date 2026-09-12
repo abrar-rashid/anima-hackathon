@@ -1,4 +1,12 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+// The runtime is only interesting here for its deterministic core and its
+// gates. Leaving a real key in the environment turns this into a live model
+// call that can time out or drift, so the key is removed before `@/agents/app`
+// is evaluated and the ADK falls back to its mock adapter.
+vi.hoisted(() => {
+  delete process.env.OPENAI_API_KEY
+})
 
 import { assembleSnapshot } from '@/agents/context-assembler'
 import { AdkRuntime } from '@/agents/runtime'

@@ -25,6 +25,26 @@ function resourceIds(resources: SimResource[]): Set<string> {
   return new Set(resources.map((resource) => resource.id))
 }
 
+/**
+ * A test order with a request time. The detector compares report times against
+ * that request time, so an order without one is unjudgeable and never fires.
+ */
+function awaitingOrder(): SimResource {
+  return {
+    id: 'fixture-order',
+    kind: 'genomic-test',
+    title: 'Panel test awaiting result',
+    status: 'open',
+    version: 1,
+    visibleTo: ['hospital'],
+    data: {},
+    site: 'hospital',
+    patientId: 'SIM-NO-RESULTS',
+    createdAt: fixtureNow() - 3_600_000,
+    provenance: { changes: [] },
+  }
+}
+
 function sourcePriority(
   finding: { priority?: string; citations: { resourceId: string }[] },
   resources: SimResource[],
@@ -88,26 +108,34 @@ describe('detectors on live fixtures', () => {
     expect(findings.some((finding) => finding.citations[0]?.resourceId === 'r-10')).toBe(true)
   })
 
-  it('detectAwaitingResult does not fire when the patient already has a report in the scanned set', () => {
+  it('detectAwaitingResult fires on r-45, whose only reports predate the request', () => {
     const genomicTest = findResource('r-45', resources)
     expect(genomicTest).toBeDefined()
-    expect(detectAwaitingResult(resources, now)).toHaveLength(0)
+    const findings = detectAwaitingResult(resources, now)
+    expect(resourceIds(resources)).toContain('r-45')
+    expect(findings.some((finding) => finding.citations[0]?.resourceId === 'r-45')).toBe(true)
   })
 
-  it('detectAwaitingResult fires when no matching report exists for the patient', () => {
-    const order: SimResource = {
-      id: 'fixture-order',
-      kind: 'genomic-test',
-      title: 'Panel test awaiting result',
-      status: 'open',
+  it('detectAwaitingResult fires when no report exists for the patient at all', () => {
+    expect(detectAwaitingResult([awaitingOrder()], now)).toHaveLength(1)
+  })
+
+  it('detectAwaitingResult stops firing once a report is filed after the request', () => {
+    const order = awaitingOrder()
+    const report: SimResource = {
+      id: 'fixture-report',
+      kind: 'report',
+      title: 'Panel result',
+      status: 'completed',
       version: 1,
       visibleTo: ['hospital'],
       data: {},
-      site: 'hospital',
-      patientId: 'SIM-NO-RESULTS',
+      site: 'diagnostics',
+      patientId: order.patientId,
+      createdAt: (order.createdAt ?? 0) + 60_000,
       provenance: { changes: [] },
     }
-    expect(detectAwaitingResult([order], now)).toHaveLength(1)
+    expect(detectAwaitingResult([order, report], now)).toHaveLength(0)
   })
 
   it('detectStalledLoops fires on real overdue resources with no post-deadline activity', () => {
@@ -199,12 +227,12 @@ describe('runDetectors corpus counts', () => {
     )
     expect(byDetector).toMatchInlineSnapshot(`
       {
-        "awaiting-result": 0,
+        "awaiting-result": 1,
         "overdue-task": 1,
-        "stalled-loop": 637,
+        "stalled-loop": 31,
         "unaccepted-referral": 7,
         "unanswered-request": 2,
-        "undispensed-prescription": 18,
+        "undispensed-prescription": 17,
         "unprocessed-handover": 37,
       }
     `)

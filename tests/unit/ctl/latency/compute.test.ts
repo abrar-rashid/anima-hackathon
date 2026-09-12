@@ -82,7 +82,8 @@ describe('latency observations', () => {
     const buckets = bucketByTransition(observations)
     expect(buckets).toHaveLength(1)
     expect(buckets[0]).toMatchObject({
-      label: 'a → b',
+      // Action names are humanised for the screen, so the bucket label is too.
+      label: 'A → B',
       n: 10,
       medianMs: 550,
       p90Ms: 900,
