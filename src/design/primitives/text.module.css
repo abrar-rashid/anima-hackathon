@@ -1,0 +1,59 @@
+.text {
+  margin: 0;
+  font-family: var(--ds-font-ui);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font-size: var(--ds-text-meta);
+  line-height: var(--ds-leading-data);
+}
+
+.body {
+  font-size: var(--ds-text-body);
+  line-height: var(--ds-leading-body);
+}
+
+.lead {
+  font-size: var(--ds-text-lead);
+  line-height: var(--ds-leading-body);
+}
+
+.ink {
+  color: var(--ds-text-ink);
+}
+
+.muted {
+  color: var(--ds-text-muted);
+}
+
+.owned {
+  color: var(--ds-text-owned);
+}
+
+.awaiting {
+  color: var(--ds-text-awaiting);
+}
+
+.proven {
+  color: var(--ds-text-proven);
+}
+
+.blocked {
+  color: var(--ds-text-blocked);
+}
+
+.unverified {
+  color: var(--ds-text-unverified);
+}
+
+.measure {
+  max-width: 70ch;
+}
+
+.data {
+  font-family: var(--ds-font-data);
+  font-size: var(--ds-text-meta);
+  line-height: var(--ds-leading-data);
+  font-weight: 500;
+}

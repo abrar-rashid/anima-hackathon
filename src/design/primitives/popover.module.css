@@ -1,0 +1,20 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.panel {
+  position: absolute;
+  left: 0;
+  top: calc(100% + var(--ds-space-xs));
+  z-index: var(--ds-z-popover);
+  width: min(22rem, calc(100vw - 2rem));
+  max-width: 100%;
+  padding: var(--ds-space-md);
+  background: var(--ds-surface-raised);
+  color: var(--ds-text-ink);
+  border: var(--ds-border-thin) solid var(--ds-border-default);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-raise);
+}

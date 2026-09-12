@@ -1,0 +1,10 @@
+.row {
+  min-width: 0;
+  padding: var(--ds-space-sm) 0;
+  border-bottom: var(--ds-border-thin) solid var(--ds-border-default);
+}
+
+.row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}

@@ -1,0 +1,47 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.alignStart {
+  align-items: flex-start;
+}
+
+.alignCenter {
+  align-items: center;
+}
+
+.alignStretch {
+  align-items: stretch;
+}
+
+.gap2xs {
+  gap: var(--ds-space-2xs);
+}
+
+.gapXs {
+  gap: var(--ds-space-xs);
+}
+
+.gapSm {
+  gap: var(--ds-space-sm);
+}
+
+.gapMd {
+  gap: var(--ds-space-md);
+}
+
+.gapLg {
+  gap: var(--ds-space-lg);
+}
+
+.gapXl {
+  gap: var(--ds-space-xl);
+}
+
+.list {
+  list-style: none;
+}

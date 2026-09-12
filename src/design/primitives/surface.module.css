@@ -1,0 +1,39 @@
+.surface {
+  min-width: 0;
+  color: var(--ds-text-ink);
+  border: var(--ds-border-thin) solid var(--ds-border-default);
+  border-radius: var(--ds-radius-lg);
+}
+
+.flat {
+  background: var(--ds-surface-canvas);
+}
+
+.raised {
+  background: var(--ds-surface-raised);
+  box-shadow: var(--ds-shadow-raise);
+}
+
+.inset {
+  background: var(--ds-surface-inset);
+  box-shadow: var(--ds-shadow-inset);
+}
+
+.padSm {
+  padding: var(--ds-space-sm) var(--ds-space-md);
+}
+
+.padMd {
+  padding: var(--ds-space-md) var(--ds-space-lg);
+}
+
+.padLg {
+  padding: var(--ds-space-lg) var(--ds-space-lg);
+}
+
+@media (max-width: 40rem) {
+  .padMd,
+  .padLg {
+    padding: var(--ds-space-md);
+  }
+}

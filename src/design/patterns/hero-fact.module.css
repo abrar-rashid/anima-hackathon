@@ -1,0 +1,55 @@
+.block {
+  display: grid;
+  justify-items: start;
+  gap: var(--ds-space-sm);
+  min-width: 0;
+  padding: var(--ds-space-md) var(--ds-space-lg);
+  background: var(--ds-surface-raised);
+  border: var(--ds-border-thin) solid var(--ds-border-default);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-raise);
+}
+
+.owned {
+  background: var(--ds-surface-owned);
+  border-color: var(--ds-border-owned);
+}
+
+.awaiting {
+  background: var(--ds-surface-awaiting);
+  border-color: var(--ds-border-awaiting);
+}
+
+.blocked {
+  background: var(--ds-surface-blocked);
+  border-color: var(--ds-border-blocked);
+}
+
+.unverified {
+  background: var(--ds-surface-unverified);
+  border-color: var(--ds-border-default);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-xs) var(--ds-space-sm);
+  min-width: 0;
+}
+
+.meaning {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--ds-text-ink);
+  font-size: var(--ds-text-body);
+  line-height: var(--ds-leading-body);
+}
+
+.detail {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--ds-text-ink);
+  font-size: var(--ds-text-meta);
+  line-height: var(--ds-leading-data);
+}

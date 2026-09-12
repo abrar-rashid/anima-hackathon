@@ -1,0 +1,39 @@
+.block {
+  display: grid;
+  justify-items: start;
+  gap: var(--ds-space-sm);
+  padding: var(--ds-space-md);
+  background: var(--ds-surface-unverified);
+  border: var(--ds-border-thin) dashed var(--ds-border-default);
+  border-radius: var(--ds-radius-md);
+  min-width: 0;
+}
+
+.lead {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-xs);
+  min-width: 0;
+}
+
+.mark {
+  display: inline-flex;
+  margin-top: 0.15rem;
+  color: var(--ds-text-unverified);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--ds-text-lead);
+  font-weight: var(--ds-weight-bold);
+  line-height: var(--ds-leading-body);
+  color: var(--ds-text-ink);
+}
+
+.body {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--ds-text-muted);
+  font-size: var(--ds-text-body);
+  line-height: var(--ds-leading-body);
+}

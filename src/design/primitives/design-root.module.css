@@ -1,0 +1,31 @@
+.root {
+  background: var(--ds-surface-canvas);
+  color: var(--ds-text-ink);
+  font-family: var(--ds-font-ui);
+  font-size: var(--ds-text-body);
+  font-weight: var(--ds-weight-regular);
+  line-height: var(--ds-leading-body);
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  max-width: 100%;
+  caret-color: var(--ds-text-owned);
+  scrollbar-color: var(--ds-border-default) var(--ds-surface-inset);
+}
+
+.root :focus-visible {
+  outline: var(--ds-border-heavy) solid var(--ds-border-focus);
+  outline-offset: 3px;
+}
+
+.root ::selection {
+  background: var(--ds-surface-owned);
+  color: var(--ds-text-ink);
+}
+
+.root :global(a) {
+  color: var(--ds-text-owned);
+}
+
+.root :global(a:hover) {
+  color: var(--ds-surface-action-hover);
+}

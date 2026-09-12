@@ -1,0 +1,58 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2xs);
+  min-height: 1.75rem;
+  padding: 0.15rem 0.45rem;
+  border: var(--ds-border-thin) solid var(--ds-border-default);
+  border-radius: var(--ds-radius-sm);
+  font-family: var(--ds-font-ui);
+  font-size: var(--ds-text-meta);
+  font-weight: var(--ds-weight-bold);
+  line-height: var(--ds-leading-data);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.mark {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+}
+
+.idle {
+  background: var(--ds-surface-unverified);
+  color: var(--ds-text-unverified);
+  border-color: var(--ds-border-default);
+}
+
+.owned {
+  background: var(--ds-surface-owned);
+  color: var(--ds-text-owned);
+  border-color: var(--ds-border-owned);
+}
+
+.awaiting {
+  background: var(--ds-surface-awaiting);
+  color: var(--ds-text-awaiting);
+  border-color: var(--ds-border-awaiting);
+}
+
+.proven {
+  background: var(--ds-surface-proven);
+  color: var(--ds-text-proven);
+  border-color: var(--ds-border-proven);
+}
+
+.blocked {
+  background: var(--ds-surface-blocked);
+  color: var(--ds-text-blocked);
+  border-color: var(--ds-border-blocked);
+}
+
+.unverified {
+  background: var(--ds-surface-unverified);
+  color: var(--ds-text-unverified);
+  border-color: var(--ds-border-default);
+}

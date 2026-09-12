@@ -1,0 +1,48 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--ds-grid-min, 16rem)), 1fr));
+  min-width: 0;
+}
+
+.gap2xs {
+  gap: var(--ds-space-2xs);
+}
+
+.gapXs {
+  gap: var(--ds-space-xs);
+}
+
+.gapSm {
+  gap: var(--ds-space-sm);
+}
+
+.gapMd {
+  gap: var(--ds-space-md);
+}
+
+.gapLg {
+  gap: var(--ds-space-lg);
+}
+
+.gapXl {
+  gap: var(--ds-space-xl);
+}
+
+.fixed1 {
+  grid-template-columns: 1fr;
+}
+
+.fixed2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fixed3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 40rem) {
+  .fixed2,
+  .fixed3 {
+    grid-template-columns: 1fr;
+  }
+}

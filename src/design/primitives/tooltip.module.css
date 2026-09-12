@@ -1,0 +1,21 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.tip {
+  position: absolute;
+  left: 0;
+  top: calc(100% + var(--ds-space-xs));
+  z-index: var(--ds-z-tooltip);
+  max-width: min(18rem, calc(100vw - 2rem));
+  padding: var(--ds-space-xs) var(--ds-space-sm);
+  background: var(--ds-text-ink);
+  color: var(--ds-text-on-action);
+  border-radius: var(--ds-radius-sm);
+  font-family: var(--ds-font-ui);
+  font-size: var(--ds-text-meta);
+  line-height: var(--ds-leading-data);
+  overflow-wrap: anywhere;
+}
